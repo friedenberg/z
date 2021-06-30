@@ -9,21 +9,25 @@ import (
 
 func GetSubcommandPrint(f *flag.FlagSet) CommandRunFunc {
 	return func(e Env) (err error) {
-		putter := MakePutter()
 		glob := filepath.Join(e.ZettelPath, "*.md")
-		processor, err := MakeProcessor(
-			glob,
-			func(z *lib.Zettel) {
-				z.GenerateAlfredItemData()
-			},
-			putter,
-		)
+		files, err := filepath.Glob(glob)
 
 		if err != nil {
-			//todo
+			return
+		}
+
+		processor := MakeProcessor(
+			e,
+			files,
+			MakePutter(),
+		)
+
+		processor.parallelAction = func(i int, z *lib.Zettel) error {
+			return z.GenerateAlfredItemData()
 		}
 
 		err = processor.Run()
+
 		return
 	}
 }

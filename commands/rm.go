@@ -1,8 +1,11 @@
 package commands
 
 import (
+	"errors"
 	"flag"
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
 )
@@ -12,11 +15,18 @@ func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 		path := f.Arg(0)
 
 		if path == "" {
-			//TODO
+			err = errors.New("path was empty")
 		}
 
-		z := &lib.Zettel{}
-		z.HydrateFromFilePath(path)
+		absPath, err := filepath.Abs(path)
+
+		if err != nil {
+			err = fmt.Errorf("%s: get absolute path: %w", path, err)
+			return
+		}
+
+		z := &lib.Zettel{Path: absPath}
+		z.HydrateFromFilePath()
 
 		err = os.Remove(z.Path)
 

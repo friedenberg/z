@@ -3,6 +3,7 @@ package commands
 import (
 	"os/user"
 	"path"
+	"path/filepath"
 )
 
 type Env struct {
@@ -19,6 +20,16 @@ func GetDefaultEnv() (e Env, err error) {
 	home := usr.HomeDir
 	e = Env{
 		ZettelPath: path.Join(home, "Zettelkasten"),
+	}
+
+	return
+}
+
+func (e Env) GetNormalizedPath(a string) (b string, err error) {
+	if filepath.IsAbs(a) {
+		b = a
+	} else {
+		b, err = filepath.Abs(path.Join(e.ZettelPath, a))
 	}
 
 	return

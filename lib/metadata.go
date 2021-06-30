@@ -15,14 +15,14 @@ const (
 )
 
 type ZettelMetadata struct {
-	Date        string   `yaml:"date,omitempty"`
-	Kind        string   `yaml:"kind,omitempty"`
-	Description string   `yaml:"description,omitempty"`
-	Areas       []string `yaml:"areas,omitempty"`
-	Projects    []string `yaml:"projects,omitempty"`
-	Tags        []string `yaml:"tags,omitempty"`
-	Url         string   `yaml:"url,omitempty"`
-	File        string   `yaml:"file,omitempty"`
+	Date        string   `yaml:"date,omitempty" json:"date,omitempty"`
+	Kind        string   `yaml:"kind,omitempty" json:"kind,omitempty"`
+	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
+	Areas       []string `yaml:"areas,omitempty" json:"areas,omitempty"`
+	Projects    []string `yaml:"projects,omitempty" json:"projects,omitempty"`
+	Tags        []string `yaml:"tags,omitempty" json:"tags,omitempty"`
+	Url         string   `yaml:"url,omitempty" json:"url,omitempty"`
+	File        string   `yaml:"file,omitempty" json:"file,omitempty"`
 }
 
 func (zettel *Zettel) ReadMetadata() (err error) {

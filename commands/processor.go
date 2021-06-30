@@ -1,35 +1,32 @@
 package commands
 
 import (
-	"path/filepath"
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/friedenberg/z/lib"
 )
 
-type ProcessorAction func(z *lib.Zettel)
+type ProcessorAction func(i int, z *lib.Zettel) error
 
 type Processor struct {
+	env                  Env
 	files                []string
 	waitGroup            sync.WaitGroup
 	openFileGuardChannel chan struct{}
 	writeWaitGroup       sync.WaitGroup
+	hydrateAction        ProcessorAction
 	parallelAction       ProcessorAction
 	putter               Putter
 }
 
-func MakeProcessor(glob string, pa ProcessorAction, putter Putter) (processor *Processor, err error) {
-	files, err := filepath.Glob(glob)
-
-	if err != nil {
-		return
-	}
-
+func MakeProcessor(e Env, files []string, putter Putter) (processor *Processor) {
 	processor = &Processor{
+		env:                  e,
 		files:                files,
 		openFileGuardChannel: make(chan struct{}, 240),
 		putter:               putter,
-		parallelAction:       pa,
 	}
 
 	return
@@ -37,9 +34,16 @@ func MakeProcessor(glob string, pa ProcessorAction, putter Putter) (processor *P
 
 func (p *Processor) Run() (err error) {
 	runRead := func() {
-		for _, file := range p.files {
+		for i, file := range p.files {
 			p.waitGroup.Add(1)
-			go p.ProcessFile(file)
+			go func(i int, f string) {
+				err := p.ProcessFile(i, f)
+
+				if err != nil {
+					err = fmt.Errorf("%s: %w", f, err)
+					fmt.Fprintln(os.Stderr, err)
+				}
+			}(i, file)
 		}
 
 		p.waitGroup.Wait()
@@ -52,7 +56,7 @@ func (p *Processor) Run() (err error) {
 	return nil
 }
 
-func (p *Processor) ProcessFile(path string) {
+func (p *Processor) ProcessFile(i int, path string) (err error) {
 	defer p.waitGroup.Done()
 
 	p.openFileGuardChannel <- struct{}{}
@@ -61,10 +65,34 @@ func (p *Processor) ProcessFile(path string) {
 	z := lib.ZettelPoolInstance.Get()
 	defer lib.ZettelPoolInstance.Put(z)
 
-	z.HydrateFromFilePath(path)
+	path, err = p.env.GetNormalizedPath(path)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	z.Path = path
+
+	if p.hydrateAction == nil {
+		err = z.HydrateFromFilePath()
+	} else {
+		err = p.hydrateAction(i, z)
+	}
+
+	if err != nil {
+		return
+	}
+
 	if p.parallelAction != nil {
-		p.parallelAction(z)
+		err = p.parallelAction(i, z)
+	}
+
+	if err != nil {
+		return
 	}
 
 	p.putter.GetChannel() <- z
+
+	return
 }

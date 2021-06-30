@@ -13,27 +13,28 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 	f.BoolVar(&shouldPerformAction, "action", false, "")
 
 	return func(e Env) (err error) {
-		path := f.Arg(0)
+		processor := MakeProcessor(
+			e,
+			f.Args(),
+			&NullPutter{Channel: make(PutterChannel)},
+		)
 
-		if path == "" {
-			//TODO
+		processor.parallelAction = func(i int, z *lib.Zettel) (err error) {
+			cmd := "mvim"
+			args := []string{z.Path}
+
+			if shouldPerformAction {
+				cmd, args = GetOpenCmdAndArgs(z, z.Path)
+			}
+
+			c := exec.Command(cmd, args...)
+			c.Dir = e.ZettelPath
+			return c.Run()
 		}
 
-		z := &lib.Zettel{}
+		err = processor.Run()
 
-		z.HydrateFromFilePath(path)
-
-		cmd := "mvim"
-		args := []string{path}
-
-		if shouldPerformAction {
-			cmd, args = GetOpenCmdAndArgs(z, path)
-		}
-
-		fmt.Println(cmd, args)
-		c := exec.Command(cmd, args...)
-		c.Dir = e.ZettelPath
-		return c.Run()
+		return
 	}
 }
 

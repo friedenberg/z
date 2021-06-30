@@ -10,58 +10,71 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
+	isUrl := false
+	f.BoolVar(&isUrl, "url", false, "")
+
 	return func(e Env) (err error) {
 		currentTime := time.Now()
-		wg := sync.WaitGroup{}
 
-		for i, p := range f.Args() {
+		processor := MakeProcessor(
+			e,
+			f.Args(),
+			&NullPutter{Channel: make(PutterChannel)},
+		)
+
+		processor.hydrateAction = func(i int, z *lib.Zettel) (err error) {
 			d, err := time.ParseDuration(strconv.Itoa(i) + "s")
-
+			t := currentTime.Add(d)
 			if err != nil {
 				panic(err)
 			}
+			unixTime := t.Unix()
+			zettelId := strconv.FormatInt(unixTime, 10)
 
-			t := currentTime.Add(d)
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				unixTime := t.Unix()
-				zettelId := strconv.FormatInt(unixTime, 10)
+			zFilename := path.Join(e.ZettelPath, zettelId+".md")
+			fmt.Println(zFilename)
 
-				zFilename := path.Join(e.ZettelPath, zettelId+".md")
-				fmt.Println(zFilename)
+			p := z.Path
 
-				z := &lib.Zettel{
-					Path: zFilename,
-					Metadata: lib.ZettelMetadata{
-						Date: t.Format("2006-01-02"),
-						Tags: []string{"open"},
-					},
-				}
+			z.Path = zFilename
+			z.Metadata = lib.ZettelMetadata{
+				Date: t.Format("2006-01-02"),
+				Tags: []string{"added"},
+			}
 
-				onWrite, err := addUrl(z, e, p, t)
+			var onWrite onZettelWrite
 
-				if err != nil {
-					onWrite, err = addFile(z, e, p, zettelId)
-				}
+			if isUrl {
+				onWrite, err = addUrl(z, e, p, t)
+			} else {
+				onWrite, err = addFile(z, e, p, zettelId)
+			}
 
-				err = z.Write()
+			if err != nil {
+				err = fmt.Errorf("failed to add url or file: %w", err)
+				return
+			}
 
-				if onWrite != nil {
-					err = onWrite(z, err)
-				}
-				//TODO
-			}()
+			err = z.Write()
+
+			if onWrite != nil {
+				err = onWrite(z, err)
+			}
+
+			if err != nil {
+				err = fmt.Errorf("failed to write: %w", err)
+			}
+
+			return
 		}
 
-		wg.Wait()
+		err = processor.Run()
 
 		return
 	}
@@ -71,13 +84,16 @@ type onZettelWrite func(*lib.Zettel, error) error
 
 func addUrl(z *lib.Zettel, e Env, u string, t time.Time) (onWrite onZettelWrite, err error) {
 	url, err := url.Parse(u)
-
-	z.Metadata.Kind = "pb"
-	//TODO description from title
+	fmt.Println(url)
+	fmt.Println(err)
+	os.Exit(1)
 
 	if err != nil {
 		return
 	}
+
+	z.Metadata.Kind = "pb"
+	//TODO description from title
 
 	chromeCommand := exec.Command(
 		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -115,7 +131,7 @@ func addUrl(z *lib.Zettel, e Env, u string, t time.Time) (onWrite onZettelWrite,
 
 func addFile(z *lib.Zettel, e Env, p string, zi string) (onWrite onZettelWrite, err error) {
 	newFilename := path.Join(e.ZettelPath, zi+path.Ext(p))
-	z.Metadata.File = p
+	z.Metadata.File = newFilename
 	z.Metadata.Kind = "file"
 	onWrite = func(z *lib.Zettel, err error) error {
 		return os.Rename(p, newFilename)

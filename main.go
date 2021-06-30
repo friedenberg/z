@@ -34,6 +34,7 @@ func makeSubcommand(name string, makeFunc func(*flag.FlagSet) commands.CommandRu
 func init() {
 	makeSubcommand("add", commands.GetSubcommandAdd)
 	makeSubcommand("autocomplete", commands.GetSubcommandAutocomplete)
+	makeSubcommand("cat", commands.GetSubcommandCat)
 	makeSubcommand("clean", commands.GetSubcommandClean)
 	makeSubcommand("edit", commands.GetSubcommandEdit)
 	makeSubcommand("new", commands.GetSubcommandNew)
@@ -62,7 +63,11 @@ func main() {
 	}
 
 	cmd.flags.Parse(os.Args[2:])
-	cmd.runFunc(defaultEnv)
+	err = cmd.runFunc(defaultEnv)
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
 
 func printUsage(err error) {

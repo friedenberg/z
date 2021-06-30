@@ -4,23 +4,23 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 	return func(e Env) (err error) {
-		glob := path.Join(e.ZettelPath, "*.md")
-		processor, err := MakeProcessor(
-			glob,
-			func(z *lib.Zettel) { cleanZettel(z, false) },
+		glob := filepath.Join(e.ZettelPath, "*.md")
+		files, err := filepath.Glob(glob)
+
+		processor := MakeProcessor(
+			e,
+			files,
 			&NullPutter{Channel: make(PutterChannel)},
 		)
 
-		if err != nil {
-			return
-		}
+		processor.hydrateAction = func(i int, z *lib.Zettel) error { return cleanZettel(z, false) }
 
 		err = processor.Run()
 
@@ -28,7 +28,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func cleanZettel(z *lib.Zettel, dryRun bool) {
+func cleanZettel(z *lib.Zettel, dryRun bool) (err error) {
 	didPrintPath := false
 	printPathIfNecessary := func() {
 		if !didPrintPath {
@@ -55,4 +55,6 @@ func cleanZettel(z *lib.Zettel, dryRun bool) {
 			a.Perform()
 		}
 	}
+
+	return
 }
