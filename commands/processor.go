@@ -37,7 +37,18 @@ func (p *Processor) Run() (err error) {
 		for i, file := range p.files {
 			p.waitGroup.Add(1)
 			go func(i int, f string) {
-				err := p.ProcessFile(i, f)
+				defer p.waitGroup.Done()
+				z, err := p.HydrateFile(i, f)
+
+				if err != nil {
+					err = fmt.Errorf("%s: failed to hydrate: %w", f, err)
+					fmt.Fprintln(os.Stderr, err)
+					return
+				}
+
+				defer lib.ZettelPoolInstance.Put(z)
+
+				err = p.ActionZettel(i, z)
 
 				if err != nil {
 					err = fmt.Errorf("%s: %w", f, err)
@@ -56,14 +67,11 @@ func (p *Processor) Run() (err error) {
 	return nil
 }
 
-func (p *Processor) ProcessFile(i int, path string) (err error) {
-	defer p.waitGroup.Done()
-
+func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	p.openFileGuardChannel <- struct{}{}
 	defer func() { <-p.openFileGuardChannel }()
 
-	z := lib.ZettelPoolInstance.Get()
-	defer lib.ZettelPoolInstance.Put(z)
+	z = lib.ZettelPoolInstance.Get()
 
 	path, err = p.env.GetNormalizedPath(path)
 
@@ -80,10 +88,10 @@ func (p *Processor) ProcessFile(i int, path string) (err error) {
 		err = p.hydrateAction(i, z)
 	}
 
-	if err != nil {
-		return
-	}
+	return
+}
 
+func (p *Processor) ActionZettel(i int, z *lib.Zettel) (err error) {
 	if p.parallelAction != nil {
 		err = p.parallelAction(i, z)
 	}
