@@ -32,8 +32,8 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func cleanZettelFunc(dryRun bool) (err error) {
-	return func(int i, z *lib.Zettel) (err error) {
+func cleanZettelFunc(dryRun bool) ProcessorAction {
+	return func(i int, z *lib.Zettel) (err error) {
 		didPrintPath := false
 		printPathIfNecessary := func() {
 			if !didPrintPath {
