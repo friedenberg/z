@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
@@ -39,8 +37,6 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 			files,
 			putter,
 		)
-
-		processor.hydrateAction = func(i int, z *lib.Zettel) error { return nil }
 
 		err = processor.Run()
 
