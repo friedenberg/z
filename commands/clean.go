@@ -10,6 +10,10 @@ import (
 )
 
 func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
+	isDryRun := false
+
+	f.BoolVar(&isDryRun, "dry-run", false, "")
+
 	return func(e Env) (err error) {
 		glob := filepath.Join(e.ZettelPath, "*.md")
 		files, err := filepath.Glob(glob)
@@ -20,7 +24,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 			&NullPutter{Channel: make(PutterChannel)},
 		)
 
-		processor.hydrateAction = func(i int, z *lib.Zettel) error { return cleanZettel(z, false) }
+		processor.parallelAction = cleanZettelFunc(isDryRun)
 
 		err = processor.Run()
 
@@ -28,33 +32,35 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func cleanZettel(z *lib.Zettel, dryRun bool) (err error) {
-	didPrintPath := false
-	printPathIfNecessary := func() {
-		if !didPrintPath {
-			fmt.Println(z.Path + ":")
+func cleanZettelFunc(dryRun bool) (err error) {
+	return func(int i, z *lib.Zettel) (err error) {
+		didPrintPath := false
+		printPathIfNecessary := func() {
+			if !didPrintPath {
+				fmt.Println(z.Path + ":")
+			}
+
+			didPrintPath = true
 		}
 
-		didPrintPath = true
+		cleanActions := lib.GetCleanActions()
+
+		for n, a := range cleanActions {
+			applicable := a.Check(z)
+
+			if !applicable {
+				continue
+			}
+
+			printPathIfNecessary()
+
+			fmt.Fprintf(os.Stderr, "\t%s: yes\n", n)
+
+			if !dryRun {
+				a.Perform(z)
+			}
+		}
+
+		return
 	}
-
-	cleanActions := z.GetCleanActions()
-
-	for n, a := range cleanActions {
-		applicable := a.Check()
-
-		if !applicable {
-			continue
-		}
-
-		printPathIfNecessary()
-
-		fmt.Fprintf(os.Stderr, "\t%s: yes\n", n)
-
-		if !dryRun {
-			a.Perform()
-		}
-	}
-
-	return
 }

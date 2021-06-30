@@ -2,24 +2,26 @@ package lib
 
 import "os"
 
-type CleanActionCheck func() bool
-type CleanActionPerform func() error
+type CleanActionCheck func(z *Zettel) bool
+type CleanActionPerform func(z *Zettel) error
 
 type CleanAction struct {
 	Check   CleanActionCheck
 	Perform CleanActionPerform
 }
 
-func (z *Zettel) GetCleanActions() map[string]CleanAction {
+func GetCleanActions() map[string]CleanAction {
 	return map[string]CleanAction{
 		"delete_if_missing_file": CleanAction{
-			z.ShouldDeleteIfMissingFile,
-			z.DeleteIfMissingFile,
+			shouldDeleteIfMissingFile,
+			deleteIfMissingFile,
 		},
+		//TODO change file permissions
+		//TODO reformat yaml
 	}
 }
 
-func (z *Zettel) ShouldDeleteIfMissingFile() bool {
+func shouldDeleteIfMissingFile(z *Zettel) bool {
 	if z.Metadata.Kind != "file" {
 		return false
 	}
@@ -28,6 +30,6 @@ func (z *Zettel) ShouldDeleteIfMissingFile() bool {
 	return os.IsNotExist(err)
 }
 
-func (z *Zettel) DeleteIfMissingFile() error {
+func deleteIfMissingFile(z *Zettel) error {
 	return os.Remove(z.Path)
 }
