@@ -8,7 +8,9 @@ import (
 	"github.com/friedenberg/z/lib"
 )
 
-type ProcessorAction func(i int, z *lib.Zettel) error
+type ArgNormalizeFunc func(int, string) (string, error)
+type HydrateFunc func(int, *lib.Zettel, string) error
+type ActionFunc func(int, *lib.Zettel) error
 
 type Processor struct {
 	env                  Env
@@ -16,8 +18,9 @@ type Processor struct {
 	waitGroup            sync.WaitGroup
 	openFileGuardChannel chan struct{}
 	writeWaitGroup       sync.WaitGroup
-	hydrateAction        ProcessorAction
-	parallelAction       ProcessorAction
+	argNormalizer        ArgNormalizeFunc
+	hydrator             HydrateFunc
+	actioner             ActionFunc
 	putter               Putter
 }
 
@@ -32,7 +35,25 @@ func MakeProcessor(e Env, files []string, putter Putter) (processor *Processor) 
 	return
 }
 
+func (p *Processor) init() {
+	if p.argNormalizer == nil {
+		p.argNormalizer = func(_ int, path string) (normalizedArg string, err error) {
+			normalizedArg, err = p.env.GetNormalizedPath(path)
+			return
+		}
+	}
+
+	if p.hydrator == nil {
+		p.hydrator = func(_ int, z *lib.Zettel, path string) error {
+			z.Path = path
+			return z.HydrateFromFilePath()
+		}
+	}
+}
+
 func (p *Processor) Run() (err error) {
+	p.init()
+
 	runRead := func() {
 		for i, file := range p.files {
 			p.waitGroup.Add(1)
@@ -73,27 +94,20 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 
 	z = lib.ZettelPoolInstance.Get()
 
-	path, err = p.env.GetNormalizedPath(path)
+	a, err := p.argNormalizer(i, path)
 
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
-	z.Path = path
-
-	if p.hydrateAction == nil {
-		err = z.HydrateFromFilePath()
-	} else {
-		err = p.hydrateAction(i, z)
-	}
+	err = p.hydrator(i, z, a)
 
 	return
 }
 
 func (p *Processor) ActionZettel(i int, z *lib.Zettel) (err error) {
-	if p.parallelAction != nil {
-		err = p.parallelAction(i, z)
+	if p.actioner != nil {
+		err = p.actioner(i, z)
 	}
 
 	if err != nil {

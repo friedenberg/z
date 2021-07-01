@@ -54,8 +54,8 @@ func (p *basicPutter) GetChannel() PutterChannel {
 
 func (p *basicPutter) Print() {
 	for z := range p.channel {
-		fmt.Print(z.MetadataYaml)
-		fmt.Print(z.Body)
+		fmt.Println(z.MetadataYaml)
+		fmt.Println(z.Body)
 	}
 }
 
@@ -76,6 +76,6 @@ func (p *jsonPutter) Print() {
 			continue
 		}
 
-		fmt.Print(string(j))
+		fmt.Println(string(j))
 	}
 }

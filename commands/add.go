@@ -28,19 +28,23 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			&NullPutter{Channel: make(PutterChannel)},
 		)
 
-		processor.hydrateAction = func(i int, z *lib.Zettel) (err error) {
+		processor.argNormalizer = func(i int, arg string) (normalizedArg string, err error) {
+			normalizedArg = arg
+			return
+		}
+
+		processor.hydrator = func(i int, z *lib.Zettel, p string) (err error) {
 			d, err := time.ParseDuration(strconv.Itoa(i) + "s")
-			t := currentTime.Add(d)
+
 			if err != nil {
 				panic(err)
 			}
+
+			t := currentTime.Add(d)
 			unixTime := t.Unix()
 			zettelId := strconv.FormatInt(unixTime, 10)
 
 			zFilename := path.Join(e.ZettelPath, zettelId+".md")
-			fmt.Println(zFilename)
-
-			p := z.Path
 
 			z.Path = zFilename
 			z.Metadata = lib.ZettelMetadata{
@@ -84,15 +88,13 @@ type onZettelWrite func(*lib.Zettel, error) error
 
 func addUrl(z *lib.Zettel, e Env, u string, t time.Time) (onWrite onZettelWrite, err error) {
 	url, err := url.Parse(u)
-	fmt.Println(url)
-	fmt.Println(err)
-	os.Exit(1)
 
 	if err != nil {
 		return
 	}
 
 	z.Metadata.Kind = "pb"
+	z.Metadata.Url = url.String()
 	//TODO description from title
 
 	chromeCommand := exec.Command(

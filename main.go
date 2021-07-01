@@ -37,6 +37,7 @@ func init() {
 	makeSubcommand("cat", commands.GetSubcommandCat)
 	makeSubcommand("clean", commands.GetSubcommandClean)
 	makeSubcommand("edit", commands.GetSubcommandEdit)
+	makeSubcommand("mv", commands.GetSubcommandMv)
 	makeSubcommand("new", commands.GetSubcommandNew)
 	makeSubcommand("open", commands.GetSubcommandOpen)
 	makeSubcommand("print", commands.GetSubcommandPrint)

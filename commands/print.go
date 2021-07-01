@@ -22,7 +22,7 @@ func GetSubcommandPrint(f *flag.FlagSet) CommandRunFunc {
 			MakePutter(),
 		)
 
-		processor.parallelAction = func(i int, z *lib.Zettel) error {
+		processor.actioner = func(i int, z *lib.Zettel) error {
 			return z.GenerateAlfredItemData()
 		}
 

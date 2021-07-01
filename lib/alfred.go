@@ -67,9 +67,9 @@ func MakeMatches(z *Zettel) string {
 
 	return join(
 		base,
-		WithPrefix(m.Areas, "a:"),
-		WithPrefix(m.Projects, "p:"),
-		WithPrefix(m.Tags, "t:"),
+		WithPrefix(Split(m.Areas, "-"), "a:"),
+		WithPrefix(Split(m.Projects, "-"), "p:"),
+		WithPrefix(Split(m.Tags, "-"), "t:"),
 	)
 }
 

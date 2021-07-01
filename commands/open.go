@@ -6,11 +6,15 @@ import (
 	"os/exec"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/util"
 )
 
 func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
-	var shouldPerformAction bool
-	f.BoolVar(&shouldPerformAction, "action", false, "")
+	var shouldEdit bool
+	var shouldOpen bool
+
+	f.BoolVar(&shouldEdit, "edit", true, "")
+	f.BoolVar(&shouldOpen, "action", false, "")
 
 	return func(e Env) (err error) {
 		processor := MakeProcessor(
@@ -19,17 +23,31 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 			&NullPutter{Channel: make(PutterChannel)},
 		)
 
-		processor.parallelAction = func(i int, z *lib.Zettel) (err error) {
-			cmd := "mvim"
-			args := []string{z.Path}
+		processor.actioner = func(i int, z *lib.Zettel) (err error) {
+			var c *exec.Cmd
 
-			if shouldPerformAction {
-				cmd, args = GetOpenCmdAndArgs(z, z.Path)
+			if shouldEdit {
+				c := exec.Command("open", z.Path)
+				c.Dir = e.ZettelPath
+				err = c.Run()
+
+				if err != nil {
+					return
+				}
 			}
 
-			c := exec.Command(cmd, args...)
-			c.Dir = e.ZettelPath
-			return c.Run()
+			if shouldOpen {
+				c, err = getOpenCmd(z)
+
+				if err != nil {
+					return err
+				}
+
+				c.Dir = e.ZettelPath
+				err = c.Run()
+			}
+
+			return
 		}
 
 		err = processor.Run()
@@ -38,19 +56,18 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func GetOpenCmdAndArgs(z *lib.Zettel, path string) (cmd string, args []string) {
+func getOpenCmd(z *lib.Zettel) (c *exec.Cmd, err error) {
 	switch z.Metadata.Kind {
 	case "file":
-		cmd = "open"
-		fmt.Println(z.Metadata.File)
-		args = []string{z.Metadata.File}
-		//TODO check if file exists
+		if !util.FileExists(z.Metadata.File) {
+			err = fmt.Errorf("%s: file does not exist", z.Metadata.File)
+			return
+		}
+
+		c = exec.Command("open", z.Metadata.File)
+
 	case "pb":
-		cmd = "open"
-		args = []string{z.Metadata.Url}
-	case "script":
-		//TODO
-		cmd = path
+		c = exec.Command("open", z.Metadata.Url)
 	}
 
 	return

@@ -35,5 +35,5 @@ func getEditor() (e string, a []string) {
 	// 	return
 	// }
 
-	return "mvim", a
+	return "open", a
 }

@@ -11,6 +11,12 @@ type Putter interface {
 	Print()
 }
 
+func MakeNullPutter() Putter {
+	return &NullPutter{
+		Channel: make(PutterChannel),
+	}
+}
+
 type NullPutter struct {
 	Channel PutterChannel
 }

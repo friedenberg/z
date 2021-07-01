@@ -24,7 +24,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 			&NullPutter{Channel: make(PutterChannel)},
 		)
 
-		processor.parallelAction = cleanZettelFunc(isDryRun)
+		processor.actioner = cleanZettelFunc(isDryRun)
 
 		err = processor.Run()
 
@@ -32,7 +32,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func cleanZettelFunc(dryRun bool) ProcessorAction {
+func cleanZettelFunc(dryRun bool) ActionFunc {
 	return func(i int, z *lib.Zettel) (err error) {
 		didPrintPath := false
 		printPathIfNecessary := func() {
@@ -57,6 +57,7 @@ func cleanZettelFunc(dryRun bool) ProcessorAction {
 			fmt.Fprintf(os.Stderr, "\t%s: yes\n", n)
 
 			if !dryRun {
+				z.ReadMetadataAndBody()
 				a.Perform(z)
 			}
 		}
