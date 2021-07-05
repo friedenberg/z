@@ -34,7 +34,7 @@ func (z *Zettel) readBodyFromReader(r *bufio.Reader) (err error) {
 		return
 	}
 
-	z.Body = string(body.Bytes())
+	z.Data.Body = string(body.Bytes())
 
 	return
 }

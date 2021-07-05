@@ -7,15 +7,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func (z *Zettel) Write() (err error) {
+type OnZettelWriteFunc func(*Zettel, error) error
+
+func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
+	defer onWriteFunc(z, err)
+
 	var y []byte
-	y, err = yaml.Marshal(z.Metadata)
+	y, err = yaml.Marshal(z.IndexData)
 
 	if err != nil {
 		return
 	}
 
-	z.MetadataYaml = string(y)
+	z.Data.MetadataYaml = string(y)
 
 	//TODO
 	f, err := os.OpenFile(z.Path, os.O_RDWR|os.O_CREATE, 0755)
@@ -34,7 +38,7 @@ func (z *Zettel) Write() (err error) {
 		return
 	}
 
-	_, err = w.WriteString(z.MetadataYaml)
+	_, err = w.WriteString(z.Data.MetadataYaml)
 
 	if err != nil {
 		return
@@ -46,7 +50,7 @@ func (z *Zettel) Write() (err error) {
 		return
 	}
 
-	if z.Body == "" {
+	if z.Data.Body == "" {
 		return
 	}
 
@@ -56,7 +60,7 @@ func (z *Zettel) Write() (err error) {
 		return
 	}
 
-	_, err = w.WriteString(z.Body)
+	_, err = w.WriteString(z.Data.Body)
 
 	return
 }

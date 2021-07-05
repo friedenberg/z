@@ -34,8 +34,8 @@ func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 			return
 		}
 
-		if z.Metadata.Kind == "file" {
-			err = os.Remove(z.Metadata.File)
+		if z.HasFile() {
+			err = os.Remove(z.IndexData.File)
 		}
 
 		return

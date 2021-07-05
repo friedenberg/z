@@ -18,21 +18,21 @@ var ZettelPoolInstance = ZettelPool{
 
 func (p ZettelPool) Get() (z *Zettel) {
 	z = p.Pool.Get().(*Zettel)
-	z.Metadata.Date = ""
-	z.Metadata.Kind = ""
-	z.Metadata.Description = ""
-	z.Metadata.Areas = z.Metadata.Areas[:0]
-	z.Metadata.Projects = z.Metadata.Projects[:0]
-	z.Metadata.Tags = z.Metadata.Tags[:0]
-	z.Metadata.Url = ""
-	z.AlfredItem.Title = ""
-	z.AlfredItem.Arg = ""
-	z.AlfredItem.Subtitle = ""
-	z.AlfredItem.Match = ""
-	z.AlfredItem.Icon = ZettelAlfredItemIcon{}
-	z.AlfredItem.Uid = ""
-	z.AlfredItem.ItemType = ""
-	z.AlfredItem.QuicklookUrl = ""
-	z.AlfredItem.Text.Copy = ""
+	z.IndexData.Date = ""
+	z.IndexData.Kind = ""
+	z.IndexData.Description = ""
+	z.IndexData.Areas = z.IndexData.Areas[:0]
+	z.IndexData.Projects = z.IndexData.Projects[:0]
+	z.IndexData.Tags = z.IndexData.Tags[:0]
+	z.IndexData.Url = ""
+	z.AlfredData.Item.Title = ""
+	z.AlfredData.Item.Arg = ""
+	z.AlfredData.Item.Subtitle = ""
+	z.AlfredData.Item.Match = ""
+	z.AlfredData.Item.Icon = ZettelAlfredItemIcon{}
+	z.AlfredData.Item.Uid = ""
+	z.AlfredData.Item.ItemType = ""
+	z.AlfredData.Item.QuicklookUrl = ""
+	z.AlfredData.Item.Text.Copy = ""
 	return
 }

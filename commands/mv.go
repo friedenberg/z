@@ -65,10 +65,10 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			values = append(values, toMoveInstruction.value)
 			toMoveInstruction.fieldReadWriter.ValueSetFunc(z, values)
 
-			fmt.Println(z.Metadata)
+			fmt.Println(z.IndexData)
 
 			if !isDryRun {
-				err = z.Write()
+				err = z.Write(func(_ *lib.Zettel, _ error) error { return nil })
 			}
 
 			if err != nil {

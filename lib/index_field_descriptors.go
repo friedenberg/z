@@ -18,10 +18,10 @@ func GetMetadataFieldReadWriterNull() MetadataFieldReadWriterArray {
 func GetMetadataFieldReadWriterAreas() MetadataFieldReadWriterArray {
 	return MetadataFieldReadWriterArray{
 		ValueGetFunc: func(z *Zettel) []string {
-			return z.Metadata.Areas
+			return z.IndexData.Areas
 		},
 		ValueSetFunc: func(z *Zettel, v []string) {
-			z.Metadata.Areas = v
+			z.IndexData.Areas = v
 		},
 	}
 }
@@ -29,10 +29,10 @@ func GetMetadataFieldReadWriterAreas() MetadataFieldReadWriterArray {
 func GetMetadataFieldReadWriterProjects() MetadataFieldReadWriterArray {
 	return MetadataFieldReadWriterArray{
 		ValueGetFunc: func(z *Zettel) []string {
-			return z.Metadata.Projects
+			return z.IndexData.Projects
 		},
 		ValueSetFunc: func(z *Zettel, v []string) {
-			z.Metadata.Projects = v
+			z.IndexData.Projects = v
 		},
 	}
 }
@@ -40,10 +40,10 @@ func GetMetadataFieldReadWriterProjects() MetadataFieldReadWriterArray {
 func GetMetadataFieldReadWriterTags() MetadataFieldReadWriterArray {
 	return MetadataFieldReadWriterArray{
 		ValueGetFunc: func(z *Zettel) []string {
-			return z.Metadata.Tags
+			return z.IndexData.Tags
 		},
 		ValueSetFunc: func(z *Zettel, v []string) {
-			z.Metadata.Tags = v
+			z.IndexData.Tags = v
 		},
 	}
 }

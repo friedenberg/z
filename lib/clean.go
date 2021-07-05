@@ -2,9 +2,6 @@ package lib
 
 import (
 	"os"
-	"path/filepath"
-	"strconv"
-	"time"
 
 	"github.com/friedenberg/z/util"
 )
@@ -21,6 +18,10 @@ func GetCleanActions() map[string]CleanAction {
 	return map[string]CleanAction{
 		"delete_if_missing_file": CleanAction{shouldDeleteIfMissingFile, deleteIfMissingFile},
 		"add_date":               CleanAction{isMissingDate, addDate},
+		//index
+		// "remove_from_index":             CleanAction{shouldRemoveFromIndex, removeFromIndex},
+		// "add_to_index":             CleanAction{shouldRemoveFromIndex, removeFromIndex},
+		// "update_in_index":             CleanAction{shouldUpdateInIndex, updateInIndex},
 		//TODO file attachment
 		//TODO change file permissions
 		//TODO reformat yaml
@@ -29,11 +30,11 @@ func GetCleanActions() map[string]CleanAction {
 }
 
 func shouldDeleteIfMissingFile(z *Zettel) bool {
-	if z.Metadata.Kind != "file" {
+	if z.IndexData.Kind != "file" {
 		return false
 	}
 
-	return !util.FileExists(z.Metadata.File)
+	return !util.FileExists(z.IndexData.File)
 }
 
 func deleteIfMissingFile(z *Zettel) error {
@@ -41,24 +42,19 @@ func deleteIfMissingFile(z *Zettel) error {
 }
 
 func isMissingDate(z *Zettel) bool {
-	return z.Metadata.Date == ""
+	return z.IndexData.Date == ""
 }
 
 func addDate(z *Zettel) (err error) {
-	base := filepath.Base(z.Path)
-	ext := filepath.Ext(z.Path)
-
-	base = base[:len(base)-len(ext)]
-	i, err := strconv.ParseInt(base, 10, 64)
+	t, err := TimeFromPath(z.Path)
 
 	if err != nil {
 		return
 	}
 
-	t := time.Unix(i, 0)
-	z.Metadata.Date = t.Format("2006-01-02")
+	z.IndexData.Date = t.Format("2006-01-02")
 
-	err = z.Write()
+	err = z.Write(func(_ *Zettel, _ error) error { return nil })
 
 	return
 }

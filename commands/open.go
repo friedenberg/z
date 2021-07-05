@@ -2,11 +2,8 @@ package commands
 
 import (
 	"flag"
-	"fmt"
-	"os/exec"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
 )
 
 func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
@@ -24,27 +21,16 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 		)
 
 		processor.actioner = func(i int, z *lib.Zettel) (err error) {
-			var c *exec.Cmd
-
-			if shouldEdit {
-				c := exec.Command("open", z.Path)
-				c.Dir = e.ZettelPath
-				err = c.Run()
-
-				if err != nil {
-					return
-				}
-			}
-
 			if shouldOpen {
-				c, err = getOpenCmd(z)
+				z.Open(e.ZettelPath)
 
 				if err != nil {
 					return err
 				}
+			}
 
-				c.Dir = e.ZettelPath
-				err = c.Run()
+			if shouldEdit {
+				err = z.Edit(e.ZettelPath)
 			}
 
 			return
@@ -54,21 +40,4 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 
 		return
 	}
-}
-
-func getOpenCmd(z *lib.Zettel) (c *exec.Cmd, err error) {
-	switch z.Metadata.Kind {
-	case "file":
-		if !util.FileExists(z.Metadata.File) {
-			err = fmt.Errorf("%s: file does not exist", z.Metadata.File)
-			return
-		}
-
-		c = exec.Command("open", z.Metadata.File)
-
-	case "pb":
-		c = exec.Command("open", z.Metadata.Url)
-	}
-
-	return
 }

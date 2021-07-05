@@ -14,7 +14,7 @@ const (
 	MetadataEndSequence   = "...\n"
 )
 
-type ZettelMetadata struct {
+type ZettelIndexData struct {
 	Date        string   `yaml:"date,omitempty" json:"date,omitempty"`
 	Kind        string   `yaml:"kind,omitempty" json:"kind,omitempty"`
 	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
@@ -58,7 +58,7 @@ func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 		}
 	}
 
-	z.MetadataYaml = sb.String()
+	z.Data.MetadataYaml = sb.String()
 
 	return
 }
@@ -71,7 +71,7 @@ func (zettel *Zettel) ParseMetadata() (err error) {
 	}()
 
 	// zettel.metadata.Description = zettel.metadataYaml
-	err = yaml.Unmarshal([]byte(zettel.MetadataYaml), &zettel.Metadata)
+	err = yaml.Unmarshal([]byte(zettel.Data.MetadataYaml), &zettel.IndexData)
 
 	return
 }

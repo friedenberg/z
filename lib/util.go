@@ -1,6 +1,11 @@
 package lib
 
-import "strings"
+import (
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+)
 
 func WithPrefix(s []string, p string) (a []string) {
 	a = make([]string, len(s))
@@ -19,6 +24,22 @@ func Split(s []string, sep string) (a []string) {
 			a = append(a, b)
 		}
 	}
+
+	return
+}
+
+func TimeFromPath(path string) (t time.Time, err error) {
+	base := filepath.Base(path)
+	ext := filepath.Ext(path)
+
+	base = base[:len(base)-len(ext)]
+	i, err := strconv.ParseInt(base, 10, 64)
+
+	if err != nil {
+		return
+	}
+
+	t = time.Unix(i, 0)
 
 	return
 }

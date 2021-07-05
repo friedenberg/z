@@ -34,7 +34,7 @@ func (p *StdoutPutter) PrintZettel(z *lib.Zettel) {
 		fmt.Print(",")
 	}
 
-	fmt.Print(z.AlfredItemJson)
+	fmt.Print(z.AlfredData.Json)
 
 	p.shouldPrintComma = true
 }
