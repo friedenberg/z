@@ -9,9 +9,12 @@ import (
 	"github.com/friedenberg/z/lib"
 )
 
-func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
-	isUrl := false
-	f.BoolVar(&isUrl, "url", false, "")
+func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
+	var shouldEdit bool
+
+	f.BoolVar(&shouldEdit, "edit", true, "")
+
+	//TODO add shouldEdit
 
 	return func(e *lib.Env) (err error) {
 		currentTime := time.Now()
@@ -41,13 +44,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			zettelId := strconv.FormatInt(t.Unix(), 10)
 			z.IndexData.Tags = []string{"added"}
 
-			var onWrite lib.OnZettelWriteFunc
-
-			if isUrl {
-				onWrite = lib.AddUrlOnWrite(p, t)
-			} else {
-				onWrite = lib.AddFileOnWrite(e.BasePath, p, zettelId)
-			}
+			onWrite := lib.AddFileOnWrite(e.BasePath, p, zettelId)
 
 			if err != nil {
 				err = fmt.Errorf("failed to add url or file: %w", err)
