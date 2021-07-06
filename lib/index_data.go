@@ -16,7 +16,6 @@ const (
 
 type ZettelIndexData struct {
 	Date        string   `yaml:"date,omitempty" json:"date,omitempty"`
-	Kind        string   `yaml:"kind,omitempty" json:"kind,omitempty"`
 	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
 	Areas       []string `yaml:"areas,omitempty" json:"areas,omitempty"`
 	Projects    []string `yaml:"projects,omitempty" json:"projects,omitempty"`

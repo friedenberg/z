@@ -19,7 +19,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&NullPutter{Channel: make(PutterChannel)},
+			&nullZettelPrinter{},
 		)
 
 		processor.argNormalizer = func(i int, arg string) (normalizedArg string, err error) {

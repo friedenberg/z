@@ -1,24 +1,36 @@
 package commands
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
 	"path/filepath"
+
+	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
-	var shouldPrintJson bool
-	f.BoolVar(&shouldPrintJson, "json", false, "TODO")
+	var outputFormat string
+	f.StringVar(&outputFormat, "output-format", "full", "One of 'alfred-json', 'metadata-json', 'full', 'filename'")
 
 	return func(e Env) (err error) {
-		var putter Putter
+		var printer zettelPrinter
+		var actioner ActionFunc
 
-		if shouldPrintJson {
-			putter = &jsonPutter{channel: make(PutterChannel)}
-		} else {
-			putter = &basicPutter{channel: make(PutterChannel)}
+		switch outputFormat {
+		case "alfred-json":
+			printer = &alfredJsonZettelPrinter{}
+			actioner = func(i int, z *lib.Zettel) error {
+				return z.GenerateAlfredItemData()
+			}
+
+		case "metadata-json":
+			printer = &jsonZettelPrinter{}
+		case "full":
+			printer = &fullZettelPrinter{}
+		case "filename":
+			printer = &filenameZettelPrinter{}
+		default:
+			return fmt.Errorf("Unsupported output format: '%s'", outputFormat)
 		}
 
 		files := f.Args()
@@ -35,47 +47,13 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			files,
-			putter,
+			printer,
 		)
+
+		processor.actioner = actioner
 
 		err = processor.Run()
 
 		return
-	}
-}
-
-type basicPutter struct {
-	channel PutterChannel
-}
-
-func (p *basicPutter) GetChannel() PutterChannel {
-	return p.channel
-}
-
-func (p *basicPutter) Print() {
-	for z := range p.channel {
-		fmt.Println(z.Data.MetadataYaml)
-		fmt.Println(z.Data.Body)
-	}
-}
-
-type jsonPutter struct {
-	channel PutterChannel
-}
-
-func (p *jsonPutter) GetChannel() PutterChannel {
-	return p.channel
-}
-
-func (p *jsonPutter) Print() {
-	for z := range p.channel {
-		j, err := json.Marshal(z.IndexData)
-
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			continue
-		}
-
-		fmt.Println(string(j))
 	}
 }

@@ -19,7 +19,6 @@ var ZettelPoolInstance = ZettelPool{
 func (p ZettelPool) Get() (z *Zettel) {
 	z = p.Pool.Get().(*Zettel)
 	z.IndexData.Date = ""
-	z.IndexData.Kind = ""
 	z.IndexData.Description = ""
 	z.IndexData.Areas = z.IndexData.Areas[:0]
 	z.IndexData.Projects = z.IndexData.Projects[:0]

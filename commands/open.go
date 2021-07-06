@@ -17,7 +17,7 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&NullPutter{Channel: make(PutterChannel)},
+			&nullZettelPrinter{},
 		)
 
 		processor.actioner = func(i int, z *lib.Zettel) (err error) {

@@ -10,7 +10,9 @@ import (
 type OnZettelWriteFunc func(*Zettel, error) error
 
 func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
-	defer onWriteFunc(z, err)
+	if onWriteFunc != nil {
+		defer onWriteFunc(z, err)
+	}
 
 	var y []byte
 	y, err = yaml.Marshal(z.IndexData)

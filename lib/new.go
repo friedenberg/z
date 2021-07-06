@@ -39,7 +39,6 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 			return
 		}
 
-		z.IndexData.Kind = "pb"
 		z.IndexData.Url = url.String()
 
 		//TODO determine summaries from sites
@@ -91,7 +90,6 @@ func AddFileOnWrite(basePath string, p string, zi string) OnZettelWriteFunc {
 		}
 
 		z.IndexData.File = newFilename
-		z.IndexData.Kind = "file"
 
 		errOut = os.Rename(p, newFilename)
 		return

@@ -60,13 +60,17 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		if shouldOpen {
-			z.Open(e.ZettelPath)
+			err = z.Open(e.ZettelPath)
+
+			if err != nil {
+				return
+			}
 		}
 
 		if shouldPrintFilename {
 			fmt.Print(z.Path)
 		}
 
-		return
+		return z.Edit(e.ZettelPath)
 	}
 }

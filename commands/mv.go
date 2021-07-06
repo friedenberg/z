@@ -40,7 +40,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			files,
-			MakeNullPutter(),
+			&nullZettelPrinter{},
 		)
 
 		processor.actioner = func(_ int, z *lib.Zettel) (err error) {

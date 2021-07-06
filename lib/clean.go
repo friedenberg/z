@@ -18,6 +18,14 @@ func GetCleanActions() map[string]CleanAction {
 	return map[string]CleanAction{
 		"delete_if_missing_file": CleanAction{shouldDeleteIfMissingFile, deleteIfMissingFile},
 		"add_date":               CleanAction{isMissingDate, addDate},
+		// "rewrite_metadata": CleanAction{
+		// 	func(_ *Zettel) bool { return true },
+		// 	func(z *Zettel) error {
+		// 		util.OpenFilesGuardInstance.Lock()
+		// 		defer util.OpenFilesGuardInstance.Unlock()
+		// 		return z.Write(nil)
+		// 	},
+		// },
 		//index
 		// "remove_from_index":             CleanAction{shouldRemoveFromIndex, removeFromIndex},
 		// "add_to_index":             CleanAction{shouldRemoveFromIndex, removeFromIndex},
@@ -30,7 +38,7 @@ func GetCleanActions() map[string]CleanAction {
 }
 
 func shouldDeleteIfMissingFile(z *Zettel) bool {
-	if z.IndexData.Kind != "file" {
+	if !z.HasFile() {
 		return false
 	}
 

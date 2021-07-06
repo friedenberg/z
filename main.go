@@ -6,8 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/friedenberg/z/commands"
+	"github.com/friedenberg/z/util"
 )
 
 type subcommand struct {
@@ -40,11 +42,12 @@ func init() {
 	makeSubcommand("mv", commands.GetSubcommandMv)
 	makeSubcommand("new", commands.GetSubcommandNew)
 	makeSubcommand("open", commands.GetSubcommandOpen)
-	makeSubcommand("print", commands.GetSubcommandPrint)
 	makeSubcommand("rm", commands.GetSubcommandRm)
 }
 
 func main() {
+	defer util.WaitForPrinter()
+
 	var err error
 	defaultEnv, err := commands.GetDefaultEnv()
 
@@ -67,19 +70,30 @@ func main() {
 	err = cmd.runFunc(defaultEnv)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		util.StdPrinterErr(err)
 	}
 }
 
 func printUsage(err error) {
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println()
+		util.StdPrinterErr(err)
+		util.StdPrinterErr(err)
 	}
 
 	fmt.Println("Usage for z: ")
 
+	sc := make([]subcommand, 0, len(subcommands))
+
 	for _, c := range subcommands {
+		fmt.Println(c.flags)
+		sc = append(sc, c)
+	}
+
+	sort.Slice(sc, func(i, j int) bool {
+		return sc[i].flags.Name() < sc[j].flags.Name()
+	})
+
+	for _, c := range sc {
 		printSubcommandUsage(c)
 	}
 
@@ -95,7 +109,7 @@ func printUsage(err error) {
 
 func printSubcommandUsage(sc subcommand) {
 	printTabbed := func(s string) {
-		fmt.Println("  ", s)
+		util.StdPrinterErrf("  %s\n", s)
 	}
 
 	flags := sc.flags

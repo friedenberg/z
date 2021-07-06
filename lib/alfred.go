@@ -45,10 +45,17 @@ func MakeMatches(z *Zettel) string {
 		return sb.String()
 	}
 
+	t, err := TimeFromPath(z.Path)
+
+	if err != nil {
+		//TODO
+	}
+
+	day := t.Format("2006-01-02")
+
 	base := []string{
 		m.Description,
-		"w:" + m.Date,
-		"k:" + m.Kind,
+		"w:" + day,
 	}
 
 	if z.HasUrl() {
@@ -57,11 +64,17 @@ func MakeMatches(z *Zettel) string {
 		if err == nil {
 			base = append(base, "d:"+url.Hostname())
 		}
+
+		base = append(base, "h:u")
 	}
 
-	t := time.Now()
+	if z.HasFile() {
+		base = append(base, "h:f")
+	}
 
-	if t.Format("2006-01-02") == m.Date {
+	today := time.Now()
+
+	if today.Format("2006-01-02") == day {
 		base = append(base, "w:today")
 	}
 
@@ -121,23 +134,19 @@ func (z *Zettel) AddIcon() {
 }
 
 func (z *Zettel) AddAlfredItem() (err error) {
-	getFirstNonEmpty := func(s ...string) string {
-		for _, v := range s {
-			if v != "" {
-				return v
-			}
-		}
-
-		panic("no non-empty values")
-	}
-
 	z.AlfredData.Item.Arg = z.Path
 	z.AlfredData.Item.ItemType = "file"
 	z.AlfredData.Item.Uid = strings.TrimSuffix(
 		path.Base(z.Path),
 		path.Ext(z.Path),
 	)
-	z.AlfredData.Item.QuicklookUrl = getFirstNonEmpty(z.IndexData.File, z.IndexData.Url, z.Path)
+
+	z.AlfredData.Item.QuicklookUrl = z.Path
+
+	if z.HasFile() {
+		z.AlfredData.Item.QuicklookUrl = z.IndexData.File
+	}
+
 	z.AlfredData.Item.Subtitle = MakeSubtitle(z)
 	z.AlfredData.Item.Title = z.IndexData.Description
 	z.AlfredData.Item.Match = MakeMatches(z)

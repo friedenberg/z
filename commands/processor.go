@@ -2,10 +2,10 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/util"
 )
 
 type ArgNormalizeFunc func(int, string) (string, error)
@@ -13,23 +13,21 @@ type HydrateFunc func(int, *lib.Zettel, string) error
 type ActionFunc func(int, *lib.Zettel) error
 
 type Processor struct {
-	env                  Env
-	files                []string
-	waitGroup            sync.WaitGroup
-	openFileGuardChannel chan struct{}
-	writeWaitGroup       sync.WaitGroup
-	argNormalizer        ArgNormalizeFunc
-	hydrator             HydrateFunc
-	actioner             ActionFunc
-	putter               Putter
+	env            Env
+	files          []string
+	waitGroup      sync.WaitGroup
+	writeWaitGroup sync.WaitGroup
+	argNormalizer  ArgNormalizeFunc
+	hydrator       HydrateFunc
+	actioner       ActionFunc
+	printer        zettelPrinter
 }
 
-func MakeProcessor(e Env, files []string, putter Putter) (processor *Processor) {
+func MakeProcessor(e Env, files []string, zp zettelPrinter) (processor *Processor) {
 	processor = &Processor{
-		env:                  e,
-		files:                files,
-		openFileGuardChannel: make(chan struct{}, 240),
-		putter:               putter,
+		env:     e,
+		files:   files,
+		printer: &multiplexingZettelPrinter{printer: zp},
 	}
 
 	return
@@ -56,14 +54,13 @@ func (p *Processor) Run() (err error) {
 
 	runRead := func() {
 		for i, file := range p.files {
-			p.waitGroup.Add(1)
 			go func(i int, f string) {
 				defer p.waitGroup.Done()
 				z, err := p.HydrateFile(i, f)
 
 				if err != nil {
 					err = fmt.Errorf("%s: failed to hydrate: %w", f, err)
-					fmt.Fprintln(os.Stderr, err)
+					p.printer.printZettel(i, z, err)
 					return
 				}
 
@@ -73,24 +70,26 @@ func (p *Processor) Run() (err error) {
 
 				if err != nil {
 					err = fmt.Errorf("%s: %w", f, err)
-					fmt.Fprintln(os.Stderr, err)
+					p.printer.printZettel(i, z, err)
 				}
 			}(i, file)
 		}
-
-		p.waitGroup.Wait()
-		close(p.putter.GetChannel())
 	}
 
+	p.waitGroup.Add(len(p.files))
+
+	p.printer.begin()
+	defer p.printer.end()
+
 	go runRead()
-	p.putter.Print()
+	defer p.waitGroup.Wait()
 
 	return nil
 }
 
 func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
-	p.openFileGuardChannel <- struct{}{}
-	defer func() { <-p.openFileGuardChannel }()
+	util.OpenFilesGuardInstance.Lock()
+	defer util.OpenFilesGuardInstance.Unlock()
 
 	z = lib.ZettelPoolInstance.Get()
 
@@ -114,7 +113,7 @@ func (p *Processor) ActionZettel(i int, z *lib.Zettel) (err error) {
 		return
 	}
 
-	p.putter.GetChannel() <- z
+	p.printer.printZettel(i, z, nil)
 
 	return
 }

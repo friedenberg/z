@@ -2,11 +2,10 @@ package commands
 
 import (
 	"flag"
-	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/util"
 )
 
 func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
@@ -21,7 +20,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			files,
-			&NullPutter{Channel: make(PutterChannel)},
+			&nullZettelPrinter{},
 		)
 
 		processor.actioner = cleanZettelFunc(isDryRun)
@@ -37,7 +36,7 @@ func cleanZettelFunc(dryRun bool) ActionFunc {
 		didPrintPath := false
 		printPathIfNecessary := func() {
 			if !didPrintPath {
-				fmt.Println(z.Path + ":")
+				util.StdPrinterErr(z.Path + ":")
 			}
 
 			didPrintPath = true
@@ -54,7 +53,7 @@ func cleanZettelFunc(dryRun bool) ActionFunc {
 
 			printPathIfNecessary()
 
-			fmt.Fprintf(os.Stderr, "\t%s: yes\n", n)
+			util.StdPrinterErrf("\t%s: yes\n", n)
 
 			if !dryRun {
 				z.ReadMetadataAndBody()
