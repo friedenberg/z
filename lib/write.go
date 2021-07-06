@@ -56,12 +56,6 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		return
 	}
 
-	_, err = w.WriteString("\n")
-
-	if err != nil {
-		return
-	}
-
 	_, err = w.WriteString(z.Data.Body)
 
 	return

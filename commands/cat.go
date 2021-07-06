@@ -12,7 +12,7 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 	var outputFormat string
 	f.StringVar(&outputFormat, "output-format", "full", "One of 'alfred-json', 'metadata-json', 'full', 'filename'")
 
-	return func(e Env) (err error) {
+	return func(e *lib.Env) (err error) {
 		var printer zettelPrinter
 		var actioner ActionFunc
 
@@ -36,7 +36,7 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 		files := f.Args()
 
 		if len(files) == 0 {
-			glob := filepath.Join(e.ZettelPath, "*.md")
+			glob := filepath.Join(e.BasePath, "*.md")
 			files, err = filepath.Glob(glob)
 
 			if err != nil {

@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/friedenberg/z/commands"
+	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
 )
 
@@ -49,7 +50,7 @@ func main() {
 	defer util.WaitForPrinter()
 
 	var err error
-	defaultEnv, err := commands.GetDefaultEnv()
+	defaultEnv, err := lib.GetDefaultEnv()
 
 	if err != nil {
 		os.Exit(1)

@@ -1,6 +1,7 @@
 package lib
 
 type Zettel struct {
+	Env        *Env
 	Path       string
 	IndexData  ZettelIndexData
 	Data       ZettelData

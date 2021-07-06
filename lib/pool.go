@@ -4,19 +4,17 @@ import (
 	"sync"
 )
 
-type ZettelPool struct {
+type ZettelPool interface {
+	Get() *Zettel
+	Put(*Zettel)
+}
+
+type zettelPool struct {
 	sync.Pool
+	env *Env
 }
 
-var ZettelPoolInstance = ZettelPool{
-	sync.Pool{
-		New: func() interface{} {
-			return new(Zettel)
-		},
-	},
-}
-
-func (p ZettelPool) Get() (z *Zettel) {
+func (p zettelPool) Get() (z *Zettel) {
 	z = p.Pool.Get().(*Zettel)
 	z.IndexData.Date = ""
 	z.IndexData.Description = ""
@@ -34,4 +32,8 @@ func (p ZettelPool) Get() (z *Zettel) {
 	z.AlfredData.Item.QuicklookUrl = ""
 	z.AlfredData.Item.Text.Copy = ""
 	return
+}
+
+func (p zettelPool) Put(z *Zettel) {
+	p.Pool.Put(z)
 }

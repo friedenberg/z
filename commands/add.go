@@ -13,7 +13,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	isUrl := false
 	f.BoolVar(&isUrl, "url", false, "")
 
-	return func(e Env) (err error) {
+	return func(e *lib.Env) (err error) {
 		currentTime := time.Now()
 
 		processor := MakeProcessor(
@@ -35,7 +35,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			}
 
 			t := currentTime.Add(d)
-			z.InitFromTime(e.ZettelPath, t)
+			z.InitFromTime(e.BasePath, t)
 
 			//TODO move into zettel init
 			zettelId := strconv.FormatInt(t.Unix(), 10)
@@ -46,7 +46,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			if isUrl {
 				onWrite = lib.AddUrlOnWrite(p, t)
 			} else {
-				onWrite = lib.AddFileOnWrite(e.ZettelPath, p, zettelId)
+				onWrite = lib.AddFileOnWrite(e.BasePath, p, zettelId)
 			}
 
 			if err != nil {

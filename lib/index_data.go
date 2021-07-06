@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 
@@ -62,15 +61,19 @@ func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 	return
 }
 
-func (zettel *Zettel) ParseMetadata() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println(r)
-		}
-	}()
+func (z *Zettel) ParseMetadata() (err error) {
+	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &z.IndexData)
 
-	// zettel.metadata.Description = zettel.metadataYaml
-	err = yaml.Unmarshal([]byte(zettel.Data.MetadataYaml), &zettel.IndexData)
+	if z.HasFile() {
+		var np string
+		np, err = z.Env.GetNormalizedPath(z.IndexData.File)
+
+		if err != nil {
+			return
+		}
+
+		z.IndexData.File = np
+	}
 
 	return
 }

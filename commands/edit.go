@@ -4,15 +4,23 @@ import (
 	"flag"
 	"os"
 	"os/exec"
+
+	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
-	return func(e Env) (err error) {
+	var shouldEdit bool
+	var shouldOpen bool
+
+	f.BoolVar(&shouldEdit, "edit", true, "")
+	f.BoolVar(&shouldOpen, "open", false, "")
+
+	return func(e *lib.Env) (err error) {
 		editor, args := getEditor()
 		args = append(args, f.Arg(0))
 
 		cmd := exec.Command(editor, args...)
-		cmd.Dir = e.ZettelPath
+		cmd.Dir = e.BasePath
 
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout

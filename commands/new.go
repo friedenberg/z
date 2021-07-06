@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
 	"time"
 
 	"github.com/friedenberg/z/lib"
@@ -19,15 +18,19 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&urlToAdd, "with-url", "", "include the passed-in URL in the zettel")
 	f.StringVar(&filePathToAdd, "with-file", "", "move the passed-in file into zettel control")
 
-	return func(e Env) (err error) {
+	return func(e *lib.Env) (err error) {
 		currentTime := time.Now()
 
 		z := &lib.Zettel{}
-		z.InitFromTime(e.ZettelPath, currentTime)
+		z.InitFromTime(e.BasePath, currentTime)
 
 		z.IndexData.Tags = []string{"added"}
 
-		zi := path.Base(z.Path)[:len(path.Ext(z.Path))]
+		zi, err := lib.ZettelIdFromPath(z.Path)
+
+		if err != nil {
+			return
+		}
 
 		if urlToAdd != "" {
 			err = lib.AddUrlOnWrite(urlToAdd, currentTime)(z, nil)
@@ -38,7 +41,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		if filePathToAdd != "" {
-			err = lib.AddFileOnWrite(e.ZettelPath, filePathToAdd, zi)(z, nil)
+			err = lib.AddFileOnWrite(e.BasePath, filePathToAdd, zi)(z, nil)
 
 			if err != nil {
 				return
@@ -60,7 +63,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		if shouldOpen {
-			err = z.Open(e.ZettelPath)
+			err = z.Open(e.BasePath)
 
 			if err != nil {
 				return
@@ -71,6 +74,6 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			fmt.Print(z.Path)
 		}
 
-		return z.Edit(e.ZettelPath)
+		return z.Edit(e.BasePath)
 	}
 }

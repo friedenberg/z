@@ -1,3 +1,5 @@
 package commands
 
-type CommandRunFunc func(Env) error
+import "github.com/friedenberg/z/lib"
+
+type CommandRunFunc func(*lib.Env) error

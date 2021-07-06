@@ -13,7 +13,7 @@ type HydrateFunc func(int, *lib.Zettel, string) error
 type ActionFunc func(int, *lib.Zettel) error
 
 type Processor struct {
-	env            Env
+	env            *lib.Env
 	files          []string
 	waitGroup      sync.WaitGroup
 	writeWaitGroup sync.WaitGroup
@@ -23,7 +23,7 @@ type Processor struct {
 	printer        zettelPrinter
 }
 
-func MakeProcessor(e Env, files []string, zp zettelPrinter) (processor *Processor) {
+func MakeProcessor(e *lib.Env, files []string, zp zettelPrinter) (processor *Processor) {
 	processor = &Processor{
 		env:     e,
 		files:   files,
@@ -64,7 +64,7 @@ func (p *Processor) Run() (err error) {
 					return
 				}
 
-				defer lib.ZettelPoolInstance.Put(z)
+				defer p.env.ZettelPool.Put(z)
 
 				err = p.ActionZettel(i, z)
 
@@ -91,7 +91,7 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	util.OpenFilesGuardInstance.Lock()
 	defer util.OpenFilesGuardInstance.Unlock()
 
-	z = lib.ZettelPoolInstance.Get()
+	z = p.env.ZettelPool.Get()
 
 	a, err := p.argNormalizer(i, path)
 

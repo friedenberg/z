@@ -11,9 +11,9 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 	var shouldOpen bool
 
 	f.BoolVar(&shouldEdit, "edit", true, "")
-	f.BoolVar(&shouldOpen, "action", false, "")
+	f.BoolVar(&shouldOpen, "open", false, "")
 
-	return func(e Env) (err error) {
+	return func(e *lib.Env) (err error) {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
@@ -21,16 +21,16 @@ func GetSubcommandOpen(f *flag.FlagSet) CommandRunFunc {
 		)
 
 		processor.actioner = func(i int, z *lib.Zettel) (err error) {
-			if shouldOpen {
-				z.Open(e.ZettelPath)
+			if shouldEdit {
+				z.Edit(e.BasePath)
 
 				if err != nil {
 					return err
 				}
 			}
 
-			if shouldEdit {
-				err = z.Edit(e.ZettelPath)
+			if shouldOpen {
+				err = z.Open(e.BasePath)
 			}
 
 			return

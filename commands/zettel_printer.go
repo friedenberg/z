@@ -24,9 +24,15 @@ type zettelPrinter interface {
 
 type nullZettelPrinter struct{}
 
-func (p *nullZettelPrinter) begin()                                    {}
-func (p *nullZettelPrinter) printZettel(_ int, _ *lib.Zettel, _ error) {}
-func (p *nullZettelPrinter) end()                                      {}
+func (p *nullZettelPrinter) begin() {}
+func (p *nullZettelPrinter) end()   {}
+
+func (p *nullZettelPrinter) printZettel(_ int, _ *lib.Zettel, errIn error) {
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+}
 
 type multiplexPrintLine struct {
 	i int
@@ -35,15 +41,20 @@ type multiplexPrintLine struct {
 }
 
 type multiplexingZettelPrinter struct {
-	printer zettelPrinter
-	channel chan multiplexPrintLine
+	printer   zettelPrinter
+	channel   chan multiplexPrintLine
+	waitGroup *sync.WaitGroup
 }
 
 func (p *multiplexingZettelPrinter) begin() {
 	p.channel = make(chan multiplexPrintLine)
 	p.printer.begin()
+	p.waitGroup = &sync.WaitGroup{}
+	p.waitGroup.Add(1)
 
 	go func() {
+		defer p.waitGroup.Done()
+
 		for l := range p.channel {
 			p.printer.printZettel(l.i, l.z, l.e)
 		}
@@ -55,6 +66,7 @@ func (p *multiplexingZettelPrinter) printZettel(i int, z *lib.Zettel, e error) {
 }
 
 func (p *multiplexingZettelPrinter) end() {
+	defer p.waitGroup.Wait()
 	close(p.channel)
 	p.printer.end()
 }
@@ -72,7 +84,11 @@ func (p *filenameZettelPrinter) begin() {}
 func (p *filenameZettelPrinter) end()   {}
 
 func (p *filenameZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
-	//TODO handle errIn
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+
 	util.StdPrinterOut(z.Path)
 }
 
@@ -89,7 +105,11 @@ func (p *jsonZettelPrinter) begin() {}
 func (p *jsonZettelPrinter) end()   {}
 
 func (p *jsonZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
-	//TODO handle errIn
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+
 	b, errOut := json.Marshal(z.IndexData)
 
 	if errOut != nil {
@@ -130,9 +150,14 @@ func (p *alfredJsonZettelPrinter) setShouldPrintComma() {
 	p.afterFirstPrint = true
 }
 
-func (p *alfredJsonZettelPrinter) printZettel(_ int, z *lib.Zettel, _ error) {
+func (p *alfredJsonZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error) {
 	defer p.setShouldPrintComma()
-	//TODO handle error
+
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+
 	sb := strings.Builder{}
 	if p.shouldPrintComma() {
 		sb.WriteString(",")
@@ -159,8 +184,12 @@ type fullZettelPrinter struct{}
 func (p *fullZettelPrinter) begin() {}
 func (p *fullZettelPrinter) end()   {}
 
-func (p *fullZettelPrinter) printZettel(_ int, z *lib.Zettel, err error) {
-	//todo handle error
+func (p *fullZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error) {
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+
 	sb := &strings.Builder{}
 	sb.WriteString(z.Data.MetadataYaml)
 	sb.WriteString("\n")

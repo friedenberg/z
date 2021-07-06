@@ -13,8 +13,8 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e Env) (err error) {
-		glob := filepath.Join(e.ZettelPath, "*.md")
+	return func(e *lib.Env) (err error) {
+		glob := filepath.Join(e.BasePath, "*.md")
 		files, err := filepath.Glob(glob)
 
 		processor := MakeProcessor(

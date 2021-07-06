@@ -11,7 +11,7 @@ import (
 )
 
 func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
-	return func(e Env) (err error) {
+	return func(e *lib.Env) (err error) {
 		path := f.Arg(0)
 
 		if path == "" {

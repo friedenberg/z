@@ -19,6 +19,7 @@ func (z *Zettel) Open(basePath string) (err error) {
 		err = c.Run()
 
 		if err != nil {
+			err = fmt.Errorf("opening attachment %s: %w", c, err)
 			return
 		}
 	}

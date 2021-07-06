@@ -1,9 +1,13 @@
 package commands
 
-import "flag"
+import (
+	"flag"
+
+	"github.com/friedenberg/z/lib"
+)
 
 func GetSubcommandAutocomplete(f *flag.FlagSet) CommandRunFunc {
-	return func(e Env) error {
+	return func(e *lib.Env) error {
 		return nil
 	}
 }
