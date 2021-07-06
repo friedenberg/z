@@ -12,6 +12,7 @@ import (
 
 func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 	return func(e *lib.Env) (err error) {
+		//TODO use processor
 		path := f.Arg(0)
 
 		if path == "" {

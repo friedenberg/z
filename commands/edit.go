@@ -2,8 +2,6 @@ package commands
 
 import (
 	"flag"
-	"os"
-	"os/exec"
 
 	"github.com/friedenberg/z/lib"
 )
@@ -16,32 +14,30 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	f.BoolVar(&shouldOpen, "open", false, "")
 
 	return func(e *lib.Env) (err error) {
-		editor, args := getEditor()
-		args = append(args, f.Arg(0))
+		processor := MakeProcessor(
+			e,
+			f.Args(),
+			&nullZettelPrinter{},
+		)
 
-		cmd := exec.Command(editor, args...)
-		cmd.Dir = e.BasePath
+		processor.actioner = func(i int, z *lib.Zettel) (err error) {
+			if shouldEdit {
+				z.Edit(e.BasePath)
 
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
+				if err != nil {
+					return err
+				}
+			}
 
-		cmd.Run()
+			if shouldOpen {
+				err = z.Open(e.BasePath)
+			}
 
-		//TODO persist what is necessary
+			return
+		}
+
+		err = processor.Run()
+
 		return
 	}
-}
-
-func getEditor() (e string, a []string) {
-	// var ok bool
-
-	// if e, ok = os.LookupEnv("EDITOR"); ok {
-	// 	return
-	// }
-
-	// if e, ok = os.LookupEnv("VISUAL"); ok {
-	// 	return
-	// }
-
-	return "open", a
 }

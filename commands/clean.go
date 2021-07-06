@@ -2,7 +2,6 @@ package commands
 
 import (
 	"flag"
-	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
@@ -14,12 +13,9 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
 	return func(e *lib.Env) (err error) {
-		glob := filepath.Join(e.BasePath, "*.md")
-		files, err := filepath.Glob(glob)
-
 		processor := MakeProcessor(
 			e,
-			files,
+			f.Args(),
 			&nullZettelPrinter{},
 		)
 

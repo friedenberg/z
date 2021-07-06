@@ -27,19 +27,9 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			return
 		}
 
-		files := args[2:]
-
-		if len(files) == 0 {
-			files, err = e.GetAllZettels()
-
-			if err != nil {
-				return
-			}
-		}
-
 		processor := MakeProcessor(
 			e,
-			files,
+			args[2:],
 			&nullZettelPrinter{},
 		)
 

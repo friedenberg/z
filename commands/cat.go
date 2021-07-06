@@ -3,7 +3,6 @@ package commands
 import (
 	"flag"
 	"fmt"
-	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
 )
@@ -33,20 +32,9 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 			return fmt.Errorf("Unsupported output format: '%s'", outputFormat)
 		}
 
-		files := f.Args()
-
-		if len(files) == 0 {
-			glob := filepath.Join(e.BasePath, "*.md")
-			files, err = filepath.Glob(glob)
-
-			if err != nil {
-				return
-			}
-		}
-
 		processor := MakeProcessor(
 			e,
-			files,
+			f.Args(),
 			printer,
 		)
 

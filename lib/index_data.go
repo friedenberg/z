@@ -2,8 +2,10 @@ package lib
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
@@ -14,7 +16,7 @@ const (
 )
 
 type ZettelIndexData struct {
-	Date        string   `yaml:"date,omitempty" json:"date,omitempty"`
+	Date        string   `yaml:"-" json:"date,omitempty"`
 	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
 	Areas       []string `yaml:"areas,omitempty" json:"areas,omitempty"`
 	Projects    []string `yaml:"projects,omitempty" json:"projects,omitempty"`
@@ -74,6 +76,17 @@ func (z *Zettel) ParseMetadata() (err error) {
 
 		z.IndexData.File = np
 	}
+
+	var t time.Time
+
+	t, err = TimeFromPath(z.Path)
+
+	if err != nil {
+		err = fmt.Errorf("parse metadata: %w", err)
+		return
+	}
+
+	z.IndexData.Date = t.Format("2006-01-02")
 
 	return
 }

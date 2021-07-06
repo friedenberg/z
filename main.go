@@ -42,7 +42,6 @@ func init() {
 	makeSubcommand("edit", commands.GetSubcommandEdit)
 	makeSubcommand("mv", commands.GetSubcommandMv)
 	makeSubcommand("new", commands.GetSubcommandNew)
-	makeSubcommand("open", commands.GetSubcommandOpen)
 	makeSubcommand("rm", commands.GetSubcommandRm)
 }
 
