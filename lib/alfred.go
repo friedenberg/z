@@ -96,11 +96,6 @@ func MakeMatches(z *Zettel) string {
 
 	return join(
 		base,
-		alfred.WithPrefix(alfred.Split(m.Areas, "-"), "a:"),
-		alfred.WithPrefix(alfred.Split(m.Projects, "-"), "p:"),
-		alfred.WithPrefix(alfred.Split(m.Tags, "-"), "t:"),
-		alfred.Split(m.Areas, "-"),
-		alfred.Split(m.Projects, "-"),
 		alfred.Split(m.Tags, "-"),
 	)
 }
@@ -119,8 +114,6 @@ func MakeSubtitle(z *Zettel) string {
 	}
 
 	add(z.IndexData.Date)
-	addMany(alfred.WithPrefix(z.IndexData.Areas, "a:"))
-	addMany(alfred.WithPrefix(z.IndexData.Projects, "p:"))
 	addMany(alfred.WithPrefix(z.IndexData.Tags, "t:"))
 
 	return strings.Join(el, ", ")

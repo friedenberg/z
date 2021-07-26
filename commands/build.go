@@ -27,24 +27,8 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 				return fmt.Errorf("linking: %s: %w", sPath, er)
 			}
 
-			for _, p := range z.IndexData.Areas {
-				er = symlinkZettel(e, "a:"+p, z)
-
-				if er != nil {
-					return fmt.Errorf("symlinking zettel to area: %w", er)
-				}
-			}
-
-			for _, p := range z.IndexData.Projects {
-				er = symlinkZettel(e, "p:"+p, z)
-
-				if er != nil {
-					return fmt.Errorf("symlinking zettel to project: %w", er)
-				}
-			}
-
-			for _, p := range z.IndexData.Tags {
-				er = symlinkZettel(e, "t:"+p, z)
+			for _, t := range z.IndexData.Tags {
+				er = symlinkZettel(e, t, z)
 
 				if er != nil {
 					return fmt.Errorf("symlinking zettel to tag: %w", er)

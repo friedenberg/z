@@ -103,10 +103,6 @@ func moveInstructionFromString(s string) (m moveInstruction, err error) {
 	}
 
 	switch fieldShortName {
-	case "a":
-		m.fieldReadWriter = lib.GetMetadataFieldReadWriterAreas()
-	case "p":
-		m.fieldReadWriter = lib.GetMetadataFieldReadWriterProjects()
 	case "t":
 		m.fieldReadWriter = lib.GetMetadataFieldReadWriterTags()
 	default:

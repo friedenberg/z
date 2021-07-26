@@ -47,8 +47,6 @@ func (f printfFormatter) Format(z *Zettel) string {
 		didConsume := true
 
 		switch f[0] {
-		case 'a':
-			sb.WriteString(strings.Join(z.IndexData.Areas, ","))
 		case 'b':
 			sb.WriteString(z.Data.Body)
 			// sb.WriteString(strings.ReplaceAll(z.Data.Body, "%", "%%"))
@@ -58,8 +56,6 @@ func (f printfFormatter) Format(z *Zettel) string {
 			sb.WriteString(z.FilePath())
 		case 'p':
 			sb.WriteString(z.Path)
-		case 'r':
-			sb.WriteString(strings.Join(z.IndexData.Projects, ","))
 		case 't':
 			sb.WriteString(strings.Join(z.IndexData.Tags, ","))
 		case 'u':

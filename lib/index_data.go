@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/friedenberg/z/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -16,11 +18,11 @@ const (
 	MetadataEndSequence   = "...\n"
 )
 
+type Metadata []string
+
 type ZettelIndexData struct {
 	Date        string   `yaml:"-" json:"date,omitempty"`
 	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
-	Areas       []string `yaml:"areas,omitempty" json:"areas,omitempty"`
-	Projects    []string `yaml:"projects,omitempty" json:"projects,omitempty"`
 	Tags        []string `yaml:"tags,omitempty" json:"tags,omitempty"`
 	Url         string   `yaml:"url,omitempty" json:"url,omitempty"`
 	File        string   `yaml:"file,omitempty" json:"file,omitempty"`
@@ -69,11 +71,52 @@ func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 }
 
 func (z *Zettel) ParseMetadata() (err error) {
-	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &z.IndexData)
+	var md Metadata
+	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &md)
 
 	if err != nil {
 		err = fmt.Errorf("parse metadata: %w", err)
 		return
+	}
+
+	for i, v := range md {
+		if i == 0 {
+			z.IndexData.Description = v
+			continue
+		}
+
+		if util.FileExists(v) {
+			if z.IndexData.File != "" {
+				err = fmt.Errorf(
+					"zettel has more than one valid file: '%' and '%'",
+					v,
+					z.IndexData.File,
+				)
+
+				return
+			}
+
+			z.IndexData.File = v
+			continue
+		}
+
+		url, e := url.Parse(v)
+
+		if e == nil {
+			// if z.IndexData.Url != "" {
+			// 	err = fmt.Errorf(
+			// 		"zettel has more than one valid url: '%s' and '%s'",
+			// 		v,
+			// 		z.IndexData.Url,
+			// 	)
+
+			// 	return
+			// }
+			z.IndexData.Url = url.String()
+			continue
+		}
+
+		z.IndexData.Tags = append(z.IndexData.Tags, v)
 	}
 
 	// if z.HasFile() {

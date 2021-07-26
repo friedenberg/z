@@ -18,8 +18,6 @@ func (p zettelPool) Get() (z *Zettel) {
 	z = p.Pool.Get().(*Zettel)
 	z.IndexData.Date = ""
 	z.IndexData.Description = ""
-	z.IndexData.Areas = z.IndexData.Areas[:0]
-	z.IndexData.Projects = z.IndexData.Projects[:0]
 	z.IndexData.Tags = z.IndexData.Tags[:0]
 	z.IndexData.Url = ""
 	z.AlfredData.Item.Title = ""
