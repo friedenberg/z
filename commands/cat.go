@@ -2,14 +2,14 @@ package commands
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 	var outputFormat string
-	f.StringVar(&outputFormat, "output-format", "full", "One of 'alfred-json', 'metadata-json', 'full', 'filename'")
+	f.StringVar(&outputFormat, "output-format", "full", "One of 'alfred-snippet-json', 'alfred-json', 'metadata-json', 'full', 'filename'")
+	// f.StringVar(&query, "query", "t:snippet", "zettel-spec")
 
 	return func(e *lib.Env) (err error) {
 		var printer zettelPrinter
@@ -18,8 +18,16 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 		switch outputFormat {
 		case "alfred-json":
 			printer = &alfredJsonZettelPrinter{}
+			format := lib.GetAlfredFormatDefault()
 			actioner = func(i int, z *lib.Zettel) error {
-				return z.GenerateAlfredItemData()
+				return z.GenerateAlfredItemData(format)
+			}
+
+		case "alfred-snippet-json":
+			printer = &alfredJsonZettelPrinter{}
+			format := lib.GetAlfredFormatSnippet()
+			actioner = func(i int, z *lib.Zettel) error {
+				return z.GenerateAlfredItemData(format)
 			}
 
 		case "metadata-json":
@@ -29,7 +37,9 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 		case "filename":
 			printer = &filenameZettelPrinter{}
 		default:
-			return fmt.Errorf("Unsupported output format: '%s'", outputFormat)
+			printer = &formatZettelPrinter{
+				formatter: lib.MakePrintfFormatter(outputFormat),
+			}
 		}
 
 		processor := MakeProcessor(
@@ -37,6 +47,11 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 			f.Args(),
 			printer,
 		)
+
+		processor.hydrator = func(_ int, z *lib.Zettel, path string) error {
+			z.Path = path
+			return z.HydrateFromFilePath(true)
+		}
 
 		processor.actioner = actioner
 

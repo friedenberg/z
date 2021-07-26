@@ -66,8 +66,8 @@ func (p *multiplexingZettelPrinter) printZettel(i int, z *lib.Zettel, e error) {
 }
 
 func (p *multiplexingZettelPrinter) end() {
-	defer p.waitGroup.Wait()
 	close(p.channel)
+	p.waitGroup.Wait()
 	p.printer.end()
 }
 
@@ -133,7 +133,7 @@ type alfredJsonZettelPrinter struct {
 }
 
 func (p *alfredJsonZettelPrinter) begin() {
-	util.StdPrinterOutf(`{"items":[`)
+	util.StdPrinterOut(`{"items":[`)
 }
 
 func (p *alfredJsonZettelPrinter) shouldPrintComma() bool {
@@ -165,11 +165,11 @@ func (p *alfredJsonZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error)
 	}
 
 	sb.WriteString(z.AlfredData.Json)
-	util.StdPrinterOutf(sb.String())
+	util.StdPrinterOut(sb.String())
 }
 
 func (p *alfredJsonZettelPrinter) end() {
-	util.StdPrinterOutf(`]}`)
+	util.StdPrinterOut(`]}`)
 }
 
 //   _____      _ _
@@ -191,8 +191,33 @@ func (p *fullZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error) {
 	}
 
 	sb := &strings.Builder{}
+	sb.WriteString(lib.MetadataStartSequence)
 	sb.WriteString(z.Data.MetadataYaml)
-	sb.WriteString("\n")
+	sb.WriteString(lib.MetadataEndSequence)
 	sb.WriteString(z.Data.Body)
 	util.StdPrinterOutf(sb.String())
+}
+
+//   _____                          _
+//  |  ___|__  _ __ _ __ ___   __ _| |_
+//  | |_ / _ \| '__| '_ ` _ \ / _` | __|
+//  |  _| (_) | |  | | | | | | (_| | |_
+//  |_|  \___/|_|  |_| |_| |_|\__,_|\__|
+//
+
+type formatZettelPrinter struct {
+	formatter lib.Formatter
+}
+
+func (p *formatZettelPrinter) begin() {}
+func (p *formatZettelPrinter) end()   {}
+
+func (p *formatZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+
+	//TODO should empty strings be printed?
+	util.StdPrinterOut(p.formatter.Format(z))
 }

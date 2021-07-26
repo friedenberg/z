@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -11,8 +12,10 @@ import (
 	"time"
 )
 
-func (z *Zettel) InitFromTime(basePath string, t time.Time) {
-	z.Path = MakePathFromTime(basePath, t)
+func (z *Zettel) InitFromTime(t time.Time) {
+	z.Path = MakePathFromTime(z.Env.BasePath, t)
+	z.Id = t.Unix()
+
 	z.IndexData = ZettelIndexData{
 		Date: t.Format("2006-01-02"),
 	}
@@ -81,17 +84,19 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 	}
 }
 
-func AddFileOnWrite(basePath string, p string, zi string) OnZettelWriteFunc {
-	newFilename := path.Join(basePath, zi+path.Ext(p))
-
+func AddFileOnWrite(oldPath string) OnZettelWriteFunc {
 	return func(z *Zettel, errIn error) (errOut error) {
+
 		if errIn != nil {
 			return
 		}
 
-		z.IndexData.File = newFilename
+		errOut = os.Rename(oldPath, z.FilePath())
 
-		errOut = os.Rename(p, newFilename)
+		if errOut != nil {
+			errOut = fmt.Errorf("rename file: %w", errOut)
+		}
+
 		return
 	}
 }

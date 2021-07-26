@@ -2,10 +2,13 @@ package lib
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/friedenberg/z/lib/alfred"
 )
 
 type ZettelAlfredItem struct {
@@ -29,7 +32,20 @@ type ZettelAlfredItemIcon struct {
 	Path string `json:"path"`
 }
 
+type ZettelAlfredItemFormat struct {
+	Title    FormatFunc
+	Arg      FormatFunc
+	Subtitle FormatFunc
+	// Match        FormatFunc
+	Text         FormatFunc
+	QuicklookUrl FormatFunc
+	IconType     FormatFunc
+	IconPath     FormatFunc
+}
+
 func MakeMatches(z *Zettel) string {
+	//TODO add more variations and match against item format
+	//e.g., Project: 2020-zettel -> p:2020-zettel, p:2020, 2020, zettel
 	m := z.IndexData
 
 	join := func(s ...[]string) string {
@@ -48,7 +64,7 @@ func MakeMatches(z *Zettel) string {
 	t, err := TimeFromPath(z.Path)
 
 	if err != nil {
-		//TODO
+		panic(fmt.Errorf("make alfred match field: %w", err))
 	}
 
 	day := t.Format("2006-01-02")
@@ -80,9 +96,12 @@ func MakeMatches(z *Zettel) string {
 
 	return join(
 		base,
-		WithPrefix(Split(m.Areas, "-"), "a:"),
-		WithPrefix(Split(m.Projects, "-"), "p:"),
-		WithPrefix(Split(m.Tags, "-"), "t:"),
+		alfred.WithPrefix(alfred.Split(m.Areas, "-"), "a:"),
+		alfred.WithPrefix(alfred.Split(m.Projects, "-"), "p:"),
+		alfred.WithPrefix(alfred.Split(m.Tags, "-"), "t:"),
+		alfred.Split(m.Areas, "-"),
+		alfred.Split(m.Projects, "-"),
+		alfred.Split(m.Tags, "-"),
 	)
 }
 
@@ -100,9 +119,9 @@ func MakeSubtitle(z *Zettel) string {
 	}
 
 	add(z.IndexData.Date)
-	addMany(WithPrefix(z.IndexData.Areas, "a:"))
-	addMany(WithPrefix(z.IndexData.Projects, "p:"))
-	addMany(WithPrefix(z.IndexData.Tags, "t:"))
+	addMany(alfred.WithPrefix(z.IndexData.Areas, "a:"))
+	addMany(alfred.WithPrefix(z.IndexData.Projects, "p:"))
+	addMany(alfred.WithPrefix(z.IndexData.Tags, "t:"))
 
 	return strings.Join(el, ", ")
 }
@@ -118,7 +137,7 @@ func (z *Zettel) AddIcon() {
 
 	getIcon := func() (alfredIcon ZettelAlfredItemIcon) {
 		if z.HasFile() {
-			alfredIcon.Path = z.IndexData.File
+			alfredIcon.Path = z.FilePath()
 			alfredIcon.Type = "fileicon"
 			return
 		}
@@ -133,27 +152,48 @@ func (z *Zettel) AddIcon() {
 	return
 }
 
-func (z *Zettel) AddAlfredItem() (err error) {
-	z.AlfredData.Item.Arg = z.Path
+func (z *Zettel) AddAlfredItem(f ZettelAlfredItemFormat) (err error) {
 	z.AlfredData.Item.ItemType = "file"
+
 	z.AlfredData.Item.Uid = strings.TrimSuffix(
 		path.Base(z.Path),
 		path.Ext(z.Path),
 	)
 
-	z.AlfredData.Item.QuicklookUrl = z.Path
-
-	if z.HasFile() {
-		z.AlfredData.Item.QuicklookUrl = z.IndexData.File
+	if f.QuicklookUrl != nil {
+		z.AlfredData.Item.QuicklookUrl = f.QuicklookUrl(z)
 	}
 
-	z.AlfredData.Item.Subtitle = MakeSubtitle(z)
-	z.AlfredData.Item.Title = z.IndexData.Description
+	if f.Arg != nil {
+		z.AlfredData.Item.Arg = f.Arg(z)
+	}
+
+	if f.Subtitle != nil {
+		z.AlfredData.Item.Subtitle = f.Subtitle(z)
+	}
+
+	if f.Title != nil {
+		z.AlfredData.Item.Title = f.Title(z)
+	}
+
+	if f.Text != nil {
+		z.AlfredData.Item.Text = ZettelAlfredItemText{
+			Copy: f.Text(z),
+		}
+	}
+
+	z.AlfredData.Item.Icon = ZettelAlfredItemIcon{}
+
+	if f.IconType != nil {
+		z.AlfredData.Item.Icon.Type = f.IconType(z)
+	}
+
+	if f.IconPath != nil {
+		z.AlfredData.Item.Icon.Path = f.IconPath(z)
+	}
+
 	z.AlfredData.Item.Match = MakeMatches(z)
-	z.AlfredData.Item.Text = ZettelAlfredItemText{
-		Copy: path.Base(z.Path),
-	}
-	z.AddIcon()
+	// z.AddIcon()
 	return nil
 }
 

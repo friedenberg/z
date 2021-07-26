@@ -1,9 +1,28 @@
 package lib
 
-import "fmt"
+import (
+	"fmt"
+	"path"
+	"strconv"
+	"strings"
+)
 
-func (z *Zettel) HydrateFromFilePath() (err error) {
-	err = z.ReadMetadata()
+func (z *Zettel) HydrateFromFilePath(readBody bool) (err error) {
+	id := strings.TrimSuffix(path.Base(z.Path), path.Ext(z.Path))
+	idInt, err := strconv.ParseInt(id, 10, 64)
+
+	if err != nil {
+		err = fmt.Errorf("extracting id from filename: %w", err)
+		return
+	}
+
+	z.Id = idInt
+
+	if readBody {
+		err = z.ReadMetadataAndBody()
+	} else {
+		err = z.ReadMetadata()
+	}
 
 	if err != nil {
 		err = fmt.Errorf("reading metadata: %w", err)
@@ -20,8 +39,8 @@ func (z *Zettel) HydrateFromFilePath() (err error) {
 	return
 }
 
-func (z *Zettel) GenerateAlfredItemData() (err error) {
-	err = z.AddAlfredItem()
+func (z *Zettel) GenerateAlfredItemData(f ZettelAlfredItemFormat) (err error) {
+	err = z.AddAlfredItem(f)
 
 	if err != nil {
 		err = fmt.Errorf("adding alfred item: %w", err)

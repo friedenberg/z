@@ -22,7 +22,7 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 
 		processor.actioner = func(i int, z *lib.Zettel) (err error) {
 			if shouldEdit {
-				z.Edit(e.BasePath)
+				z.Edit()
 
 				if err != nil {
 					return err
@@ -30,7 +30,7 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 			}
 
 			if shouldOpen {
-				err = z.Open(e.BasePath)
+				err = z.Open()
 			}
 
 			return

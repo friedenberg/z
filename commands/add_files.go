@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 	"fmt"
+	"path"
 	"strconv"
 	"time"
 
@@ -10,11 +11,10 @@ import (
 )
 
 func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
-	var shouldEdit bool
+	var shouldEdit, shouldOpen bool
 
-	f.BoolVar(&shouldEdit, "edit", true, "")
-
-	//TODO add shouldEdit
+	f.BoolVar(&shouldEdit, "edit", true, "open the created zettel")
+	f.BoolVar(&shouldOpen, "open", true, "open the attached file(s)")
 
 	return func(e *lib.Env) (err error) {
 		currentTime := time.Now()
@@ -38,30 +38,36 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 			}
 
 			t := currentTime.Add(d)
-			z.InitFromTime(e.BasePath, t)
+			z.InitFromTime(t)
 
-			//TODO move into zettel init
-			zettelId := strconv.FormatInt(t.Unix(), 10)
 			z.IndexData.Tags = []string{"added"}
+			z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
 
-			onWrite := lib.AddFileOnWrite(e.BasePath, p, zettelId)
-
-			if err != nil {
-				err = fmt.Errorf("failed to add url or file: %w", err)
-				return
-			}
-
-			err = z.Write(onWrite)
-
-			if onWrite != nil {
-				err = onWrite(z, err)
-			}
+			err = z.Write(lib.AddFileOnWrite(p))
 
 			if err != nil {
 				err = fmt.Errorf("failed to write: %w", err)
 			}
 
 			return
+		}
+
+		if shouldEdit {
+			processor.actioner = func(i int, z *lib.Zettel) (actionErr error) {
+				if shouldEdit {
+					actionErr = z.Edit()
+				}
+
+				if err != nil {
+					return
+				}
+
+				if shouldOpen {
+					actionErr = z.Open()
+				}
+
+				return
+			}
 		}
 
 		err = processor.Run()

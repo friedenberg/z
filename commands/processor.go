@@ -53,7 +53,7 @@ func (p *Processor) init() {
 	if p.hydrator == nil {
 		p.hydrator = func(_ int, z *lib.Zettel, path string) error {
 			z.Path = path
-			return z.HydrateFromFilePath()
+			return z.HydrateFromFilePath(false)
 		}
 	}
 }
@@ -78,7 +78,7 @@ func (p *Processor) Run() (err error) {
 				err = p.ActionZettel(i, z)
 
 				if err != nil {
-					err = fmt.Errorf("%s: %w", f, err)
+					err = fmt.Errorf("%s:\n\t%w", f, err)
 					p.printer.printZettel(i, z, err)
 				}
 			}(i, file)
@@ -88,10 +88,10 @@ func (p *Processor) Run() (err error) {
 	p.waitGroup.Add(len(p.files))
 
 	p.printer.begin()
-	defer p.printer.end()
 
 	go runRead()
-	defer p.waitGroup.Wait()
+	p.waitGroup.Wait()
+	p.printer.end()
 
 	return nil
 }

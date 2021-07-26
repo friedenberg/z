@@ -7,7 +7,7 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-func (z *Zettel) Open(basePath string) (err error) {
+func (z *Zettel) Open() (err error) {
 	cmds, err := getOpenCmds(z)
 
 	if err != nil {
@@ -15,7 +15,7 @@ func (z *Zettel) Open(basePath string) (err error) {
 	}
 
 	for _, c := range cmds {
-		c.Dir = basePath
+		c.Dir = z.Env.BasePath
 		err = c.Run()
 
 		if err != nil {
@@ -29,16 +29,16 @@ func (z *Zettel) Open(basePath string) (err error) {
 
 func getOpenCmds(z *Zettel) (c []*exec.Cmd, err error) {
 	if z.HasFile() {
-		if !util.FileExists(z.IndexData.File) {
-			err = fmt.Errorf("%s: file does not exist", z.IndexData.File)
+		if !util.FileExists(z.FilePath()) {
+			err = fmt.Errorf("%s: file does not exist", z.FilePath())
 			return
 		}
 
-		c = append(c, exec.Command("open", z.IndexData.File))
+		c = append(c, exec.Command("open", z.FilePath()))
 	}
 
 	if z.HasUrl() {
-		c = append(c, exec.Command("open", z.IndexData.Url))
+		c = append(c, exec.Command("open", z.FilePath()))
 	}
 
 	return

@@ -2,12 +2,14 @@ package lib
 
 import (
 	"os"
+	"path"
 
 	"github.com/friedenberg/z/util"
 )
 
+//TODO swithch to p rintable description
 type CleanActionCheck func(z *Zettel) bool
-type CleanActionPerform func(z *Zettel) error
+type CleanActionPerform func(z *Zettel) (bool, error)
 
 type CleanAction struct {
 	Check   CleanActionCheck
@@ -17,12 +19,35 @@ type CleanAction struct {
 func GetCleanActions() map[string]CleanAction {
 	return map[string]CleanAction{
 		"delete_if_missing_file": CleanAction{shouldDeleteIfMissingFile, deleteIfMissingFile},
+		"normalize_file": CleanAction{
+			func(z *Zettel) bool {
+				if z.IndexData.File == "" {
+					return false
+				}
+
+				normalizedFile := path.Base(z.IndexData.File)
+
+				return normalizedFile != z.IndexData.File
+			},
+			func(z *Zettel) (shouldWrite bool, err error) {
+				z.IndexData.File = path.Base(z.IndexData.File)
+				shouldWrite = true
+				return
+			},
+		},
 		"rewrite_metadata": CleanAction{
-			func(_ *Zettel) bool { return true },
-			func(z *Zettel) error {
+			func(z *Zettel) bool {
+				oldYaml := z.Data.MetadataYaml
+				//TODO handle err
+				z.GenerateMetadataYaml()
+
+				return oldYaml != z.Data.MetadataYaml
+			},
+			func(z *Zettel) (shouldWrite bool, err error) {
 				util.OpenFilesGuardInstance.Lock()
 				defer util.OpenFilesGuardInstance.Unlock()
-				return z.Write(nil)
+				shouldWrite = true
+				return
 			},
 		},
 		//index
@@ -41,9 +66,10 @@ func shouldDeleteIfMissingFile(z *Zettel) bool {
 		return false
 	}
 
-	return !util.FileExists(z.IndexData.File)
+	return !util.FileExists(z.FilePath())
 }
 
-func deleteIfMissingFile(z *Zettel) error {
-	return os.Remove(z.Path)
+func deleteIfMissingFile(z *Zettel) (shouldWrite bool, err error) {
+	err = os.Remove(z.Path)
+	return
 }

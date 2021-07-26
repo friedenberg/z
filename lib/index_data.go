@@ -3,6 +3,7 @@ package lib
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -45,6 +46,10 @@ func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 	for {
 		some_string, err := r.ReadString('\n')
 
+		if err == io.EOF {
+			return nil
+		}
+
 		if err != nil {
 			return err
 		}
@@ -66,16 +71,16 @@ func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 func (z *Zettel) ParseMetadata() (err error) {
 	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &z.IndexData)
 
-	if z.HasFile() {
-		var np string
-		np, err = z.Env.GetNormalizedPath(z.IndexData.File)
+	// if z.HasFile() {
+	// 	var np string
+	// 	np, err = z.Env.GetNormalizedPath(z.IndexData.File)
 
-		if err != nil {
-			return
-		}
+	// 	if err != nil {
+	// 		return
+	// 	}
 
-		z.IndexData.File = np
-	}
+	// 	z.IndexData.File = np
+	// }
 
 	var t time.Time
 

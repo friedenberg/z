@@ -29,16 +29,8 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 
 func cleanZettelFunc(dryRun bool) ActionFunc {
 	return func(i int, z *lib.Zettel) (err error) {
-		didPrintPath := false
-		printPathIfNecessary := func() {
-			if !didPrintPath {
-				util.StdPrinterErr(z.Path + ":")
-			}
-
-			didPrintPath = true
-		}
-
 		cleanActions := lib.GetCleanActions()
+		shouldWrite := false
 
 		for n, a := range cleanActions {
 			applicable := a.Check(z)
@@ -47,14 +39,24 @@ func cleanZettelFunc(dryRun bool) ActionFunc {
 				continue
 			}
 
-			printPathIfNecessary()
-
-			util.StdPrinterErrf("\t%s: yes\n", n)
+			util.StdPrinterErrf("%s: %s\n", z.Path, n)
 
 			if !dryRun {
 				z.ReadMetadataAndBody()
-				a.Perform(z)
+				var newShouldWrite bool
+				newShouldWrite, err = a.Perform(z)
+				shouldWrite = shouldWrite || newShouldWrite
+
+				if err != nil {
+					return
+				}
 			}
+		}
+
+		if shouldWrite {
+			util.OpenFilesGuardInstance.Lock()
+			defer util.OpenFilesGuardInstance.Unlock()
+			err = z.Write(nil)
 		}
 
 		return

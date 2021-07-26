@@ -4,7 +4,7 @@ import (
 	"os/exec"
 )
 
-func (z *Zettel) Edit(basePath string) (err error) {
+func (z *Zettel) Edit() (err error) {
 	// cmd := exec.Command(editor, args...)
 	// cmd.Dir = e.BasePath
 
@@ -14,7 +14,7 @@ func (z *Zettel) Edit(basePath string) (err error) {
 	// cmd.Run()
 
 	c := exec.Command("open", z.Path)
-	c.Dir = basePath
+	c.Dir = z.Env.BasePath
 	err = c.Run()
 	return
 }

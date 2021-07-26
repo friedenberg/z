@@ -1,43 +1,35 @@
 package commands
 
 import (
-	"errors"
 	"flag"
-	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
 )
 
 func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 	return func(e *lib.Env) (err error) {
-		//TODO use processor
-		path := f.Arg(0)
+		processor := MakeProcessor(
+			e,
+			f.Args(),
+			&nullZettelPrinter{},
+		)
 
-		if path == "" {
-			err = errors.New("path was empty")
-		}
+		processor.actioner = func(i int, z *lib.Zettel) (actionErr error) {
+			actionErr = os.Remove(z.Path)
 
-		absPath, err := filepath.Abs(path)
+			if actionErr != nil {
+				return
+			}
 
-		if err != nil {
-			err = fmt.Errorf("%s: get absolute path: %w", path, err)
+			if z.HasFile() {
+				actionErr = os.Remove(z.FilePath())
+			}
+
 			return
 		}
 
-		z := &lib.Zettel{Path: absPath}
-		z.HydrateFromFilePath()
-
-		err = os.Remove(z.Path)
-
-		if err != nil {
-			return
-		}
-
-		if z.HasFile() {
-			err = os.Remove(z.IndexData.File)
-		}
+		err = processor.Run()
 
 		return
 	}
