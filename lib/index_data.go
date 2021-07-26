@@ -71,6 +71,11 @@ func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 func (z *Zettel) ParseMetadata() (err error) {
 	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &z.IndexData)
 
+	if err != nil {
+		err = fmt.Errorf("parse metadata: %w", err)
+		return
+	}
+
 	// if z.HasFile() {
 	// 	var np string
 	// 	np, err = z.Env.GetNormalizedPath(z.IndexData.File)
