@@ -57,7 +57,7 @@ func (f printfFormatter) Format(z *Zettel) string {
 		case 'p':
 			sb.WriteString(z.Path)
 		case 't':
-			sb.WriteString(strings.Join(z.IndexData.Tags, ","))
+			sb.WriteString(strings.Join(z.IndexData.Tags, ", "))
 		case 'u':
 			sb.WriteString(z.IndexData.Url)
 		case 'w':

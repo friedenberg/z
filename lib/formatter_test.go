@@ -59,22 +59,14 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 			output:     "%",
 		},
 		printfFormatterTestCase{
-			name:       "literal percent",
-			makeZettel: makeZettelWithDate,
-			format:     "%w,a:%a,p:%r,t:%t",
-			output:     "2021-07-26,a:,p:,t:",
-		},
-		printfFormatterTestCase{
-			name: "literal percent",
+			name: "date then tags",
 			makeZettel: func() (z *Zettel) {
 				z = makeZettelWithDate()
-				z.IndexData.Areas = []string{"some-area"}
-				z.IndexData.Projects = []string{"some-project"}
 				z.IndexData.Tags = []string{"some-tag"}
 				return
 			},
-			format: "%w,a:%a,p:%r,t:%t",
-			output: "2021-07-26,a:some-area,p:some-project,t:some-tag",
+			format: "%w, %t",
+			output: "2021-07-26, some-tag",
 		},
 	}
 }

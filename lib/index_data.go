@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -85,10 +86,12 @@ func (z *Zettel) ParseMetadata() (err error) {
 			continue
 		}
 
-		if util.FileExists(v) {
+		filePath := path.Join(z.Env.BasePath, v)
+
+		if util.FileExists(filePath) {
 			if z.IndexData.File != "" {
 				err = fmt.Errorf(
-					"zettel has more than one valid file: '%' and '%'",
+					"zettel has more than one valid file: '%s' and '%s'",
 					v,
 					z.IndexData.File,
 				)
@@ -102,16 +105,16 @@ func (z *Zettel) ParseMetadata() (err error) {
 
 		url, e := url.Parse(v)
 
-		if e == nil {
-			// if z.IndexData.Url != "" {
-			// 	err = fmt.Errorf(
-			// 		"zettel has more than one valid url: '%s' and '%s'",
-			// 		v,
-			// 		z.IndexData.Url,
-			// 	)
+		if e == nil && url.Hostname() != "" {
+			if z.IndexData.Url != "" {
+				err = fmt.Errorf(
+					"zettel has more than one valid url: '%s' and '%s'",
+					v,
+					z.IndexData.Url,
+				)
 
-			// 	return
-			// }
+				return
+			}
 			z.IndexData.Url = url.String()
 			continue
 		}
