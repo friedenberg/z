@@ -12,7 +12,7 @@ type OnZettelWriteFunc func(*Zettel, error) error
 
 func (z *Zettel) GenerateMetadataYaml() (err error) {
 	var y []byte
-	y, err = yaml.Marshal(z.IndexData)
+	y, err = yaml.Marshal(z.IndexData.ToMetadata())
 
 	if err != nil {
 		return

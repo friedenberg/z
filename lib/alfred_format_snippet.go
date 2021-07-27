@@ -10,7 +10,7 @@ func GetAlfredFormatSnippet() ZettelAlfredItemFormat {
 			return
 		},
 		Arg:          MakePrintfFormatFunc("%p"),
-		Subtitle:     MakePrintfFormatFunc("%d,a:%a,p:%r,t:%t"),
+		Subtitle:     MakePrintfFormatFunc("%d, %t"),
 		QuicklookUrl: MakePrintfFormatFunc("%f"),
 		IconType:     MakePrintfFormatFunc("file"),
 		IconPath:     MakePrintfFormatFunc("%f"),

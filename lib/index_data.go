@@ -29,6 +29,26 @@ type ZettelIndexData struct {
 	File        string   `yaml:"file,omitempty" json:"file,omitempty"`
 }
 
+func (id ZettelIndexData) ToMetadata() (md Metadata) {
+	if id.Description != "" {
+		md = append(md, id.Description)
+	}
+
+	if len(id.Tags) > 0 {
+		md = append(md, id.Tags...)
+	}
+
+	if id.File != "" {
+		md = append(md, id.File)
+	}
+
+	if id.Url != "" {
+		md = append(md, id.Url)
+	}
+
+	return
+}
+
 func (zettel *Zettel) ReadMetadata() (err error) {
 	f, err := os.Open(zettel.Path)
 	defer f.Close()

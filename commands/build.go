@@ -72,15 +72,17 @@ func symlinkZettel(e *lib.Env, dir string, z *lib.Zettel) (err error) {
 	pzPath, err := getZettelBuildFileName(z)
 
 	if err != nil {
-		err = fmt.Errorf("making project zettel symlink: %s: %w", pPath, err)
+		err = fmt.Errorf("making zettel symlink: %s: %w", pPath, err)
 		return
 	}
 
 	pzPath = path.Join(pPath, pzPath)
 	err = syscall.Link(z.Path, pzPath)
 
-	if err != nil {
-		err = fmt.Errorf("linking project zettel: %s: %w", pzPath, err)
+	if os.IsExist(err) {
+		err = nil
+	} else if err != nil && !os.IsExist(err) {
+		err = fmt.Errorf("linking zettel: %s: %w", pzPath, err)
 		return
 	}
 
