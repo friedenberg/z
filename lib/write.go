@@ -48,7 +48,6 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 	}
 
 	w := bufio.NewWriter(f)
-	defer w.Flush()
 
 	_, err = w.WriteString(MetadataStartSequence)
 
@@ -71,15 +70,17 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		return
 	}
 
-	if z.Data.Body == "" {
-		return
+	if z.Data.Body != "" {
+		_, err = w.WriteString(z.Data.Body)
+
+		if err != nil {
+			err = fmt.Errorf("writing body: %w", err)
+			return
+		}
 	}
 
-	_, err = w.WriteString(z.Data.Body)
-
-	if err != nil {
-		err = fmt.Errorf("writing body: %w", err)
-		return
+	if err == nil {
+		w.Flush()
 	}
 
 	return
