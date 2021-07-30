@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/friedenberg/z/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -36,8 +37,10 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 	}
 
 	//TODO
-	f, err := os.OpenFile(z.Path, os.O_RDWR|os.O_CREATE, 0755)
+	util.OpenFilesGuardInstance.Lock()
+	f, err := os.OpenFile(z.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	defer f.Close()
+	defer util.OpenFilesGuardInstance.Unlock()
 
 	if err != nil {
 		err = fmt.Errorf("opening zettel file: %w", err)
