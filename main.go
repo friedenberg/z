@@ -78,7 +78,6 @@ func main() {
 func printUsage(err error) {
 	if err != nil {
 		util.StdPrinterErr(err)
-		util.StdPrinterErr(err)
 	}
 
 	fmt.Println("Usage for z: ")
@@ -86,7 +85,6 @@ func printUsage(err error) {
 	sc := make([]subcommand, 0, len(subcommands))
 
 	for _, c := range subcommands {
-		fmt.Println(c.flags)
 		sc = append(sc, c)
 	}
 
