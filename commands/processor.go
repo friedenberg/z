@@ -97,6 +97,7 @@ func (p *Processor) Run() (err error) {
 }
 
 func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
+	//TODO move to read site
 	util.OpenFilesGuardInstance.Lock()
 	defer util.OpenFilesGuardInstance.Unlock()
 

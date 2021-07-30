@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -33,6 +34,10 @@ func (id ZettelIndexData) ToMetadata() (md Metadata) {
 	if id.Description != "" {
 		md = append(md, id.Description)
 	}
+
+	sort.Slice(id.Tags, func(i, j int) bool {
+		return id.Tags[i] < id.Tags[j]
+	})
 
 	if len(id.Tags) > 0 {
 		md = append(md, id.Tags...)
