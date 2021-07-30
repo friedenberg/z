@@ -45,7 +45,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			}
 		}
 
-		z.IndexData.Tags = []string{"added"}
+		z.IndexData.Tags = []string{"t-added"}
 
 		if err != nil {
 			return

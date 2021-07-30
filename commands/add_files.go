@@ -40,7 +40,7 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 			t := currentTime.Add(d)
 			z.InitFromTime(t)
 
-			z.IndexData.Tags = []string{"added"}
+			z.IndexData.Tags = []string{"t-added"}
 			z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
 
 			err = z.Write(lib.AddFileOnWrite(p))

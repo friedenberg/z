@@ -3,7 +3,6 @@ package commands
 import (
 	"flag"
 	"fmt"
-	"strings"
 
 	"github.com/friedenberg/z/lib"
 )
@@ -89,25 +88,9 @@ func moveInstructionFromString(s string) (m moveInstruction, err error) {
 		return
 	}
 
-	split := strings.Split(s, ":")
-
-	if len(split) != 2 {
-		err = fmt.Errorf("'%s': incorrect number of field specifier characters (':')", s)
-		return
-	}
-
-	fieldShortName := split[0]
-
 	m = moveInstruction{
-		value: split[1],
-	}
-
-	switch fieldShortName {
-	case "t":
-		m.fieldReadWriter = lib.GetMetadataFieldReadWriterTags()
-	default:
-		err = fmt.Errorf("'%s': invalid field short name", fieldShortName)
-		return
+		value:           s,
+		fieldReadWriter: lib.GetMetadataFieldReadWriterTags(),
 	}
 
 	return
