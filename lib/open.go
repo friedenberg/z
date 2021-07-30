@@ -38,7 +38,7 @@ func getOpenCmds(z *Zettel) (c []*exec.Cmd, err error) {
 	}
 
 	if z.HasUrl() {
-		c = append(c, exec.Command("open", z.FilePath()))
+		c = append(c, exec.Command("open", z.IndexData.Url))
 	}
 
 	return
