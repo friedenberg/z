@@ -32,6 +32,11 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			&nullZettelPrinter{},
 		)
 
+		processor.hydrator = func(_ int, z *lib.Zettel, path string) (err error) {
+			z.Path = path
+			return z.HydrateFromFilePath(true)
+		}
+
 		processor.actioner = func(_ int, z *lib.Zettel) (err error) {
 			found := -1
 			values := fromMoveInstruction.fieldReadWriter.ValueGetFunc(z)
@@ -53,8 +58,6 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			values = toMoveInstruction.fieldReadWriter.ValueGetFunc(z)
 			values = append(values, toMoveInstruction.value)
 			toMoveInstruction.fieldReadWriter.ValueSetFunc(z, values)
-
-			fmt.Println(z.IndexData)
 
 			if !isDryRun {
 				err = z.Write(func(_ *lib.Zettel, _ error) error { return nil })
