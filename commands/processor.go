@@ -13,14 +13,13 @@ type HydrateFunc func(int, *lib.Zettel, string) error
 type ActionFunc func(int, *lib.Zettel) error
 
 type Processor struct {
-	env            *lib.Env
-	files          []string
-	waitGroup      sync.WaitGroup
-	writeWaitGroup sync.WaitGroup
-	argNormalizer  ArgNormalizeFunc
-	hydrator       HydrateFunc
-	actioner       ActionFunc
-	printer        zettelPrinter
+	env           *lib.Env
+	files         []string
+	waitGroup     sync.WaitGroup
+	argNormalizer ArgNormalizeFunc
+	hydrator      HydrateFunc
+	actioner      ActionFunc
+	printer       zettelPrinter
 }
 
 func MakeProcessor(e *lib.Env, files []string, zp zettelPrinter) (processor *Processor) {
