@@ -53,7 +53,9 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		if shouldEdit {
-			processor.actioner = func(i int, z *lib.Zettel) (actionErr error) {
+			processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
+				shouldPrint = true
+
 				if shouldEdit {
 					actionErr = z.Edit()
 				}

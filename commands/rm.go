@@ -15,7 +15,8 @@ func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 			&nullZettelPrinter{},
 		)
 
-		processor.actioner = func(i int, z *lib.Zettel) (actionErr error) {
+		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
+			shouldPrint = true
 			actionErr = os.Remove(z.Path)
 
 			if actionErr != nil {

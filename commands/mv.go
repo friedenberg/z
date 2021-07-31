@@ -37,7 +37,8 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			return z.HydrateFromFilePath(true)
 		}
 
-		processor.actioner = func(_ int, z *lib.Zettel) (err error) {
+		processor.actioner = func(_ int, z *lib.Zettel) (shouldPrint bool, err error) {
+			shouldPrint = true
 			found := -1
 			values := fromMoveInstruction.fieldReadWriter.ValueGetFunc(z)
 
@@ -49,6 +50,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			}
 
 			if found < 0 {
+				shouldPrint = false
 				return
 			}
 

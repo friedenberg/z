@@ -10,7 +10,7 @@ import (
 
 type ArgNormalizeFunc func(int, string) (string, error)
 type HydrateFunc func(int, *lib.Zettel, string) error
-type ActionFunc func(int, *lib.Zettel) error
+type ActionFunc func(int, *lib.Zettel) (bool, error)
 
 type Processor struct {
 	env           *lib.Env
@@ -114,15 +114,19 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 }
 
 func (p *Processor) ActionZettel(i int, z *lib.Zettel) (err error) {
+	shouldPrint := true
+
 	if p.actioner != nil {
-		err = p.actioner(i, z)
+		shouldPrint, err = p.actioner(i, z)
 	}
 
 	if err != nil {
 		return
 	}
 
-	p.printer.printZettel(i, z, nil)
+	if shouldPrint {
+		p.printer.printZettel(i, z, nil)
+	}
 
 	return
 }

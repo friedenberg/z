@@ -13,29 +13,34 @@ import (
 
 func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 	return func(e *lib.Env) (err error) {
-		actioner := func(i int, z *lib.Zettel) error {
-			name, bErr := getZettelBuildFileName(z)
+		actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
+			shouldPrint = true
+
+			var name string
+			name, actionErr = getZettelBuildFileName(z)
 			sPath := path.Join(e.BasePath, "build", name)
 
-			if bErr != nil {
-				return bErr
+			if actionErr != nil {
+				return
 			}
 
-			er := syscall.Link(z.Path, sPath)
+			actionErr = syscall.Link(z.Path, sPath)
 
-			if er != nil && !os.IsExist(er) {
-				return fmt.Errorf("linking: %s: %w", sPath, er)
+			if actionErr != nil && !os.IsExist(actionErr) {
+				actionErr = fmt.Errorf("linking: %s: %w", sPath, actionErr)
+				return
 			}
 
 			for _, t := range z.IndexData.Tags {
-				er = symlinkZettel(e, t, z)
+				actionErr = symlinkZettel(e, t, z)
 
-				if er != nil {
-					return fmt.Errorf("symlinking zettel to tag: %w", er)
+				if actionErr != nil {
+					actionErr = fmt.Errorf("symlinking zettel to tag: %w", actionErr)
+					return
 				}
 			}
 
-			return nil
+			return
 		}
 
 		processor := MakeProcessor(

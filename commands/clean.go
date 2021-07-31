@@ -28,7 +28,8 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 }
 
 func cleanZettelFunc(dryRun bool) ActionFunc {
-	return func(i int, z *lib.Zettel) (err error) {
+	return func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
+		shouldPrint = true
 		cleanActions := lib.GetCleanActions()
 		shouldWrite := false
 

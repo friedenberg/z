@@ -19,15 +19,15 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 		case "alfred-json":
 			printer = &alfredJsonZettelPrinter{}
 			format := lib.GetAlfredFormatDefault()
-			actioner = func(i int, z *lib.Zettel) error {
-				return z.GenerateAlfredItemData(format)
+			actioner = func(i int, z *lib.Zettel) (bool, error) {
+				return true, z.GenerateAlfredItemData(format)
 			}
 
 		case "alfred-snippet-json":
 			printer = &alfredJsonZettelPrinter{}
 			format := lib.GetAlfredFormatSnippet()
-			actioner = func(i int, z *lib.Zettel) error {
-				return z.GenerateAlfredItemData(format)
+			actioner = func(i int, z *lib.Zettel) (bool, error) {
+				return true, z.GenerateAlfredItemData(format)
 			}
 
 		case "metadata-json":
