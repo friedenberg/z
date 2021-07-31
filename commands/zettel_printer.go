@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"os/exec"
 	"strings"
 	"sync"
 
@@ -220,4 +221,104 @@ func (p *formatZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
 
 	//TODO should empty strings be printed?
 	util.StdPrinterOut(p.formatter.Format(z))
+}
+
+//      _        _   _
+//     / \   ___| |_(_) ___  _ __
+//    / _ \ / __| __| |/ _ \| '_ \
+//   / ___ \ (__| |_| | (_) | | | |
+//  /_/   \_\___|\__|_|\___/|_| |_|
+//
+
+type actionZettelPrinter struct {
+	env                    *lib.Env
+	shouldEdit, shouldOpen bool
+	zettels                []*lib.Zettel
+	files                  []string
+	urls                   []string
+}
+
+func (p *actionZettelPrinter) begin() {}
+
+func (p *actionZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
+	if errIn != nil {
+		util.StdPrinterErr(errIn)
+		return
+	}
+
+	p.zettels = append(p.zettels, z)
+
+	if z.HasFile() {
+		p.files = append(p.files, z.FilePath())
+	}
+
+	if z.HasUrl() {
+		p.urls = append(p.urls, z.IndexData.Url)
+	}
+}
+
+func (p *actionZettelPrinter) end() {
+	if p.shouldEdit {
+		p.openZettels()
+	}
+
+	if p.shouldOpen {
+		p.openFiles()
+		p.openUrls()
+	}
+}
+
+func (p *actionZettelPrinter) openZettels() {
+	if len(p.zettels) == 0 {
+		return
+	}
+
+	zettelFiles := make([]string, len(p.zettels))
+
+	for i, z := range p.zettels {
+		zettelFiles[i] = z.Path
+	}
+
+	args := []string{"-p"}
+
+	cmd := exec.Command(
+		"mvim",
+		append(args, zettelFiles...)...,
+	)
+
+	cmd.Run()
+}
+
+func (p *actionZettelPrinter) openFiles() {
+	if len(p.files) == 0 {
+		return
+	}
+
+	cmd := exec.Command(
+		"open",
+		p.files...,
+	)
+
+	cmd.Run()
+}
+
+func (p *actionZettelPrinter) openUrls() {
+	if len(p.urls) == 0 {
+		return
+	}
+
+	args := []string{
+		"-na",
+		"Google Chrome",
+		"--args",
+		"--new-window",
+	}
+
+	cmd := exec.Command(
+		"open",
+		append(args, p.urls...)...,
+	)
+
+	cmd.Run()
+	//TODO return errors
 }
