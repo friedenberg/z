@@ -21,12 +21,13 @@ func GetTestExpandTagsTestCases(t *testing.T) []ExpandTagsTestCase {
 		ExpandTagsTestCase{
 			"no hyphens",
 			"tag",
-			[]string{},
+			[]string{"tag"},
 		},
 		ExpandTagsTestCase{
 			"one hyphen",
 			"tag-part",
 			[]string{
+				"tag-part",
 				"tag",
 				"part",
 			},
@@ -35,6 +36,7 @@ func GetTestExpandTagsTestCases(t *testing.T) []ExpandTagsTestCase {
 			"two hyphens",
 			"p-2021-zettel",
 			[]string{
+				"p-2021-zettel",
 				"p",
 				"2021-zettel",
 				"p-2021",
@@ -58,6 +60,8 @@ func TestExpandTags(t *testing.T) {
 						actual,
 						testCase.expandedTags,
 					)
+
+					return
 				}
 
 				for i, a := range actual {

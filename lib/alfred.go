@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/lib/alfred"
+	"github.com/friedenberg/z/util"
 )
 
 type ZettelAlfredItem struct {
@@ -47,18 +48,11 @@ func MakeMatches(z *Zettel) string {
 	//TODO add more variations and match against item format
 	//e.g., Project: 2020-zettel -> p:2020-zettel, p:2020, 2020, zettel
 	m := z.IndexData
+	sb := &strings.Builder{}
 
-	join := func(s ...[]string) string {
-		sb := strings.Builder{}
-
-		for _, a := range s {
-			for _, b := range a {
-				sb.WriteString(b)
-				sb.WriteString(" ")
-			}
-		}
-
-		return sb.String()
+	addMatch := func(s string) {
+		sb.WriteString(s)
+		sb.WriteString(" ")
 	}
 
 	t, err := TimeFromPath(z.Path)
@@ -67,37 +61,39 @@ func MakeMatches(z *Zettel) string {
 		panic(fmt.Errorf("make alfred match field: %w", err))
 	}
 
+	addMatch(m.Description)
+
 	day := t.Format("2006-01-02")
 
-	base := []string{
-		m.Description,
-		"w:" + day,
-	}
+	addMatch("w-" + day)
 
 	if z.HasUrl() {
 		url, err := url.Parse(m.Url)
 
 		if err == nil {
-			base = append(base, "d:"+url.Hostname())
+			addMatch("d-" + url.Hostname())
 		}
 
-		base = append(base, "h:u")
+		addMatch("h-u")
 	}
 
 	if z.HasFile() {
-		base = append(base, "h:f")
+		addMatch("h-f")
 	}
 
 	today := time.Now()
 
 	if today.Format("2006-01-02") == day {
-		base = append(base, "w:today")
+		addMatch("w-today")
 	}
 
-	return join(
-		base,
-		alfred.Split(m.Tags, "-"),
-	)
+	for _, t := range m.Tags {
+		for _, m := range util.ExpandTags(t) {
+			addMatch(m)
+		}
+	}
+
+	return sb.String()
 }
 
 func MakeSubtitle(z *Zettel) string {

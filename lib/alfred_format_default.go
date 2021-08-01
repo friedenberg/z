@@ -7,7 +7,7 @@ func GetAlfredFormatDefault() ZettelAlfredItemFormat {
 		Subtitle: func(z *Zettel) (s string) {
 			var f FormatFunc
 			if len(z.IndexData.Tags) > 0 {
-				f = MakePrintfFormatFunc("%w, %t")
+				f = MakePrintfFormatFunc("%t")
 			} else {
 				f = MakePrintfFormatFunc("%w")
 			}

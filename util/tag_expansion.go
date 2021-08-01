@@ -13,7 +13,12 @@ func init() {
 }
 
 func ExpandTags(t string) (expanded []string) {
+	if t == "" {
+		return
+	}
+
 	hyphens := regexExpandTagsHyphens.FindAllIndex([]byte(t), -1)
+	expanded = []string{t}
 
 	if hyphens == nil {
 		return

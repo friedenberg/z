@@ -2,6 +2,7 @@ package commands
 
 import (
 	"flag"
+	"strings"
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
@@ -46,7 +47,7 @@ func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
 	}
 
 	for _, t := range z.IndexData.Tags {
-		if t == q {
+		if strings.Contains(t, q) {
 			return true
 		}
 	}

@@ -23,11 +23,12 @@ const (
 type Metadata []string
 
 type ZettelIndexData struct {
-	Date        string   `yaml:"-" json:"date,omitempty"`
-	Description string   `yaml:"description,omitempty" json:"description,omitempty"`
-	Tags        []string `yaml:"tags,omitempty" json:"tags,omitempty"`
-	Url         string   `yaml:"url,omitempty" json:"url,omitempty"`
-	File        string   `yaml:"file,omitempty" json:"file,omitempty"`
+	Date         string   `yaml:"-" json:"date,omitempty"`
+	Description  string   `yaml:"description,omitempty" json:"description,omitempty"`
+	Tags         []string `yaml:"tags,omitempty" json:"tags,omitempty"`
+	ExpandedTags []string `yaml:"-" json:"expanded_tags,omitempty"`
+	Url          string   `yaml:"url,omitempty" json:"url,omitempty"`
+	File         string   `yaml:"file,omitempty" json:"file,omitempty"`
 }
 
 func (id ZettelIndexData) ToMetadata() (md Metadata) {
@@ -168,6 +169,13 @@ func (z *Zettel) ParseMetadata() (err error) {
 	}
 
 	z.IndexData.Date = t.Format("2006-01-02")
+
+	for _, t := range z.IndexData.Tags {
+		z.IndexData.ExpandedTags = append(
+			z.IndexData.ExpandedTags,
+			util.ExpandTags(t)...,
+		)
+	}
 
 	return
 }
