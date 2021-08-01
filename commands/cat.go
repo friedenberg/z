@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 )
 
@@ -12,40 +13,40 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 	// f.StringVar(&query, "query", "t:snippet", "zettel-spec")
 
 	return func(e *lib.Env) (err error) {
-		var printer zettelPrinter
+		var p printer.ZettelPrinter
 		var actioner ActionFunc
 
 		switch outputFormat {
 		case "alfred-json":
-			printer = &alfredJsonZettelPrinter{}
+			p = &printer.AlfredJsonZettelPrinter{}
 			format := lib.GetAlfredFormatDefault()
 			actioner = func(i int, z *lib.Zettel) (bool, error) {
 				return true, z.GenerateAlfredItemData(format)
 			}
 
 		case "alfred-snippet-json":
-			printer = &alfredJsonZettelPrinter{}
+			p = &printer.AlfredJsonZettelPrinter{}
 			format := lib.GetAlfredFormatSnippet()
 			actioner = func(i int, z *lib.Zettel) (bool, error) {
 				return true, z.GenerateAlfredItemData(format)
 			}
 
 		case "metadata-json":
-			printer = &jsonZettelPrinter{}
+			p = &printer.JsonZettelPrinter{}
 		case "full":
-			printer = &fullZettelPrinter{}
+			p = &printer.FullZettelPrinter{}
 		case "filename":
-			printer = &filenameZettelPrinter{}
+			p = &printer.FilenameZettelPrinter{}
 		default:
-			printer = &formatZettelPrinter{
-				formatter: lib.MakePrintfFormatter(outputFormat),
+			p = &printer.FormatZettelPrinter{
+				Formatter: lib.MakePrintfFormatter(outputFormat),
 			}
 		}
 
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			printer,
+			p,
 		)
 
 		processor.hydrator = func(_ int, z *lib.Zettel, path string) error {

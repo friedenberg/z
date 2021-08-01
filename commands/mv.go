@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 )
 
@@ -29,7 +30,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			args[2:],
-			&nullZettelPrinter{},
+			&printer.NullZettelPrinter{},
 		)
 
 		processor.hydrator = func(_ int, z *lib.Zettel, path string) (err error) {

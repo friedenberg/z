@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 )
 
@@ -12,7 +13,7 @@ func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&nullZettelPrinter{},
+			&printer.NullZettelPrinter{},
 		)
 
 		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {

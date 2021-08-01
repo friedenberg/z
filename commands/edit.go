@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 )
 
@@ -19,11 +20,11 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&multiplexingZettelPrinter{
-				printer: &actionZettelPrinter{
-					env:        e,
-					shouldEdit: shouldEdit,
-					shouldOpen: shouldOpen,
+			&printer.MultiplexingZettelPrinter{
+				Printer: &printer.ActionZettelPrinter{
+					Env:        e,
+					ShouldEdit: shouldEdit,
+					ShouldOpen: shouldOpen,
 				},
 			},
 		)

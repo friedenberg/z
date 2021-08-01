@@ -1,4 +1,4 @@
-package commands
+package printer
 
 import (
 	"encoding/json"
@@ -10,10 +10,10 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-type zettelPrinter interface {
-	begin()
-	printZettel(int, *lib.Zettel, error)
-	end()
+type ZettelPrinter interface {
+	Begin()
+	PrintZettel(int, *lib.Zettel, error)
+	End()
 }
 
 //   _   _       _ _
@@ -23,12 +23,12 @@ type zettelPrinter interface {
 //  |_| \_|\__,_|_|_|
 //
 
-type nullZettelPrinter struct{}
+type NullZettelPrinter struct{}
 
-func (p *nullZettelPrinter) begin() {}
-func (p *nullZettelPrinter) end()   {}
+func (p *NullZettelPrinter) Begin() {}
+func (p *NullZettelPrinter) End()   {}
 
-func (p *nullZettelPrinter) printZettel(_ int, _ *lib.Zettel, errIn error) {
+func (p *NullZettelPrinter) PrintZettel(_ int, _ *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -41,15 +41,15 @@ type multiplexPrintLine struct {
 	e error
 }
 
-type multiplexingZettelPrinter struct {
-	printer   zettelPrinter
+type MultiplexingZettelPrinter struct {
+	Printer   ZettelPrinter
 	channel   chan multiplexPrintLine
 	waitGroup *sync.WaitGroup
 }
 
-func (p *multiplexingZettelPrinter) begin() {
+func (p *MultiplexingZettelPrinter) Begin() {
 	p.channel = make(chan multiplexPrintLine)
-	p.printer.begin()
+	p.Printer.Begin()
 	p.waitGroup = &sync.WaitGroup{}
 	p.waitGroup.Add(1)
 
@@ -57,19 +57,19 @@ func (p *multiplexingZettelPrinter) begin() {
 		defer p.waitGroup.Done()
 
 		for l := range p.channel {
-			p.printer.printZettel(l.i, l.z, l.e)
+			p.Printer.PrintZettel(l.i, l.z, l.e)
 		}
 	}()
 }
 
-func (p *multiplexingZettelPrinter) printZettel(i int, z *lib.Zettel, e error) {
+func (p *MultiplexingZettelPrinter) PrintZettel(i int, z *lib.Zettel, e error) {
 	p.channel <- multiplexPrintLine{i, z, e}
 }
 
-func (p *multiplexingZettelPrinter) end() {
+func (p *MultiplexingZettelPrinter) End() {
 	close(p.channel)
 	p.waitGroup.Wait()
-	p.printer.end()
+	p.Printer.End()
 }
 
 //   _____ _ _
@@ -79,12 +79,12 @@ func (p *multiplexingZettelPrinter) end() {
 //  |_|   |_|_|\___|_| |_|\__,_|_| |_| |_|\___|
 //
 
-type filenameZettelPrinter struct{}
+type FilenameZettelPrinter struct{}
 
-func (p *filenameZettelPrinter) begin() {}
-func (p *filenameZettelPrinter) end()   {}
+func (p *FilenameZettelPrinter) Begin() {}
+func (p *FilenameZettelPrinter) End()   {}
 
-func (p *filenameZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
+func (p *FilenameZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -100,12 +100,12 @@ func (p *filenameZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
 //   \___/|____/ \___/|_| \_|
 //
 
-type jsonZettelPrinter struct{}
+type JsonZettelPrinter struct{}
 
-func (p *jsonZettelPrinter) begin() {}
-func (p *jsonZettelPrinter) end()   {}
+func (p *JsonZettelPrinter) Begin() {}
+func (p *JsonZettelPrinter) End()   {}
 
-func (p *jsonZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
+func (p *JsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -128,30 +128,30 @@ func (p *jsonZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
 //  /_/   \_\_|_| |_|  \___|\__,_|
 //
 
-type alfredJsonZettelPrinter struct {
+type AlfredJsonZettelPrinter struct {
 	afterFirstPrint bool
 	sync.Mutex
 }
 
-func (p *alfredJsonZettelPrinter) begin() {
+func (p *AlfredJsonZettelPrinter) Begin() {
 	util.StdPrinterOut(`{"items":[`)
 }
 
-func (p *alfredJsonZettelPrinter) shouldPrintComma() bool {
+func (p *AlfredJsonZettelPrinter) shouldPrintComma() bool {
 	p.Lock()
 	defer p.Unlock()
 
 	return p.afterFirstPrint
 }
 
-func (p *alfredJsonZettelPrinter) setShouldPrintComma() {
+func (p *AlfredJsonZettelPrinter) setShouldPrintComma() {
 	p.Lock()
 	defer p.Unlock()
 
 	p.afterFirstPrint = true
 }
 
-func (p *alfredJsonZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error) {
+func (p *AlfredJsonZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
 	defer p.setShouldPrintComma()
 
 	if errIn != nil {
@@ -169,7 +169,7 @@ func (p *alfredJsonZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error)
 	util.StdPrinterOut(sb.String())
 }
 
-func (p *alfredJsonZettelPrinter) end() {
+func (p *AlfredJsonZettelPrinter) End() {
 	util.StdPrinterOut(`]}`)
 }
 
@@ -180,12 +180,12 @@ func (p *alfredJsonZettelPrinter) end() {
 //  |_|   \__,_|_|_|
 //
 
-type fullZettelPrinter struct{}
+type FullZettelPrinter struct{}
 
-func (p *fullZettelPrinter) begin() {}
-func (p *fullZettelPrinter) end()   {}
+func (p *FullZettelPrinter) Begin() {}
+func (p *FullZettelPrinter) End()   {}
 
-func (p *fullZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error) {
+func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -206,21 +206,21 @@ func (p *fullZettelPrinter) printZettel(_ int, z *lib.Zettel, errIn error) {
 //  |_|  \___/|_|  |_| |_| |_|\__,_|\__|
 //
 
-type formatZettelPrinter struct {
-	formatter lib.Formatter
+type FormatZettelPrinter struct {
+	Formatter lib.Formatter
 }
 
-func (p *formatZettelPrinter) begin() {}
-func (p *formatZettelPrinter) end()   {}
+func (p *FormatZettelPrinter) Begin() {}
+func (p *FormatZettelPrinter) End()   {}
 
-func (p *formatZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
+func (p *FormatZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
 	}
 
 	//TODO should empty strings be printed?
-	util.StdPrinterOut(p.formatter.Format(z))
+	util.StdPrinterOut(p.Formatter.Format(z))
 }
 
 //      _        _   _
@@ -230,17 +230,17 @@ func (p *formatZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
 //  /_/   \_\___|\__|_|\___/|_| |_|
 //
 
-type actionZettelPrinter struct {
-	env                    *lib.Env
-	shouldEdit, shouldOpen bool
+type ActionZettelPrinter struct {
+	Env                    *lib.Env
+	ShouldEdit, ShouldOpen bool
 	zettels                []*lib.Zettel
 	files                  []string
 	urls                   []string
 }
 
-func (p *actionZettelPrinter) begin() {}
+func (p *ActionZettelPrinter) Begin() {}
 
-func (p *actionZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
+func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -257,18 +257,18 @@ func (p *actionZettelPrinter) printZettel(i int, z *lib.Zettel, errIn error) {
 	}
 }
 
-func (p *actionZettelPrinter) end() {
-	if p.shouldEdit {
+func (p *ActionZettelPrinter) End() {
+	if p.ShouldEdit {
 		p.openZettels()
 	}
 
-	if p.shouldOpen {
+	if p.ShouldOpen {
 		p.openFiles()
 		p.openUrls()
 	}
 }
 
-func (p *actionZettelPrinter) openZettels() {
+func (p *ActionZettelPrinter) openZettels() {
 	if len(p.zettels) == 0 {
 		return
 	}
@@ -289,7 +289,7 @@ func (p *actionZettelPrinter) openZettels() {
 	cmd.Run()
 }
 
-func (p *actionZettelPrinter) openFiles() {
+func (p *ActionZettelPrinter) openFiles() {
 	if len(p.files) == 0 {
 		return
 	}
@@ -302,7 +302,7 @@ func (p *actionZettelPrinter) openFiles() {
 	cmd.Run()
 }
 
-func (p *actionZettelPrinter) openUrls() {
+func (p *ActionZettelPrinter) openUrls() {
 	if len(p.urls) == 0 {
 		return
 	}

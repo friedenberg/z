@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 )
 
@@ -26,7 +27,7 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&nullZettelPrinter{},
+			&printer.NullZettelPrinter{},
 		)
 
 		processor.argNormalizer = func(i int, arg string) (normalizedArg string, err error) {

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 )
 
@@ -46,7 +47,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&nullZettelPrinter{},
+			&printer.NullZettelPrinter{},
 		)
 
 		processor.actioner = actioner

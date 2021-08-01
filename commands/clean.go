@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
 )
@@ -16,7 +17,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&nullZettelPrinter{},
+			&printer.NullZettelPrinter{},
 		)
 
 		processor.actioner = cleanZettelFunc(isDryRun)

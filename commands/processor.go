@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
 )
@@ -19,10 +20,10 @@ type Processor struct {
 	argNormalizer ArgNormalizeFunc
 	hydrator      HydrateFunc
 	actioner      ActionFunc
-	printer       zettelPrinter
+	printer       printer.ZettelPrinter
 }
 
-func MakeProcessor(e *lib.Env, files []string, zp zettelPrinter) (processor *Processor) {
+func MakeProcessor(e *lib.Env, files []string, zp printer.ZettelPrinter) (processor *Processor) {
 	if len(files) == 0 {
 		var err error
 		files, err = e.GetAllZettels()
@@ -35,7 +36,7 @@ func MakeProcessor(e *lib.Env, files []string, zp zettelPrinter) (processor *Pro
 	processor = &Processor{
 		env:     e,
 		files:   files,
-		printer: &multiplexingZettelPrinter{printer: zp},
+		printer: &printer.MultiplexingZettelPrinter{Printer: zp},
 	}
 
 	return
@@ -68,7 +69,7 @@ func (p *Processor) Run() (err error) {
 
 				if err != nil {
 					err = fmt.Errorf("%s: failed to hydrate: %w", f, err)
-					p.printer.printZettel(i, z, err)
+					p.printer.PrintZettel(i, z, err)
 					return
 				}
 
@@ -78,7 +79,7 @@ func (p *Processor) Run() (err error) {
 
 				if err != nil {
 					err = fmt.Errorf("%s:\n\t%w", f, err)
-					p.printer.printZettel(i, z, err)
+					p.printer.PrintZettel(i, z, err)
 				}
 			}(i, file)
 		}
@@ -86,11 +87,11 @@ func (p *Processor) Run() (err error) {
 
 	p.waitGroup.Add(len(p.files))
 
-	p.printer.begin()
+	p.printer.Begin()
 
 	go runRead()
 	p.waitGroup.Wait()
-	p.printer.end()
+	p.printer.End()
 
 	return nil
 }
@@ -125,7 +126,7 @@ func (p *Processor) ActionZettel(i int, z *lib.Zettel) (err error) {
 	}
 
 	if shouldPrint {
-		p.printer.printZettel(i, z, nil)
+		p.printer.PrintZettel(i, z, nil)
 	}
 
 	return
