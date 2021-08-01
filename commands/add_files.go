@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"path"
@@ -12,9 +13,12 @@ import (
 
 func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 	var shouldEdit, shouldOpen bool
+	var metadata_json string
 
 	f.BoolVar(&shouldEdit, "edit", true, "open the created zettel")
 	f.BoolVar(&shouldOpen, "open", true, "open the attached file(s)")
+
+	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
 
 	return func(e *lib.Env) (err error) {
 		currentTime := time.Now()
@@ -40,7 +44,17 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 			t := currentTime.Add(d)
 			z.InitFromTime(t)
 
-			z.IndexData.Tags = []string{"t-added"}
+			if metadata_json != "" {
+				err = json.Unmarshal([]byte(metadata_json), &z.IndexData)
+
+				if err != nil {
+					err = fmt.Errorf("parsing metadata json: %w", err)
+					return
+				}
+			} else {
+				z.IndexData.Tags = []string{"t-added"}
+			}
+
 			z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
 
 			err = z.Write(lib.AddFileOnWrite(p))
