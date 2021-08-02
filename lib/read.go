@@ -39,7 +39,7 @@ func (z *Zettel) HydrateFromFilePath(readBody bool) (err error) {
 	return
 }
 
-func (z *Zettel) GenerateAlfredItemData(f ZettelAlfredItemFormat) (err error) {
+func (z *Zettel) GenerateAlfredItemData(f AlfredItemFormat) (err error) {
 	err = z.AddAlfredItem(f)
 
 	if err != nil {

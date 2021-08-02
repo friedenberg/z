@@ -12,28 +12,28 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-type ZettelAlfredItem struct {
+type AlfredItem struct {
 	Title        string               `json:"title"`
 	Arg          string               `json:"arg"`
 	Subtitle     string               `json:"subtitle"`
 	Match        string               `json:"match"`
-	Icon         ZettelAlfredItemIcon `json:"icon"`
+	Icon         AlfredItemIcon `json:"icon"`
 	Uid          string               `json:"uid"`
 	ItemType     string               `json:"type"`
 	QuicklookUrl string               `json:"quicklookurl"`
-	Text         ZettelAlfredItemText `json:"text"`
+	Text         AlfredItemText `json:"text"`
 }
 
-type ZettelAlfredItemText struct {
+type AlfredItemText struct {
 	Copy string `json:"copy"`
 }
 
-type ZettelAlfredItemIcon struct {
+type AlfredItemIcon struct {
 	Type string `json:"type"`
 	Path string `json:"path"`
 }
 
-type ZettelAlfredItemFormat struct {
+type AlfredItemFormat struct {
 	Title    FormatFunc
 	Arg      FormatFunc
 	Subtitle FormatFunc
@@ -124,7 +124,7 @@ func (z *Zettel) AddIcon() {
 		return "note"
 	}
 
-	getIcon := func() (alfredIcon ZettelAlfredItemIcon) {
+	getIcon := func() (alfredIcon AlfredItemIcon) {
 		if z.HasFile() {
 			alfredIcon.Path = z.FilePath()
 			alfredIcon.Type = "fileicon"
@@ -141,7 +141,7 @@ func (z *Zettel) AddIcon() {
 	return
 }
 
-func (z *Zettel) AddAlfredItem(f ZettelAlfredItemFormat) (err error) {
+func (z *Zettel) AddAlfredItem(f AlfredItemFormat) (err error) {
 	z.AlfredData.Item.ItemType = "file"
 
 	z.AlfredData.Item.Uid = strings.TrimSuffix(
@@ -166,12 +166,12 @@ func (z *Zettel) AddAlfredItem(f ZettelAlfredItemFormat) (err error) {
 	}
 
 	if f.Text != nil {
-		z.AlfredData.Item.Text = ZettelAlfredItemText{
+		z.AlfredData.Item.Text = AlfredItemText{
 			Copy: f.Text(z),
 		}
 	}
 
-	z.AlfredData.Item.Icon = ZettelAlfredItemIcon{}
+	z.AlfredData.Item.Icon = AlfredItemIcon{}
 
 	if f.IconType != nil {
 		z.AlfredData.Item.Icon.Type = f.IconType(z)

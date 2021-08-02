@@ -15,6 +15,6 @@ type ZettelData struct {
 }
 
 type AlfredData struct {
-	Item ZettelAlfredItem
+	Item AlfredItem
 	Json string
 }

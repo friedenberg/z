@@ -24,7 +24,7 @@ func (p zettelPool) Get() (z *Zettel) {
 	z.AlfredData.Item.Arg = ""
 	z.AlfredData.Item.Subtitle = ""
 	z.AlfredData.Item.Match = ""
-	z.AlfredData.Item.Icon = ZettelAlfredItemIcon{}
+	z.AlfredData.Item.Icon = AlfredItemIcon{}
 	z.AlfredData.Item.Uid = ""
 	z.AlfredData.Item.ItemType = ""
 	z.AlfredData.Item.QuicklookUrl = ""

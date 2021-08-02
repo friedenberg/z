@@ -2,8 +2,8 @@ package lib
 
 import "strings"
 
-func GetAlfredFormatSnippet() ZettelAlfredItemFormat {
-	return ZettelAlfredItemFormat{
+func GetAlfredFormatSnippet() AlfredItemFormat {
+	return AlfredItemFormat{
 		Title: func(z *Zettel) (s string) {
 			s = MakePrintfFormatFunc("%b")(z)
 			s = strings.ReplaceAll(s, "\n", " ")

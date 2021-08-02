@@ -1,7 +1,7 @@
 package lib
 
-func GetAlfredFormatDefault() ZettelAlfredItemFormat {
-	return ZettelAlfredItemFormat{
+func GetAlfredFormatDefault() AlfredItemFormat {
+	return AlfredItemFormat{
 		Title: MakePrintfFormatFunc("%d"),
 		Arg:   MakePrintfFormatFunc("%p"),
 		Subtitle: func(z *Zettel) (s string) {
