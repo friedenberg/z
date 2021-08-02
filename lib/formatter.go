@@ -80,3 +80,7 @@ func (f printfFormatter) Format(z *Zettel) string {
 
 	return sb.String()
 }
+
+func (z *Zettel) Format(f string) string {
+	return MakePrintfFormatter(f).Format(z)
+}

@@ -39,20 +39,20 @@ func (z *Zettel) HydrateFromFilePath(readBody bool) (err error) {
 	return
 }
 
-func (z *Zettel) GenerateAlfredItemData(f AlfredItemFormat) (err error) {
-	err = z.AddAlfredItem(f)
+// func (z *Zettel) GenerateAlfredItemData(f AlfredItemFormat) (err error) {
+// 	err = z.AddAlfredItem(f)
 
-	if err != nil {
-		err = fmt.Errorf("adding alfred item: %w", err)
-		return
-	}
+// 	if err != nil {
+// 		err = fmt.Errorf("adding alfred item: %w", err)
+// 		return
+// 	}
 
-	err = z.GenerateAlfredJson()
+// 	err = z.GenerateAlfredJson()
 
-	if err != nil {
-		err = fmt.Errorf("generating alfred json: %w", err)
-		return
-	}
+// 	if err != nil {
+// 		err = fmt.Errorf("generating alfred json: %w", err)
+// 		return
+// 	}
 
-	return
-}
+// 	return
+// }

@@ -20,15 +20,15 @@ func (p zettelPool) Get() (z *Zettel) {
 	z.IndexData.Description = ""
 	z.IndexData.Tags = z.IndexData.Tags[:0]
 	z.IndexData.Url = ""
-	z.AlfredData.Item.Title = ""
-	z.AlfredData.Item.Arg = ""
-	z.AlfredData.Item.Subtitle = ""
-	z.AlfredData.Item.Match = ""
-	z.AlfredData.Item.Icon = AlfredItemIcon{}
-	z.AlfredData.Item.Uid = ""
-	z.AlfredData.Item.ItemType = ""
-	z.AlfredData.Item.QuicklookUrl = ""
-	z.AlfredData.Item.Text.Copy = ""
+	// z.AlfredData.Item.Title = ""
+	// z.AlfredData.Item.Arg = ""
+	// z.AlfredData.Item.Subtitle = ""
+	// z.AlfredData.Item.Match = ""
+	// z.AlfredData.Item.Icon = alfred.AlfredItemIcon{}
+	// z.AlfredData.Item.Uid = ""
+	// z.AlfredData.Item.ItemType = ""
+	// z.AlfredData.Item.QuicklookUrl = ""
+	// z.AlfredData.Item.Text.Copy = ""
 	return
 }
 

@@ -9,11 +9,22 @@ import (
 )
 
 type AlfredJsonZettelPrinter struct {
+	PrintFunc       func(i int, z *lib.Zettel, sb *strings.Builder)
 	afterFirstPrint bool
 	sync.Mutex
 }
 
 func (p *AlfredJsonZettelPrinter) Begin() {
+	if p.PrintFunc == nil {
+		p.PrintFunc = func(i int, z *lib.Zettel, sb *strings.Builder) {
+			item := alfredItemFromZettelDefault(z)
+			//TODO handle error
+			j, _ := lib.GenerateAlfredJson(item)
+
+			sb.WriteString(j)
+		}
+	}
+
 	util.StdPrinterOut(`{"items":[`)
 }
 
@@ -31,7 +42,7 @@ func (p *AlfredJsonZettelPrinter) setShouldPrintComma() {
 	p.afterFirstPrint = true
 }
 
-func (p *AlfredJsonZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
+func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	defer p.setShouldPrintComma()
 
 	if errIn != nil {
@@ -45,7 +56,7 @@ func (p *AlfredJsonZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error)
 		sb.WriteString("\n")
 	}
 
-	sb.WriteString(z.AlfredData.Json)
+	p.PrintFunc(i, z, &sb)
 	util.StdPrinterOut(sb.String())
 }
 
