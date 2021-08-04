@@ -13,7 +13,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e *lib.Env) (err error) {
+	return func(e *lib.Kasten) (err error) {
 		args := f.Args()
 
 		fromMoveInstruction, err := moveInstructionFromString(args[0])

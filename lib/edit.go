@@ -14,7 +14,7 @@ func (z *Zettel) Edit() (err error) {
 	// cmd.Run()
 
 	c := exec.Command("open", z.Path)
-	c.Dir = z.Env.BasePath
+	c.Dir = z.Kasten.BasePath
 	err = c.Run()
 	return
 }

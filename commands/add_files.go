@@ -21,7 +21,7 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 
 	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
 
-	return func(e *lib.Env) (err error) {
+	return func(e *lib.Kasten) (err error) {
 		currentTime := time.Now()
 
 		processor := MakeProcessor(

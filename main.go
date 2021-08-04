@@ -50,7 +50,7 @@ func main() {
 	defer util.WaitForPrinter()
 
 	var err error
-	defaultEnv, err := lib.GetDefaultEnv()
+	defaultKasten, err := lib.GetDefaultKasten()
 
 	if err != nil {
 		os.Exit(1)
@@ -68,7 +68,7 @@ func main() {
 	}
 
 	cmd.flags.Parse(os.Args[2:])
-	err = cmd.runFunc(defaultEnv)
+	err = cmd.runFunc(defaultKasten)
 
 	if err != nil {
 		util.StdPrinterErr(err)

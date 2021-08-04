@@ -17,13 +17,13 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	f.BoolVar(&shouldOpen, "open", false, "")
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 
-	return func(e *lib.Env) (err error) {
+	return func(e *lib.Kasten) (err error) {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
 			&printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					Env:        e,
+					Kasten:        e,
 					ShouldEdit: shouldEdit,
 					ShouldOpen: shouldOpen,
 				},

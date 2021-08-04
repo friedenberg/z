@@ -9,7 +9,7 @@ import (
 )
 
 func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
-	return func(e *lib.Env) (err error) {
+	return func(e *lib.Kasten) (err error) {
 		processor := MakeProcessor(
 			e,
 			f.Args(),

@@ -112,7 +112,7 @@ func (z *Zettel) ParseMetadata() (err error) {
 			continue
 		}
 
-		filePath := path.Join(z.Env.BasePath, v)
+		filePath := path.Join(z.Kasten.BasePath, v)
 
 		if util.FileExists(filePath) {
 			if z.IndexData.File != "" {
@@ -150,7 +150,7 @@ func (z *Zettel) ParseMetadata() (err error) {
 
 	// if z.HasFile() {
 	// 	var np string
-	// 	np, err = z.Env.GetNormalizedPath(z.IndexData.File)
+	// 	np, err = z.Kasten.GetNormalizedPath(z.IndexData.File)
 
 	// 	if err != nil {
 	// 		return

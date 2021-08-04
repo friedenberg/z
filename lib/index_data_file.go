@@ -11,5 +11,5 @@ func (z *Zettel) FilePath() string {
 		return ""
 	}
 
-	return path.Join(z.Env.BasePath, z.IndexData.File)
+	return path.Join(z.Kasten.BasePath, z.IndexData.File)
 }

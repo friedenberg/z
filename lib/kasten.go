@@ -7,19 +7,19 @@ import (
 	"sync"
 )
 
-type Env struct {
+type Kasten struct {
 	BasePath string
 	ZettelPool
 }
 
-func GetDefaultEnv() (e *Env, err error) {
+func GetDefaultKasten() (e *Kasten, err error) {
 	usr, err := user.Current()
 
 	if err != nil {
 		return
 	}
 
-	e = &Env{
+	e = &Kasten{
 		BasePath: path.Join(usr.HomeDir, "Zettelkasten"),
 	}
 
@@ -27,23 +27,23 @@ func GetDefaultEnv() (e *Env, err error) {
 		Pool: sync.Pool{
 			New: func() interface{} {
 				z := new(Zettel)
-				z.Env = e
+				z.Kasten = e
 				return z
 			},
 		},
-		env: e,
+		kasten: e,
 	}
 
 	return
 }
 
-func (e *Env) GetAllZettels() (zettels []string, err error) {
+func (e *Kasten) GetAllZettels() (zettels []string, err error) {
 	glob := filepath.Join(e.BasePath, "*.md")
 	zettels, err = filepath.Glob(glob)
 	return
 }
 
-func (e *Env) GetNormalizedPath(a string) (b string, err error) {
+func (e *Kasten) GetNormalizedPath(a string) (b string, err error) {
 	if filepath.IsAbs(a) {
 		b = a
 	} else {

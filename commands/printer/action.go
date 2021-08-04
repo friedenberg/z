@@ -8,7 +8,7 @@ import (
 )
 
 type ActionZettelPrinter struct {
-	Env                    *lib.Env
+	Kasten                    *lib.Kasten
 	ShouldEdit, ShouldOpen bool
 	zettels                []*lib.Zettel
 	files                  []string

@@ -57,7 +57,7 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&outputFormat, "output-format", "full", fmt.Sprintf("One of %q", outputFormatKeys))
 	// f.StringVar(&query, "query", "t:snippet", "zettel-spec")
 
-	return func(e *lib.Env) (err error) {
+	return func(e *lib.Kasten) (err error) {
 		var p printer.ZettelPrinter
 		var actioner ActionFunc
 

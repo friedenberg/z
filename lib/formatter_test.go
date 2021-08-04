@@ -15,7 +15,7 @@ type printfFormatterTestCase struct {
 }
 
 func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
-	env := Env{}
+	kasten := Kasten{}
 
 	makeZettelWithDate := func() (z *Zettel) {
 		time, err := time.Parse("2006-01-02", "2021-07-26")
@@ -25,7 +25,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 		}
 
 		z = &Zettel{
-			Env: &env,
+			Kasten: &kasten,
 		}
 
 		z.InitFromTime(time)

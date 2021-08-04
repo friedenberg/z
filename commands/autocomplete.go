@@ -7,7 +7,7 @@ import (
 )
 
 func GetSubcommandAutocomplete(f *flag.FlagSet) CommandRunFunc {
-	return func(e *lib.Env) error {
+	return func(e *lib.Kasten) error {
 		return nil
 	}
 }

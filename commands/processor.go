@@ -14,7 +14,7 @@ type HydrateFunc func(int, *lib.Zettel, string) error
 type ActionFunc func(int, *lib.Zettel) (bool, error)
 
 type Processor struct {
-	env           *lib.Env
+	kasten           *lib.Kasten
 	files         []string
 	waitGroup     sync.WaitGroup
 	argNormalizer ArgNormalizeFunc
@@ -23,7 +23,7 @@ type Processor struct {
 	printer       printer.ZettelPrinter
 }
 
-func MakeProcessor(e *lib.Env, files []string, zp printer.ZettelPrinter) (processor *Processor) {
+func MakeProcessor(e *lib.Kasten, files []string, zp printer.ZettelPrinter) (processor *Processor) {
 	if len(files) == 0 {
 		var err error
 		files, err = e.GetAllZettels()
@@ -34,7 +34,7 @@ func MakeProcessor(e *lib.Env, files []string, zp printer.ZettelPrinter) (proces
 	}
 
 	processor = &Processor{
-		env:     e,
+		kasten:     e,
 		files:   files,
 		printer: &printer.MultiplexingZettelPrinter{Printer: zp},
 	}
@@ -45,7 +45,7 @@ func MakeProcessor(e *lib.Env, files []string, zp printer.ZettelPrinter) (proces
 func (p *Processor) init() {
 	if p.argNormalizer == nil {
 		p.argNormalizer = func(_ int, path string) (normalizedArg string, err error) {
-			normalizedArg, err = p.env.GetNormalizedPath(path)
+			normalizedArg, err = p.kasten.GetNormalizedPath(path)
 			return
 		}
 	}
@@ -73,7 +73,7 @@ func (p *Processor) Run() (err error) {
 					return
 				}
 
-				defer p.env.ZettelPool.Put(z)
+				defer p.kasten.ZettelPool.Put(z)
 
 				err = p.ActionZettel(i, z)
 
@@ -101,7 +101,7 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	util.OpenFilesGuardInstance.Lock()
 	defer util.OpenFilesGuardInstance.Unlock()
 
-	z = p.env.ZettelPool.Get()
+	z = p.kasten.ZettelPool.Get()
 
 	a, err := p.argNormalizer(i, path)
 

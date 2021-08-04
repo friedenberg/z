@@ -13,7 +13,7 @@ import (
 )
 
 func (z *Zettel) InitFromTime(t time.Time) {
-	z.Path = MakePathFromTime(z.Env.BasePath, t)
+	z.Path = MakePathFromTime(z.Kasten.BasePath, t)
 	z.Id = t.Unix()
 
 	z.IndexData = ZettelIndexData{

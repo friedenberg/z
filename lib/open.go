@@ -15,7 +15,7 @@ func (z *Zettel) Open() (err error) {
 	}
 
 	for _, c := range cmds {
-		c.Dir = z.Env.BasePath
+		c.Dir = z.Kasten.BasePath
 		err = c.Run()
 
 		if err != nil {

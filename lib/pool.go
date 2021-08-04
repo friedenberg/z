@@ -11,7 +11,7 @@ type ZettelPool interface {
 
 type zettelPool struct {
 	sync.Pool
-	env *Env
+	kasten *Kasten
 }
 
 func (p zettelPool) Get() (z *Zettel) {
