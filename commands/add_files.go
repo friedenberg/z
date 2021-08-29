@@ -10,6 +10,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/util"
 )
 
 func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
@@ -44,6 +45,21 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 
 			t := currentTime.Add(d)
 			z.InitFromTime(t)
+
+			for {
+				if util.FileExists(z.Path) {
+					d, err := time.ParseDuration("1s")
+
+					if err != nil {
+						panic(err)
+					}
+
+					currentTime = currentTime.Add(d)
+					z.InitFromTime(currentTime)
+				} else {
+					break
+				}
+			}
 
 			if metadata_json != "" {
 				err = json.Unmarshal([]byte(metadata_json), &z.IndexData)
