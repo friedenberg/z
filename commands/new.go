@@ -45,8 +45,6 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			}
 		}
 
-		z.IndexData.Tags = []string{"t-added"}
-
 		if err != nil {
 			return
 		}
@@ -83,6 +81,8 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 				return
 			}
 		}
+
+		z.IndexData.Tags = append(z.IndexData.Tags, "zz-inbox")
 
 		if content == "-" {
 			var b []byte

@@ -52,9 +52,9 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 					err = fmt.Errorf("parsing metadata json: %w", err)
 					return
 				}
-			} else {
-				z.IndexData.Tags = []string{"t-added"}
 			}
+
+			z.IndexData.Tags = append(z.IndexData.Tags, "zz-inbox")
 
 			z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
 
