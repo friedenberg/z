@@ -17,26 +17,20 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 		actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 			shouldPrint = true
 
-			var name string
-			name, actionErr = getZettelBuildFileName(z)
-			sPath := path.Join(e.BasePath, "build", name)
-
-			if actionErr != nil {
-				return
-			}
-
-			actionErr = syscall.Link(z.Path, sPath)
-
-			if actionErr != nil && !os.IsExist(actionErr) {
-				actionErr = fmt.Errorf("linking: %s: %w", sPath, actionErr)
-				return
-			}
-
 			for _, t := range z.IndexData.Tags {
 				actionErr = symlinkZettel(e, t, z)
 
 				if actionErr != nil {
 					actionErr = fmt.Errorf("symlinking zettel to tag: %w", actionErr)
+					return
+				}
+			}
+
+			if len(z.IndexData.Tags) == 0 {
+				actionErr = symlinkZettel(e, "untagged", z)
+
+				if actionErr != nil {
+					actionErr = fmt.Errorf("symlinking zettel: %w", actionErr)
 					return
 				}
 			}
@@ -68,28 +62,40 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 }
 
 func symlinkZettel(e *lib.Kasten, dir string, z *lib.Zettel) (err error) {
-	pPath, err := makeDirectoryIfNecessary(e, dir)
+	buildDir, err := makeDirectoryIfNecessary(e, dir)
 
 	if err != nil {
 		err = fmt.Errorf("making directory: %s: %w", dir, err)
 		return
 	}
 
-	pzPath, err := getZettelBuildFileName(z)
+	doSym := func(originalPath, ext string) error {
+		newFilename, err := getZettelBuildFileName(z, ext)
+		// fmt.Println(originalPath)
+		// fmt.Println(newFilename)
+
+		if err != nil {
+			return fmt.Errorf("making zettel symlink: %s: %w", originalPath, err)
+		}
+
+		symPath := path.Join(buildDir, newFilename)
+		err = syscall.Link(originalPath, symPath)
+
+		if err != nil && !os.IsExist(err) {
+			return fmt.Errorf("linking zettel: %s: %w", symPath, err)
+		}
+
+		return nil
+	}
+
+	err = doSym(z.Path, ".md")
 
 	if err != nil {
-		err = fmt.Errorf("making zettel symlink: %s: %w", pPath, err)
 		return
 	}
 
-	pzPath = path.Join(pPath, pzPath)
-	err = syscall.Link(z.Path, pzPath)
-
-	if os.IsExist(err) {
-		err = nil
-	} else if err != nil && !os.IsExist(err) {
-		err = fmt.Errorf("linking zettel: %s: %w", pzPath, err)
-		return
+	if z.HasFile() {
+		err = doSym(z.FilePath(), path.Ext(z.IndexData.File))
 	}
 
 	return
@@ -106,7 +112,7 @@ func makeDirectoryIfNecessary(e *lib.Kasten, p string) (a string, err error) {
 	return
 }
 
-func getZettelBuildFileName(z *lib.Zettel) (path string, err error) {
+func getZettelBuildFileName(z *lib.Zettel, ext string) (path string, err error) {
 	sb := &strings.Builder{}
 	t, err := lib.TimeFromPath(z.Path)
 
@@ -120,7 +126,7 @@ func getZettelBuildFileName(z *lib.Zettel) (path string, err error) {
 	sb.WriteString(" ")
 
 	sb.WriteString(strings.ReplaceAll(z.IndexData.Description, "/", "-"))
-	sb.WriteString(".md")
+	sb.WriteString(ext)
 
 	path = sb.String()
 
