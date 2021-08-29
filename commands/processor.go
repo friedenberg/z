@@ -14,7 +14,7 @@ type HydrateFunc func(int, *lib.Zettel, string) error
 type ActionFunc func(int, *lib.Zettel) (bool, error)
 
 type Processor struct {
-	kasten           *lib.Kasten
+	kasten        *lib.Kasten
 	files         []string
 	waitGroup     sync.WaitGroup
 	argNormalizer ArgNormalizeFunc
@@ -34,7 +34,7 @@ func MakeProcessor(e *lib.Kasten, files []string, zp printer.ZettelPrinter) (pro
 	}
 
 	processor = &Processor{
-		kasten:     e,
+		kasten:  e,
 		files:   files,
 		printer: &printer.MultiplexingZettelPrinter{Printer: zp},
 	}
