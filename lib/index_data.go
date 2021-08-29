@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -19,6 +20,14 @@ const (
 	MetadataStartSequence = "---\n"
 	MetadataEndSequence   = "...\n"
 )
+
+var (
+	RegexTag *regexp.Regexp
+)
+
+func init() {
+	RegexTag = regexp.MustCompile(`^\w+-`)
+}
 
 type Metadata []string
 
@@ -107,7 +116,7 @@ func (z *Zettel) ParseMetadata() (err error) {
 	}
 
 	for i, v := range md {
-		if i == 0 {
+		if i == 0 && !RegexTag.MatchString(v) {
 			z.IndexData.Description = v
 			continue
 		}

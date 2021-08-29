@@ -16,7 +16,12 @@ func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 
 func alfredItemFromZettelDefault(z *lib.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
-	i.Title = z.IndexData.Description
+	if len(z.IndexData.Description) > 0 {
+		i.Title = z.IndexData.Description
+	} else {
+		i.Title = z.Format("%w")
+	}
+
 	i.Arg = z.Path
 	i.Uid = "z." + id
 
