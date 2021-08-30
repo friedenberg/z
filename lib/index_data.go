@@ -186,5 +186,13 @@ func (z *Zettel) ParseMetadata() (err error) {
 		)
 	}
 
+	if z.HasFile() {
+		z.IndexData.ExpandedTags = append(z.IndexData.ExpandedTags, "h-f")
+	}
+
+	if z.HasUrl() {
+		z.IndexData.ExpandedTags = append(z.IndexData.ExpandedTags, "h-u")
+	}
+
 	return
 }
