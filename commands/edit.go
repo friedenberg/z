@@ -2,7 +2,6 @@ package commands
 
 import (
 	"flag"
-	"strings"
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
@@ -10,11 +9,11 @@ import (
 
 func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	var shouldEdit bool
-	var shouldOpen bool
+	editActions := printer.Actions(printer.ActionEdit)
 	var query string
 
 	f.BoolVar(&shouldEdit, "edit", true, "")
-	f.BoolVar(&shouldOpen, "open", false, "")
+	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 
 	return func(e *lib.Kasten) (err error) {
@@ -23,9 +22,8 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 			f.Args(),
 			&printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					Kasten:        e,
-					ShouldEdit: shouldEdit,
-					ShouldOpen: shouldOpen,
+					Kasten:  e,
+					Actions: editActions,
 				},
 			},
 		)
@@ -41,13 +39,22 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
+//TODO refactor
 func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
 	if q == "" {
 		return true
 	}
 
-	for _, t := range z.IndexData.Tags {
-		if strings.Contains(t, q) {
+	if z.IndexData.File == q {
+		return true
+	}
+
+	if z.IndexData.Url == q {
+		return true
+	}
+
+	for _, t := range z.IndexData.ExpandedTags {
+		if t == q {
 			return true
 		}
 	}

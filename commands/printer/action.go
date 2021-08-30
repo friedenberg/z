@@ -8,11 +8,11 @@ import (
 )
 
 type ActionZettelPrinter struct {
-	Kasten                    *lib.Kasten
-	ShouldEdit, ShouldOpen bool
-	zettels                []*lib.Zettel
-	files                  []string
-	urls                   []string
+	Kasten  *lib.Kasten
+	Actions Actions
+	zettels []*lib.Zettel
+	files   []string
+	urls    []string
 }
 
 func (p *ActionZettelPrinter) Begin() {}
@@ -35,12 +35,15 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 }
 
 func (p *ActionZettelPrinter) End() {
-	if p.ShouldEdit {
+	if p.Actions&ActionEdit != 0 {
 		p.openZettels()
 	}
 
-	if p.ShouldOpen {
+	if p.Actions&ActionOpenFile != 0 {
 		p.openFiles()
+	}
+
+	if p.Actions&ActionOpenUrl != 0 {
 		p.openUrls()
 	}
 }
