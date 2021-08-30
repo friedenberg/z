@@ -26,7 +26,7 @@ var (
 )
 
 func init() {
-	RegexTag = regexp.MustCompile(`^\w+-`)
+	RegexTag = regexp.MustCompile(`^\w{,2}-`)
 }
 
 type Metadata []string
