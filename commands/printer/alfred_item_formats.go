@@ -20,6 +20,7 @@ func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 
 	i.Arg = z.Path
 	i.Uid = "z." + id
+	i.ItemType = "file:skipcheck"
 
 	if len(z.IndexData.Tags) > 0 {
 		i.Subtitle = z.Format("%t")
@@ -53,7 +54,6 @@ func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
 	i := alfredItemFromZettelBase(z)
 	i.Icon.Path = z.FilePath()
 	i.Arg = z.FilePath()
-	i.ItemType = "file:skipcheck"
 	i.Uid = i.Uid + ".file"
 	i.Match = i.Match + "i-f"
 	a = append(a, i)
