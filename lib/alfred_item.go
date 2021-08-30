@@ -1,6 +1,9 @@
 package lib
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 type AlfredItem struct {
 	Title        string         `json:"title"`
@@ -23,8 +26,24 @@ type AlfredItemIcon struct {
 	Path string `json:"path"`
 }
 
-func GenerateAlfredJson(i AlfredItem) (j string, err error) {
-	alfredItemJson, err := json.Marshal(i)
-	j = string(alfredItemJson)
+func GenerateAlfredItemsJson(i []AlfredItem) (j string, err error) {
+	sb := &strings.Builder{}
+
+	for idx, v := range i {
+		if idx > 0 {
+			sb.WriteString(",")
+		}
+
+		var alfredItemJson []byte
+		alfredItemJson, err = json.Marshal(v)
+
+		if err != nil {
+			return
+		}
+
+		sb.WriteString(string(alfredItemJson))
+	}
+
+	j = sb.String()
 	return
 }

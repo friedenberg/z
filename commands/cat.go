@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
@@ -12,6 +13,7 @@ import (
 type outputFormatFunc func() (printer.ZettelPrinter, ActionFunc)
 type outputFormatPrinter struct {
 	printer printer.ZettelPrinter
+	filter  func(int, *lib.Zettel) (bool, error)
 }
 
 var (
@@ -24,9 +26,43 @@ func init() {
 		"alfred-json": outputFormatPrinter{
 			printer: &printer.AlfredJsonZettelPrinter{},
 		},
-		"alfred-snippet-json": outputFormatPrinter{
+		"alfred-json-files": outputFormatPrinter{
+			printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelFiles,
+			},
+			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
+				shouldPrint = z.HasFile()
+				return
+			},
+		},
+		"alfred-json-urls": outputFormatPrinter{
+			printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelUrls,
+			},
+			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
+				shouldPrint = z.HasUrl()
+				return
+			},
+		},
+		"alfred-json-all": outputFormatPrinter{
+			printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelAll,
+			},
+		},
+		"alfred-json-snippets": outputFormatPrinter{
 			//TODO
-			printer: &printer.AlfredJsonZettelPrinter{},
+			printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelSnippets,
+			},
+			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
+				for _, t := range z.IndexData.Tags {
+					if strings.Contains(t, "t-snippet") {
+						shouldPrint = true
+					}
+				}
+
+				return
+			},
 		},
 		"metadata-json": outputFormatPrinter{
 			printer: &printer.JsonZettelPrinter{},
@@ -53,9 +89,9 @@ func init() {
 }
 
 func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
-	var outputFormat string
+	var outputFormat, query string
 	f.StringVar(&outputFormat, "output-format", "full", fmt.Sprintf("One of %q", outputFormatKeys))
-	// f.StringVar(&query, "query", "t:snippet", "zettel-spec")
+	f.StringVar(&query, "query", "", "zettel-spec")
 
 	return func(e *lib.Kasten) (err error) {
 		var p printer.ZettelPrinter
@@ -63,6 +99,7 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 
 		if format, ok := outputFormats[outputFormat]; ok {
 			p = format.printer
+			actioner = format.filter
 		} else {
 			p = &printer.FormatZettelPrinter{
 				Formatter: lib.MakePrintfFormatter(outputFormat),
@@ -80,7 +117,16 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 			return z.HydrateFromFilePath(true)
 		}
 
-		processor.actioner = actioner
+		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
+			if actioner != nil {
+				shouldPrint, err = actioner(i, z)
+				shouldPrint = shouldPrint && doesZettelMatchQuery(z, query)
+			} else {
+				shouldPrint = doesZettelMatchQuery(z, query)
+			}
+
+			return
+		}
 
 		err = processor.Run()
 

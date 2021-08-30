@@ -9,20 +9,14 @@ import (
 )
 
 type AlfredJsonZettelPrinter struct {
-	PrintFunc       func(i int, z *lib.Zettel, sb *strings.Builder)
+	ItemFunc        func(z *lib.Zettel) []lib.AlfredItem
 	afterFirstPrint bool
 	sync.Mutex
 }
 
 func (p *AlfredJsonZettelPrinter) Begin() {
-	if p.PrintFunc == nil {
-		p.PrintFunc = func(i int, z *lib.Zettel, sb *strings.Builder) {
-			item := alfredItemFromZettelDefault(z)
-			//TODO handle error
-			j, _ := lib.GenerateAlfredJson(item)
-
-			sb.WriteString(j)
-		}
+	if p.ItemFunc == nil {
+		p.ItemFunc = alfredItemsFromZettelDefault
 	}
 
 	util.StdPrinterOut(`{"items":[`)
@@ -56,7 +50,11 @@ func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error)
 		sb.WriteString("\n")
 	}
 
-	p.PrintFunc(i, z, &sb)
+	items := p.ItemFunc(z)
+	//TODO handle erro
+	j, _ := lib.GenerateAlfredItemsJson(items)
+
+	sb.WriteString(j)
 	util.StdPrinterOut(sb.String())
 }
 

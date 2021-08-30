@@ -61,7 +61,7 @@ func (p *Tags) End() {
 
 		item := alfredItemFromTag(t, c)
 		//TODO handle error
-		j, _ := lib.GenerateAlfredJson(item)
+		j, _ := lib.GenerateAlfredItemsJson([]lib.AlfredItem{item})
 
 		util.StdPrinterOut(j)
 		needsComma = true

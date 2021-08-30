@@ -11,10 +11,6 @@ import (
 
 //TODO refactor default into base
 func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
-	return
-}
-
-func alfredItemFromZettelDefault(z *lib.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
 	if len(z.IndexData.Description) > 0 {
 		i.Title = z.IndexData.Description
@@ -38,11 +34,7 @@ func alfredItemFromZettelDefault(z *lib.Zettel) (i lib.AlfredItem) {
 		Type: "fileicon",
 	}
 
-	if z.HasFile() {
-		i.Icon.Path = z.FilePath()
-	} else {
-		i.Icon.Path = z.Path
-	}
+	i.Icon.Path = z.Path
 
 	i.Text = lib.AlfredItemText{
 		Copy: id,
@@ -51,10 +43,56 @@ func alfredItemFromZettelDefault(z *lib.Zettel) (i lib.AlfredItem) {
 	return
 }
 
-func alfredItemFromZettelSnippet(z *lib.Zettel) (i lib.AlfredItem) {
-	i = alfredItemFromZettelDefault(z)
+func alfredItemsFromZettelDefault(z *lib.Zettel) (a []lib.AlfredItem) {
+	a = append(a, alfredItemFromZettelBase(z))
+
+	return
+}
+
+func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
+	i := alfredItemFromZettelBase(z)
+	i.Icon.Path = z.FilePath()
+	i.Arg = z.FilePath()
+	i.ItemType = "file:skipcheck"
+	i.Uid = i.Uid + ".file"
+	i.Match = i.Match + "i-f"
+	a = append(a, i)
+
+	return
+}
+
+func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
+	i := alfredItemFromZettelBase(z)
+	//TODO set to url icon
+	// i.Icon.Path = z.FilePath()
+	i.Arg = z.IndexData.Url
+	i.Title = z.IndexData.Url
+	i.Uid = i.Uid + ".url"
+	i.Match = i.Match + "i-u"
+	a = append(a, i)
+
+	return
+}
+
+func AlfredItemsFromZettelAll(z *lib.Zettel) (a []lib.AlfredItem) {
+	a = append(a, alfredItemFromZettelBase(z))
+
+	if z.HasFile() {
+		a = append(a, AlfredItemsFromZettelFiles(z)...)
+	}
+
+	if z.HasUrl() {
+		a = append(a, AlfredItemsFromZettelUrls(z)...)
+	}
+
+	return
+}
+
+func AlfredItemsFromZettelSnippets(z *lib.Zettel) (a []lib.AlfredItem) {
+	i := alfredItemFromZettelBase(z)
 	i.Title = strings.ReplaceAll(z.Data.Body, "\n", " ")
 	i.Subtitle = z.Format("%d, %t")
+	a = append(a, i)
 	return
 }
 
