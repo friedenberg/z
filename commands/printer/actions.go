@@ -23,8 +23,12 @@ func (a *Actions) String() string {
 }
 
 func (a *Actions) Set(s string) (err error) {
+	if *a == ActionEdit {
+		*a = ActionUnknown
+	}
+
 	if s == "" {
-		*a = ActionEdit
+		*a = *a | ActionEdit
 		return
 	}
 
