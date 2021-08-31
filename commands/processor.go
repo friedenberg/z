@@ -73,8 +73,6 @@ func (p *Processor) Run() (err error) {
 					return
 				}
 
-				defer p.kasten.ZettelPool.Put(z)
-
 				err = p.ActionZettel(i, z)
 
 				if err != nil {
@@ -101,7 +99,9 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	util.OpenFilesGuardInstance.Lock()
 	defer util.OpenFilesGuardInstance.Unlock()
 
-	z = p.kasten.ZettelPool.Get()
+	z = &lib.Zettel{
+		Kasten: p.kasten,
+	}
 
 	a, err := p.argNormalizer(i, path)
 
