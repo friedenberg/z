@@ -9,7 +9,6 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-//TODO refactor default into base
 func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
 	if len(z.IndexData.Description) > 0 {
