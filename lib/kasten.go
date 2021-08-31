@@ -4,12 +4,11 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
-	"sync"
 )
 
 type Kasten struct {
 	BasePath string
-	ZettelPool
+	Index    Index
 }
 
 func GetDefaultKasten() (e *Kasten, err error) {
@@ -21,17 +20,7 @@ func GetDefaultKasten() (e *Kasten, err error) {
 
 	e = &Kasten{
 		BasePath: path.Join(usr.HomeDir, "Zettelkasten"),
-	}
-
-	e.ZettelPool = &zettelPool{
-		Pool: sync.Pool{
-			New: func() interface{} {
-				z := new(Zettel)
-				z.Kasten = e
-				return z
-			},
-		},
-		kasten: e,
+		Index:    MakeIndex(),
 	}
 
 	return

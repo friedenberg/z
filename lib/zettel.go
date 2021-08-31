@@ -1,7 +1,7 @@
 package lib
 
 type Zettel struct {
-	Kasten       *Kasten
+	Kasten    *Kasten
 	Path      string
 	Id        int64
 	IndexData ZettelIndexData

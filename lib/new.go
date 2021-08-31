@@ -10,7 +10,37 @@ import (
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/friedenberg/z/util"
 )
+
+func (z *Zettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err error) {
+	d, err := time.ParseDuration(strconv.Itoa(i) + "s")
+
+	if err != nil {
+		return
+	}
+
+	t := currentTime.Add(d)
+	z.InitFromTime(t)
+
+	for {
+		if util.FileExists(z.Path) {
+			d, err = time.ParseDuration("1s")
+
+			if err != nil {
+				return
+			}
+
+			currentTime = currentTime.Add(d)
+			z.InitFromTime(currentTime)
+		} else {
+			break
+		}
+	}
+
+	return
+}
 
 func (z *Zettel) InitFromTime(t time.Time) {
 	z.Path = MakePathFromTime(z.Kasten.BasePath, t)

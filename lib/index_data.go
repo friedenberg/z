@@ -115,6 +115,10 @@ func (z *Zettel) ParseMetadata() (err error) {
 		return
 	}
 
+	return z.FromMetadata(md)
+}
+
+func (z *Zettel) FromMetadata(md Metadata) (err error) {
 	for i, v := range md {
 		if i == 0 && !RegexTag.MatchString(v) {
 			z.IndexData.Description = v
@@ -156,17 +160,6 @@ func (z *Zettel) ParseMetadata() (err error) {
 
 		z.IndexData.Tags = append(z.IndexData.Tags, v)
 	}
-
-	// if z.HasFile() {
-	// 	var np string
-	// 	np, err = z.Kasten.GetNormalizedPath(z.IndexData.File)
-
-	// 	if err != nil {
-	// 		return
-	// 	}
-
-	// 	z.IndexData.File = np
-	// }
 
 	var t time.Time
 
