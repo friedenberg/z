@@ -50,6 +50,18 @@ func (a *Actions) Set(s string) (err error) {
 	return
 }
 
+func (a *Actions) ShouldEdit() bool {
+	return *a&ActionEdit != 0
+}
+
+func (a *Actions) ShouldOpenFile() bool {
+	return *a&ActionOpenFile != 0
+}
+
+func (a *Actions) ShouldOpenUrl() bool {
+	return *a&ActionOpenUrl != 0
+}
+
 func (a *Actions) MatchZettel(z *lib.Zettel) bool {
 	if *a&ActionEdit != 0 {
 		return true

@@ -35,7 +35,7 @@ func makeSubcommand(name string, makeFunc func(*flag.FlagSet) commands.CommandRu
 }
 
 func init() {
-	makeSubcommand("add-files", commands.GetSubcommandAddFiles)
+	makeSubcommand("add", commands.GetSubcommandAdd)
 	makeSubcommand("autocomplete", commands.GetSubcommandAutocomplete)
 	makeSubcommand("build", commands.GetSubcommandBuild)
 	makeSubcommand("cat", commands.GetSubcommandCat)

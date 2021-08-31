@@ -13,22 +13,46 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
-	var shouldEdit, shouldOpen bool
-	var metadata_json string
+func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
+	var metadata_json, kind string
+	editActions := printer.Actions(printer.ActionEdit)
 
-	f.BoolVar(&shouldEdit, "edit", true, "open the created zettel")
-	f.BoolVar(&shouldOpen, "open", true, "open the attached file(s)")
+	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
+	f.StringVar(&kind, "kind", "", "treat the positional arguments as this kind.")
 
 	return func(e *lib.Kasten) (err error) {
+		var add func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc
+
+		switch kind {
+		case "files":
+			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+				z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
+				return lib.AddFileOnWrite(p)
+			}
+		case "urls":
+			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+				//TODO normalize
+				z.IndexData.Url = p
+				return lib.AddUrlOnWrite(p, t)
+			}
+		default:
+			err = fmt.Errorf("unsupported kind: '%s'", kind)
+			return
+		}
+
 		currentTime := time.Now()
 
 		processor := MakeProcessor(
 			e,
 			f.Args(),
-			&printer.NullZettelPrinter{},
+			&printer.MultiplexingZettelPrinter{
+				Printer: &printer.ActionZettelPrinter{
+					Kasten:  e,
+					Actions: editActions,
+				},
+			},
 		)
 
 		processor.argNormalizer = func(i int, arg string) (normalizedArg string, err error) {
@@ -72,35 +96,15 @@ func GetSubcommandAddFiles(f *flag.FlagSet) CommandRunFunc {
 
 			z.IndexData.Tags = append(z.IndexData.Tags, "zz-inbox")
 
-			z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
+			onWrite := add(z, currentTime, p)
 
-			err = z.Write(lib.AddFileOnWrite(p))
+			err = z.Write(onWrite)
 
 			if err != nil {
 				err = fmt.Errorf("failed to write: %w", err)
 			}
 
 			return
-		}
-
-		if shouldEdit {
-			processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
-				shouldPrint = true
-
-				if shouldEdit {
-					actionErr = z.Edit()
-				}
-
-				if err != nil {
-					return
-				}
-
-				if shouldOpen {
-					actionErr = z.Open()
-				}
-
-				return
-			}
 		}
 
 		err = processor.Run()
