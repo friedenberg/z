@@ -122,9 +122,11 @@ func AddFileOnWrite(oldPath string) OnZettelWriteFunc {
 		}
 
 		errOut = os.Rename(oldPath, z.FilePath())
+		// cmd := exec.Command("cp", "-R", oldPath, z.FilePath())
+		// errOut = cmd.Run()
 
 		if errOut != nil {
-			errOut = fmt.Errorf("rename file: %w", errOut)
+			errOut = fmt.Errorf("cp file: %w", errOut)
 		}
 
 		return

@@ -8,17 +8,17 @@ import (
 	"os"
 	"time"
 
+	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
 )
 
 func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
-	var shouldEdit, shouldPrintFilename, shouldOpenFile bool
 	var metadata_json, content, urlToAdd, filePathToAdd string
+	editActions := printer.Actions(printer.ActionEdit)
 
-	f.BoolVar(&shouldEdit, "edit", false, "open the newly created zettel")
-	f.BoolVar(&shouldOpenFile, "open-file", false, "open the passed-in file")
-	f.BoolVar(&shouldPrintFilename, "print-filename", false, "print the resulting zettel's filename")
+	f.Var(&editActions, "actions", "action to perform for the matched zettels")
+	//TODO convert to action
 	f.StringVar(&urlToAdd, "with-url", "", "include the passed-in URL in the zettel")
 	f.StringVar(&filePathToAdd, "with-file", "", "move the passed-in file into zettel control")
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
@@ -64,10 +64,6 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 				return
 			}
 
-			if shouldOpenFile {
-				err = z.Open()
-			}
-
 			if err != nil {
 				return
 			}
@@ -102,6 +98,8 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 				if z.HasFile() {
 					errOut = os.Remove(z.FilePath())
 				}
+
+				return
 			}
 
 			return
@@ -111,18 +109,15 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			return
 		}
 
-		if shouldEdit {
-			err = z.Open()
-
-			if err != nil {
-				return
-			}
+		actionPrinter := printer.ActionZettelPrinter{
+			Actions: editActions,
+			Kasten:  e,
 		}
 
-		if shouldPrintFilename {
-			fmt.Print(z.Path)
-		}
+		actionPrinter.Begin()
+		actionPrinter.PrintZettel(0, z, nil)
+		actionPrinter.End()
 
-		return z.Edit()
+		return
 	}
 }

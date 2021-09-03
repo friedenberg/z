@@ -57,7 +57,6 @@ func GetCleanActions() map[string]CleanAction {
 		//TODO file attachment
 		//TODO change file permissions
 		//TODO reformat yaml
-		//TODO add date
 	}
 }
 

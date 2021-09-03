@@ -1,18 +1,21 @@
 package printer
 
 import (
+	"fmt"
 	"os/exec"
+	"sync"
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
 )
 
 type ActionZettelPrinter struct {
-	Kasten  *lib.Kasten
-	Actions Actions
-	zettels []*lib.Zettel
-	files   []string
-	urls    []string
+	Kasten      *lib.Kasten
+	Actions     Actions
+	zettels     []*lib.Zettel
+	zettelFiles []string
+	files       []string
+	urls        []string
 }
 
 func (p *ActionZettelPrinter) Begin() {}
@@ -24,6 +27,7 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	p.zettels = append(p.zettels, z)
+	p.zettelFiles = append(p.zettelFiles, z.Path)
 
 	if z.HasFile() {
 		p.files = append(p.files, z.FilePath())
@@ -32,57 +36,109 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if z.HasUrl() {
 		p.urls = append(p.urls, z.IndexData.Url)
 	}
+
+	if p.Actions&ActionPrintZettelPath != 0 {
+		//TODO full path
+		util.StdPrinterOut(z.Path)
+	}
 }
 
 func (p *ActionZettelPrinter) End() {
+	gitPrinter := &GitPrinter{
+		Kasten:           p.Kasten,
+		Mutex:            &sync.Mutex{},
+		GitCommitMessage: "edit",
+	}
+
+	gitPrinter.Begin()
+	defer gitPrinter.End()
+
+	wg := &sync.WaitGroup{}
+
+	var err error
+
+	runAction := func(actionFunc func() error) {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			err := actionFunc()
+
+			if err != nil {
+				util.StdPrinterErr(err)
+				return
+			}
+
+			gitPrinter.SetShouldCommit()
+		}()
+	}
+
 	if p.Actions&ActionEdit != 0 {
-		p.openZettels()
+		runAction(p.openZettels)
 	}
 
 	if p.Actions&ActionOpenFile != 0 {
-		p.openFiles()
+		runAction(p.openFiles)
 	}
 
 	if p.Actions&ActionOpenUrl != 0 {
-		p.openUrls()
+		runAction(p.openUrls)
+	}
+
+	for i, z := range p.zettels {
+		gitPrinter.PrintZettel(i, z, nil)
+	}
+
+	wg.Wait()
+
+	if err != nil {
+		util.StdPrinterErr(err)
 	}
 }
 
-func (p *ActionZettelPrinter) openZettels() {
+func (p *ActionZettelPrinter) openZettels() (err error) {
 	if len(p.zettels) == 0 {
 		return
 	}
 
-	zettelFiles := make([]string, len(p.zettels))
-
-	for i, z := range p.zettels {
-		zettelFiles[i] = z.Path
-	}
-
-	args := []string{"-p"}
+	args := []string{"-f", "-p"}
 
 	cmd := exec.Command(
 		"mvim",
-		append(args, zettelFiles...)...,
+		append(args, p.zettelFiles...)...,
 	)
 
-	cmd.Run()
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		err = fmt.Errorf("opening zettels ('%q'): %s", p.zettels, output)
+		return
+	}
+
+	return
 }
 
-func (p *ActionZettelPrinter) openFiles() {
+func (p *ActionZettelPrinter) openFiles() (err error) {
 	if len(p.files) == 0 {
 		return
 	}
 
 	cmd := exec.Command(
 		"open",
-		p.files...,
+		append([]string{"-W"}, p.files...)...,
 	)
 
-	cmd.Run()
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		err = fmt.Errorf("opening files ('%q'): %s", p.files, output)
+		return
+	}
+
+	return
 }
 
-func (p *ActionZettelPrinter) openUrls() {
+func (p *ActionZettelPrinter) openUrls() (err error) {
 	if len(p.urls) == 0 {
 		return
 	}
@@ -99,6 +155,12 @@ func (p *ActionZettelPrinter) openUrls() {
 		append(args, p.urls...)...,
 	)
 
-	cmd.Run()
-	//TODO return errors
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		err = fmt.Errorf("opening urls ('%q'): %s", p.urls, output)
+		return
+	}
+
+	return
 }

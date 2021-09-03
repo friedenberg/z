@@ -58,6 +58,10 @@ func (p *Processor) init() {
 	}
 }
 
+func (p *Processor) SetPrinter(printer printer.ZettelPrinter) {
+	p.printer = printer
+}
+
 func (p *Processor) Run() (err error) {
 	p.init()
 

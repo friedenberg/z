@@ -13,7 +13,8 @@ const (
 	ActionEdit    = 1 << iota
 	ActionOpenFile
 	ActionOpenUrl
-	ActionOpenAll = ActionEdit | ActionOpenFile | ActionOpenUrl
+	ActionPrintZettelPath
+	ActionOpenAll = ActionEdit | ActionOpenFile | ActionOpenUrl | ActionPrintZettelPath
 )
 
 func (a *Actions) String() string {
@@ -42,6 +43,8 @@ func (a *Actions) Set(s string) (err error) {
 			*a = *a | ActionOpenFile
 		case "open-urls":
 			*a = *a | ActionOpenUrl
+		case "print-zettel-path":
+			*a = *a | ActionPrintZettelPath
 		case "open-all":
 			*a = *a | ActionOpenAll
 		}
@@ -72,6 +75,10 @@ func (a *Actions) MatchZettel(z *lib.Zettel) bool {
 	}
 
 	if *a&ActionOpenUrl != 0 && z.HasUrl() {
+		return true
+	}
+
+	if *a&ActionPrintZettelPath != 0 {
 		return true
 	}
 

@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 	"fmt"
+	"sync"
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
@@ -27,10 +28,18 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			return
 		}
 
+		gitPrinter := &printer.GitPrinter{
+			Mutex:            &sync.Mutex{},
+			GitCommitMessage: "mv",
+			Kasten:           e,
+		}
+
+		gitPrinter.SetShouldCommit()
+
 		processor := MakeProcessor(
 			e,
 			args[2:],
-			&printer.NullZettelPrinter{},
+			gitPrinter,
 		)
 
 		processor.hydrator = func(_ int, z *lib.Zettel, path string) (err error) {

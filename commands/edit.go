@@ -8,11 +8,9 @@ import (
 )
 
 func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
-	var shouldEdit bool
 	var query string
 	editActions := printer.Actions(printer.ActionEdit)
 
-	f.BoolVar(&shouldEdit, "edit", true, "")
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
