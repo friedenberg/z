@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/util"
 )
 
 func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
@@ -25,6 +26,13 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 				},
 			},
 		)
+
+		processor.argNormalizer = func(_ int, p string) (normalizedArg string, err error) {
+			b := util.BaseNameNoSuffix(p)
+			p = b + ".md"
+			normalizedArg, err = e.GetNormalizedPath(p)
+			return
+		}
 
 		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
 			shouldPrint = doesZettelMatchQuery(z, query)
