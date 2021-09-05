@@ -47,24 +47,21 @@ func init() {
 }
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	defer util.WaitForPrinter()
 
-	var err error
-	defaultKasten, err := lib.GetDefaultKasten()
-
-	if err != nil {
-		os.Exit(1)
-	}
-
 	if len(os.Args) < 2 {
-		printUsage(nil)
+		return printUsage(nil)
 	}
 
 	specifiedSubcommand := os.Args[1]
 	cmd, ok := subcommands[specifiedSubcommand]
 
 	if !ok {
-		printUsage(fmt.Errorf("No subcommand '%s'", specifiedSubcommand))
+		return printUsage(fmt.Errorf("No subcommand '%s'", specifiedSubcommand))
 	}
 
 	cmd.flags.Parse(os.Args[2:])
@@ -73,9 +70,11 @@ func main() {
 	if err != nil {
 		util.StdPrinterErr(err)
 	}
+
+	return 0
 }
 
-func printUsage(err error) {
+func printUsage(err error) int {
 	if err != nil {
 		util.StdPrinterErr(err)
 	}
@@ -103,7 +102,7 @@ func printUsage(err error) {
 		status = 1
 	}
 
-	os.Exit(status)
+	return status
 }
 
 func printSubcommandUsage(sc subcommand) {
