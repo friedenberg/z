@@ -21,7 +21,7 @@ func GetCleanActions() map[string]CleanAction {
 		"delete_if_missing_file": CleanAction{shouldDeleteIfMissingFile, deleteIfMissingFile},
 		"normalize_file": CleanAction{
 			func(z *Zettel) bool {
-				if z.Metadata.File == "" {
+				if z.HasFile() {
 					return false
 				}
 
