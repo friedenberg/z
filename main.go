@@ -64,6 +64,23 @@ func run() int {
 		return printUsage(fmt.Errorf("No subcommand '%s'", specifiedSubcommand))
 	}
 
+	var err error
+	c, err := lib.LoadDefaultConfig()
+
+	if err != nil {
+		util.StdPrinterErr(err)
+		return 1
+	}
+
+	ks, err := c.GetKasten()
+
+	if err != nil || len(ks) < 1 {
+		util.StdPrinterErr(err)
+		return 1
+	}
+
+	defaultKasten := ks[0]
+
 	cmd.flags.Parse(os.Args[2:])
 	err = cmd.runFunc(defaultKasten)
 

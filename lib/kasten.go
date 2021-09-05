@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"os/user"
 	"path"
 	"path/filepath"
 )
@@ -9,21 +8,6 @@ import (
 type Kasten struct {
 	BasePath string
 	Index    Index
-}
-
-func GetDefaultKasten() (e *Kasten, err error) {
-	usr, err := user.Current()
-
-	if err != nil {
-		return
-	}
-
-	e = &Kasten{
-		BasePath: path.Join(usr.HomeDir, "Zettelkasten"),
-		Index:    MakeIndex(),
-	}
-
-	return
 }
 
 func (e *Kasten) GetAllZettels() (zettels []string, err error) {
