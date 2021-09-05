@@ -24,10 +24,10 @@ func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	tags := z.IndexData.Tags
+	tags := z.Metadata.Tags
 
 	if p.ShouldExpand {
-		tags = z.IndexData.ExpandedTags
+		tags = z.Metadata.ExpandedTags
 	}
 
 	for _, t := range tags {

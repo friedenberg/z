@@ -55,7 +55,7 @@ func init() {
 				ItemFunc: printer.AlfredItemsFromZettelSnippets,
 			},
 			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-				for _, t := range z.IndexData.Tags {
+				for _, t := range z.Metadata.Tags {
 					if strings.Contains(t, "t-snippet") {
 						shouldPrint = true
 					}

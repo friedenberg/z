@@ -17,7 +17,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 		actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 			shouldPrint = true
 
-			for _, t := range z.IndexData.Tags {
+			for _, t := range z.Metadata.Tags {
 				actionErr = symlinkZettel(e, t, z)
 
 				if actionErr != nil {
@@ -26,7 +26,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 				}
 			}
 
-			if len(z.IndexData.Tags) == 0 {
+			if len(z.Metadata.Tags) == 0 {
 				actionErr = symlinkZettel(e, "untagged", z)
 
 				if actionErr != nil {
@@ -95,7 +95,7 @@ func symlinkZettel(e *lib.Kasten, dir string, z *lib.Zettel) (err error) {
 	}
 
 	if z.HasFile() {
-		err = doSym(z.FilePath(), path.Ext(z.IndexData.File))
+		err = doSym(z.FilePath(), path.Ext(z.Metadata.File))
 	}
 
 	return
@@ -125,7 +125,7 @@ func getZettelBuildFileName(z *lib.Zettel, ext string) (path string, err error) 
 	sb.WriteString(day)
 	sb.WriteString(" ")
 
-	sb.WriteString(strings.ReplaceAll(z.IndexData.Description, "/", "-"))
+	sb.WriteString(strings.ReplaceAll(z.Metadata.Description, "/", "-"))
 	sb.WriteString(ext)
 
 	path = sb.String()

@@ -18,10 +18,10 @@ func GetMetadataFieldReadWriterNull() MetadataFieldReadWriterArray {
 func GetMetadataFieldReadWriterTags() MetadataFieldReadWriterArray {
 	return MetadataFieldReadWriterArray{
 		ValueGetFunc: func(z *Zettel) []string {
-			return z.IndexData.Tags
+			return z.Metadata.Tags
 		},
 		ValueSetFunc: func(z *Zettel, v []string) {
-			z.IndexData.Tags = v
+			z.Metadata.Tags = v
 		},
 	}
 }

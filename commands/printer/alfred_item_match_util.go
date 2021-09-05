@@ -13,7 +13,7 @@ import (
 func MakeAlfredMatches(z *lib.Zettel) string {
 	//TODO add more variations and match against item format
 	//e.g., Project: 2020-zettel -> p:2020-zettel, p:2020, 2020, zettel
-	m := z.IndexData
+	m := z.Metadata
 	sb := &strings.Builder{}
 
 	addMatch := func(s string) {

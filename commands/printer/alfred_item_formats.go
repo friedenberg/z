@@ -11,8 +11,8 @@ import (
 
 func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
-	if len(z.IndexData.Description) > 0 {
-		i.Title = z.IndexData.Description
+	if len(z.Metadata.Description) > 0 {
+		i.Title = z.Metadata.Description
 	} else {
 		i.Title = z.Format("%w")
 	}
@@ -21,7 +21,7 @@ func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 	i.Uid = "z." + id
 	i.ItemType = "file:skipcheck"
 
-	if len(z.IndexData.Tags) > 0 {
+	if len(z.Metadata.Tags) > 0 {
 		i.Subtitle = z.Format("%t")
 	} else {
 		i.Subtitle = z.Format("%w")
@@ -64,8 +64,8 @@ func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
 	i := alfredItemFromZettelBase(z)
 	//TODO set to url icon
 	// i.Icon.Path = z.FilePath()
-	i.Arg = z.IndexData.Url
-	i.Title = z.IndexData.Url
+	i.Arg = z.Metadata.Url
+	i.Title = z.Metadata.Url
 	i.Uid = i.Uid + ".url"
 	i.Match = i.Match + "i-u"
 	a = append(a, i)

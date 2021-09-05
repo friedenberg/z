@@ -18,7 +18,7 @@ func (p *JsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	b, errOut := json.Marshal(z.IndexData)
+	b, errOut := json.Marshal(z.Metadata)
 
 	if errOut != nil {
 		util.StdPrinterErr(errOut)

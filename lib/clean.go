@@ -21,16 +21,16 @@ func GetCleanActions() map[string]CleanAction {
 		"delete_if_missing_file": CleanAction{shouldDeleteIfMissingFile, deleteIfMissingFile},
 		"normalize_file": CleanAction{
 			func(z *Zettel) bool {
-				if z.IndexData.File == "" {
+				if z.Metadata.File == "" {
 					return false
 				}
 
-				normalizedFile := path.Base(z.IndexData.File)
+				normalizedFile := path.Base(z.Metadata.File)
 
-				return normalizedFile != z.IndexData.File
+				return normalizedFile != z.Metadata.File
 			},
 			func(z *Zettel) (shouldWrite bool, err error) {
-				z.IndexData.File = path.Base(z.IndexData.File)
+				z.Metadata.File = path.Base(z.Metadata.File)
 				shouldWrite = true
 				return
 			},

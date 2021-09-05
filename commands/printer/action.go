@@ -34,7 +34,7 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	if z.HasUrl() {
-		p.urls = append(p.urls, z.IndexData.Url)
+		p.urls = append(p.urls, z.Metadata.Url)
 	}
 
 	if p.Actions&ActionPrintZettelPath != 0 {

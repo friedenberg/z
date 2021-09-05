@@ -70,7 +70,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		if metadata_json != "" {
-			err = json.Unmarshal([]byte(metadata_json), &z.IndexData)
+			err = json.Unmarshal([]byte(metadata_json), &z.Metadata)
 
 			if err != nil {
 				err = fmt.Errorf("parsing metadata json: %w", err)
@@ -78,7 +78,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			}
 		}
 
-		z.IndexData.Tags = append(z.IndexData.Tags, "zz-inbox")
+		z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
 
 		if content == "-" {
 			var b []byte

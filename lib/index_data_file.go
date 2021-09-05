@@ -1,9 +1,11 @@
 package lib
 
-import "path"
+import (
+	"path"
+)
 
 func (z *Zettel) HasFile() bool {
-	return z.IndexData.File != ""
+	return z.Metadata.File != ""
 }
 
 func (z *Zettel) FilePath() string {
@@ -11,5 +13,5 @@ func (z *Zettel) FilePath() string {
 		return ""
 	}
 
-	return path.Join(z.Kasten.BasePath, z.IndexData.File)
+	return path.Join(z.Kasten.BasePath, z.Metadata.File)
 }

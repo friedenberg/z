@@ -46,7 +46,7 @@ func (z *Zettel) InitFromTime(t time.Time) {
 	z.Path = MakePathFromTime(z.Kasten.BasePath, t)
 	z.Id = t.Unix()
 
-	z.IndexData = ZettelIndexData{
+	z.Metadata = Metadata{
 		Date: t.Format("2006-01-02"),
 	}
 
@@ -72,7 +72,7 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 			return
 		}
 
-		z.IndexData.Url = url.String()
+		z.Metadata.Url = url.String()
 
 		//TODO determine summaries from sites
 		return

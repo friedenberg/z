@@ -6,9 +6,9 @@ import (
 )
 
 type IndexZettel struct {
-	Path      string
-	Id        int64
-	IndexData ZettelIndexData
+	Path     string
+	Id       int64
+	Metadata Metadata
 }
 
 type ZettelIdMap struct {
@@ -85,9 +85,9 @@ func (i Index) Add(z *Zettel) error {
 	}
 
 	i.Set(z.Id, IndexZettel{
-		Path:      z.Path,
-		Id:        z.Id,
-		IndexData: z.IndexData,
+		Path:     z.Path,
+		Id:       z.Id,
+		Metadata: z.Metadata,
 	})
 
 	if z.HasFile() {
@@ -95,10 +95,10 @@ func (i Index) Add(z *Zettel) error {
 	}
 
 	if z.HasUrl() {
-		i.Urls.Add(z.IndexData.Url, z.Id)
+		i.Urls.Add(z.Metadata.Url, z.Id)
 	}
 
-	for _, t := range z.IndexData.Tags {
+	for _, t := range z.Metadata.Tags {
 		i.Tags.Add(t, z.Id)
 	}
 
@@ -106,7 +106,7 @@ func (i Index) Add(z *Zettel) error {
 }
 
 func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
-	z.IndexData = zb.IndexData
+	z.Metadata = zb.Metadata
 	z.Id = zb.Id
 	z.Path = zb.Path
 }

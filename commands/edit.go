@@ -51,15 +51,15 @@ func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
 		return true
 	}
 
-	if z.IndexData.File == q {
+	if z.Metadata.File == q {
 		return true
 	}
 
-	if z.IndexData.Url == q {
+	if z.Metadata.Url == q {
 		return true
 	}
 
-	for _, t := range z.IndexData.ExpandedTags {
+	for _, t := range z.Metadata.ExpandedTags {
 		if t == q {
 			return true
 		}

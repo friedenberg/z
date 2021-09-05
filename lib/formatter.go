@@ -51,17 +51,17 @@ func (f printfFormatter) Format(z *Zettel) string {
 			sb.WriteString(z.Data.Body)
 			// sb.WriteString(strings.ReplaceAll(z.Data.Body, "%", "%%"))
 		case 'd':
-			sb.WriteString(z.IndexData.Description)
+			sb.WriteString(z.Metadata.Description)
 		case 'f':
 			sb.WriteString(z.FilePath())
 		case 'p':
 			sb.WriteString(z.Path)
 		case 't':
-			sb.WriteString(strings.Join(z.IndexData.Tags, ", "))
+			sb.WriteString(strings.Join(z.Metadata.Tags, ", "))
 		case 'u':
-			sb.WriteString(z.IndexData.Url)
+			sb.WriteString(z.Metadata.Url)
 		case 'w':
-			sb.WriteString(z.IndexData.Date)
+			sb.WriteString(z.Metadata.Date)
 		case 'z':
 			sb.WriteString(strconv.FormatInt(z.Id, 10))
 		default:

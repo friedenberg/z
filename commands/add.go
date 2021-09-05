@@ -42,14 +42,14 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 		switch kind {
 		case "files":
 			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-				z.IndexData.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
+				z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
 				return lib.AddFileOnWrite(p)
 			}
 			hydrator = bootstrapZettel
 		case "urls":
 			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
 				//TODO normalize
-				z.IndexData.Url = p
+				z.Metadata.Url = p
 				return lib.AddUrlOnWrite(p, t)
 			}
 			hydrator = func(i int, z *lib.Zettel, p string) (err error) {
@@ -103,12 +103,12 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 
 			if tagString != "" {
 				tags := strings.Split(tagString, " ")
-				z.IndexData.Tags = append(z.IndexData.Tags, tags...)
+				z.Metadata.Tags = append(z.Metadata.Tags, tags...)
 			} else {
-				z.IndexData.Tags = append(z.IndexData.Tags, "zz-inbox")
+				z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
 			}
 
-			z.IndexData.Tags = uniqueAndSortTags(z.IndexData.Tags)
+			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
 
 			onWrite := add(z, currentTime, p)
 

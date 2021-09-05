@@ -62,7 +62,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 			name: "date then tags",
 			makeZettel: func() (z *Zettel) {
 				z = makeZettelWithDate()
-				z.IndexData.Tags = []string{"some-tag"}
+				z.Metadata.Tags = []string{"some-tag"}
 				return
 			},
 			format: "%w, %t",
