@@ -7,6 +7,7 @@ import (
 	"os/user"
 	"path"
 
+	"github.com/friedenberg/z/lib/kasten"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -14,12 +15,10 @@ type ConfigTagForNewZettels struct {
 	TagForNewZettels string `toml:"tag-for-new-zettels"`
 }
 
-type KastenImplementationType string
-
 type KastenConfig struct {
 	ConfigTagForNewZettels
 
-	Implementation KastenImplementationType
+	Implementation string `toml:"type"`
 	Options        map[string]string
 }
 
@@ -32,7 +31,7 @@ type Config struct {
 	ConfigTagForNewZettels
 
 	Tags          map[string]TagConfig
-	FilesAndGit   map[string]KastenConfig
+	Kasten        map[string]KastenConfig
 	DefaultKasten string `toml:"default-kasten"`
 }
 
@@ -104,19 +103,36 @@ func LoadDefaultConfig() (c Config, err error) {
 	return
 }
 
-func (c Config) GetKasten() (ks []*FilesAndGit, err error) {
-	usr, err := user.Current()
+func (c Config) Umwelt() (e Umwelt, err error) {
+	e.Kasten = make(map[string]kasten.Implementation)
 
-	if err != nil {
-		return
+	for n, kc := range c.Kasten {
+		if i, ok := kasten.Registry.Get(kc.Implementation); ok {
+			i.InitFromOptions(kc.Options)
+			e.Kasten[n] = i
+			//TODO
+			e.DefaultKasten = i
+		} else {
+			fmt.Println(kc.Implementation)
+			fmt.Println(kasten.Registry)
+			fmt.Println(c)
+			err = fmt.Errorf("missing implementation for kasten from config: '%s'", n)
+			return
+		}
 	}
 
-	e := &FilesAndGit{
-		BasePath: path.Join(usr.HomeDir, "Zettelkasten"),
-		Index:    MakeIndex(),
-	}
+	if c.DefaultKasten != "" {
+		if i, ok := e.Kasten[c.DefaultKasten]; ok {
+			e.DefaultKasten = i
+		} else {
+			err = fmt.Errorf(
+				"no kasten matching name '%s' for default",
+				c.DefaultKasten,
+			)
 
-	ks = append(ks, e)
+			return
+		}
+	}
 
 	return
 }

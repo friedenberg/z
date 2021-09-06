@@ -72,17 +72,17 @@ func run() int {
 		return 1
 	}
 
-	ks, err := c.GetKasten()
+	env, err := c.Umwelt()
 
-	if err != nil || len(ks) < 1 {
+	if err != nil {
 		util.StdPrinterErr(err)
 		return 1
 	}
 
-	defaultKasten := ks[0]
+	defaultKasten := env.DefaultKasten
 
 	cmd.flags.Parse(os.Args[2:])
-	err = cmd.runFunc(defaultKasten)
+	err = cmd.runFunc(defaultKasten.(*lib.FilesAndGit))
 
 	if err != nil {
 		util.StdPrinterErr(err)

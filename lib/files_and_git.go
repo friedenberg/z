@@ -1,13 +1,38 @@
 package lib
 
 import (
+	"os/user"
 	"path"
 	"path/filepath"
+
+	"github.com/friedenberg/z/lib/kasten"
 )
+
+var (
+	FilesAndGitInstance *FilesAndGit
+)
+
+func init() {
+	FilesAndGitInstance = &FilesAndGit{}
+	kasten.Registry.Register("files-and-git", FilesAndGitInstance)
+}
 
 type FilesAndGit struct {
 	BasePath string
 	Index    Index
+}
+
+func (k *FilesAndGit) InitFromOptions(o map[string]string) (err error) {
+	usr, err := user.Current()
+
+	if err != nil {
+		return
+	}
+
+	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
+	k.Index = MakeIndex()
+
+	return
 }
 
 func (e *FilesAndGit) GetAll() (zettels []string, err error) {
