@@ -1,17 +1,22 @@
-package main
+package lib
 
 import (
 	"path"
 	"path/filepath"
 )
 
-func (e *Kasten) GetAll() (zettels []string, err error) {
+type FilesAndGit struct {
+	BasePath string
+	Index    Index
+}
+
+func (e *FilesAndGit) GetAll() (zettels []string, err error) {
 	glob := filepath.Join(e.BasePath, "*.md")
 	zettels, err = filepath.Glob(glob)
 	return
 }
 
-func (e *Kasten) GetNormalizedPath(a string) (b string, err error) {
+func (e *FilesAndGit) GetNormalizedPath(a string) (b string, err error) {
 	if filepath.IsAbs(a) {
 		b = a
 	} else {

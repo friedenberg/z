@@ -7,7 +7,7 @@ import (
 	"github.com/friedenberg/z/lib"
 )
 
-func hydrateIndex(k *lib.Kasten) error {
+func hydrateIndex(k *lib.FilesAndGit) error {
 	indexProcessor := MakeProcessor(
 		k,
 		nil,

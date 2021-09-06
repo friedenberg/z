@@ -21,7 +21,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&tagString, "tags", "", "parse the passed-in string as the metadata.")
 	f.StringVar(&kind, "kind", "", "treat the positional arguments as this kind.")
 
-	return func(e *lib.Kasten) (err error) {
+	return func(e *lib.FilesAndGit) (err error) {
 		currentTime := time.Now()
 
 		bootstrapZettel := func(i int, z *lib.Zettel, p string) (err error) {
@@ -83,8 +83,8 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			f.Args(),
 			&printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					Kasten:  e,
-					Actions: editActions,
+					FilesAndGit: e,
+					Actions:     editActions,
 				},
 			},
 		)

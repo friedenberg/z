@@ -32,7 +32,7 @@ type Config struct {
 	ConfigTagForNewZettels
 
 	Tags          map[string]TagConfig
-	Kasten        map[string]KastenConfig
+	FilesAndGit   map[string]KastenConfig
 	DefaultKasten string `toml:"default-kasten"`
 }
 
@@ -104,14 +104,14 @@ func LoadDefaultConfig() (c Config, err error) {
 	return
 }
 
-func (c Config) GetKasten() (ks []*Kasten, err error) {
+func (c Config) GetKasten() (ks []*FilesAndGit, err error) {
 	usr, err := user.Current()
 
 	if err != nil {
 		return
 	}
 
-	e := &Kasten{
+	e := &FilesAndGit{
 		BasePath: path.Join(usr.HomeDir, "Zettelkasten"),
 		Index:    MakeIndex(),
 	}

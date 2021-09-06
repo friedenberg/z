@@ -9,7 +9,7 @@ import (
 
 type GitPrinter struct {
 	*sync.Mutex
-	Kasten           *lib.Kasten
+	FilesAndGit      *lib.FilesAndGit
 	GitCommitMessage string
 	shouldCommit     bool
 	files            []string
@@ -42,7 +42,7 @@ func (p *GitPrinter) End() {
 	if p.shouldCommit && len(p.files) > 0 {
 		git := util.GitFilesToCommit{
 			Git: util.Git{
-				Path: p.Kasten.BasePath,
+				Path: p.FilesAndGit.BasePath,
 			},
 			Files: p.files,
 		}
