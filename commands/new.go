@@ -88,9 +88,9 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 				return
 			}
 
-			z.Data.Body = "\n" + string(b)
+			z.Body = "\n" + string(b)
 		} else {
-			z.Data.Body = content
+			z.Body = content
 		}
 
 		err = z.Write(func(z *lib.Zettel, errIn error) (errOut error) {

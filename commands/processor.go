@@ -26,7 +26,7 @@ type Processor struct {
 func MakeProcessor(e *lib.Kasten, files []string, zp printer.ZettelPrinter) (processor *Processor) {
 	if len(files) == 0 {
 		var err error
-		files, err = e.GetAllZettels()
+		files, err = e.GetAll()
 
 		if err != nil {
 			panic(err)

@@ -68,8 +68,8 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		return
 	}
 
-	if z.Data.Body != "" {
-		_, err = w.WriteString(z.Data.Body)
+	if z.Body != "" {
+		_, err = w.WriteString(z.Body)
 
 		if err != nil {
 			err = fmt.Errorf("writing body: %w", err)

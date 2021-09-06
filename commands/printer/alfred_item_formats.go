@@ -89,7 +89,7 @@ func AlfredItemsFromZettelAll(z *lib.Zettel) (a []lib.AlfredItem) {
 
 func AlfredItemsFromZettelSnippets(z *lib.Zettel) (a []lib.AlfredItem) {
 	i := alfredItemFromZettelBase(z)
-	i.Title = strings.ReplaceAll(z.Data.Body, "\n", " ")
+	i.Title = strings.ReplaceAll(z.Body, "\n", " ")
 	i.Subtitle = z.Format("%d, %t")
 	a = append(a, i)
 	return

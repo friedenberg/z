@@ -1,15 +1,9 @@
-package lib
+package main
 
 import (
 	"path"
 	"path/filepath"
 )
-
-type Kasten struct {
-	Implementation KastenImplementation
-	BasePath       string
-	Index          Index
-}
 
 func (e *Kasten) GetAll() (zettels []string, err error) {
 	glob := filepath.Join(e.BasePath, "*.md")

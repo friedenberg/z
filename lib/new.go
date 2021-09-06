@@ -108,7 +108,7 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 		w.Close()
 		pandocCommand.Wait()
 
-		z.Data.Body = md.String()
+		z.Body = md.String()
 
 		return
 	}

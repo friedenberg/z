@@ -22,6 +22,6 @@ func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
 	sb.WriteString(lib.MetadataStartSequence)
 	sb.WriteString(z.Data.MetadataYaml)
 	sb.WriteString(lib.MetadataEndSequence)
-	sb.WriteString(z.Data.Body)
+	sb.WriteString(z.Body)
 	util.StdPrinterOutf(sb.String())
 }
