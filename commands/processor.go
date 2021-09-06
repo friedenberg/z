@@ -53,7 +53,7 @@ func (p *Processor) init() {
 	if p.hydrator == nil {
 		p.hydrator = func(_ int, z *lib.Zettel, path string) error {
 			z.Path = path
-			return z.HydrateFromFilePath(false)
+			return z.Hydrate(false)
 		}
 	}
 }

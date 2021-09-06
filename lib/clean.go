@@ -39,7 +39,7 @@ func GetCleanActions() map[string]CleanAction {
 			func(z *Zettel) bool {
 				oldYaml := z.Data.MetadataYaml
 				//TODO handle err
-				z.GenerateMetadataYaml()
+				z.generateMetadataYaml()
 
 				return oldYaml != z.Data.MetadataYaml
 			},

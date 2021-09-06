@@ -44,7 +44,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 
 		processor.hydrator = func(_ int, z *lib.Zettel, path string) (err error) {
 			z.Path = path
-			return z.HydrateFromFilePath(true)
+			return z.Hydrate(true)
 		}
 
 		processor.actioner = func(_ int, z *lib.Zettel) (shouldPrint bool, err error) {

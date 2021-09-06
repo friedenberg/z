@@ -114,7 +114,7 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 
 		processor.hydrator = func(_ int, z *lib.Zettel, path string) error {
 			z.Path = path
-			return z.HydrateFromFilePath(true)
+			return z.Hydrate(true)
 		}
 
 		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {

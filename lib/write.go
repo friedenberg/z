@@ -9,9 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type OnZettelWriteFunc func(*Zettel, error) error
-
-func (z *Zettel) GenerateMetadataYaml() (err error) {
+func (z *Zettel) generateMetadataYaml() (err error) {
 	var y []byte
 	y, err = yaml.Marshal(z.Metadata.ToMetadata())
 
@@ -29,7 +27,7 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		defer onWriteFunc(z, err)
 	}
 
-	err = z.GenerateMetadataYaml()
+	err = z.generateMetadataYaml()
 
 	if err != nil {
 		err = fmt.Errorf("writing zettel: %w", err)
