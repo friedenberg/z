@@ -113,9 +113,6 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 			//TODO
 			e.DefaultKasten = i
 		} else {
-			fmt.Println(kc.Implementation)
-			fmt.Println(kasten.Registry)
-			fmt.Println(c)
 			err = fmt.Errorf("missing implementation for kasten from config: '%s'", n)
 			return
 		}
