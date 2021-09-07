@@ -48,7 +48,7 @@ func (f printfFormatter) Format(z *Zettel) string {
 
 		switch f[0] {
 		case 'b':
-			sb.WriteString(z.Body)
+			sb.WriteString(strings.TrimSpace(z.Body))
 			// sb.WriteString(strings.ReplaceAll(z.Data.Body, "%", "%%"))
 		case 'd':
 			sb.WriteString(z.Metadata.Description)
