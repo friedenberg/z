@@ -13,5 +13,5 @@ func (z *Zettel) FilePath() string {
 		return ""
 	}
 
-	return path.Join(z.FilesAndGit.BasePath, z.Metadata.File)
+	return path.Join(z.Umwelt.FilesAndGit().BasePath, z.Metadata.File)
 }

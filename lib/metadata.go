@@ -125,7 +125,7 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 			continue
 		}
 
-		filePath := path.Join(z.FilesAndGit.BasePath, v)
+		filePath := path.Join(z.Umwelt.FilesAndGit().BasePath, v)
 
 		if util.FileExists(filePath) {
 			if z.Metadata.File != "" {

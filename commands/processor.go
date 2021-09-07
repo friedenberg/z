@@ -104,7 +104,7 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	defer util.OpenFilesGuardInstance.Unlock()
 
 	z = &lib.Zettel{
-		FilesAndGit: p.kasten.FilesAndGit(),
+		Umwelt: p.kasten,
 	}
 
 	a, err := p.argNormalizer(i, path)

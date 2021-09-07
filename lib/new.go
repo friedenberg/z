@@ -43,7 +43,7 @@ func (z *Zettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err error)
 }
 
 func (z *Zettel) InitFromTime(t time.Time) {
-	z.Path = MakePathFromTime(z.FilesAndGit.BasePath, t)
+	z.Path = MakePathFromTime(z.Umwelt.FilesAndGit().BasePath, t)
 	z.Id = t.Unix()
 
 	z.Metadata = Metadata{

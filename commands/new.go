@@ -27,7 +27,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 	return func(e lib.Umwelt) (err error) {
 		currentTime := time.Now()
 
-		z := &lib.Zettel{FilesAndGit: e.FilesAndGit()}
+		z := &lib.Zettel{Umwelt: e}
 		z.InitFromTime(currentTime)
 
 		for {
