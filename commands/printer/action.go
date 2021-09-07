@@ -10,7 +10,7 @@ import (
 )
 
 type ActionZettelPrinter struct {
-	FilesAndGit *lib.FilesAndGit
+	Umwelt      lib.Umwelt
 	Actions     Actions
 	zettels     []*lib.Zettel
 	zettelFiles []string
@@ -45,7 +45,7 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 
 func (p *ActionZettelPrinter) End() {
 	gitPrinter := &GitPrinter{
-		FilesAndGit:      p.FilesAndGit,
+		Umwelt:           p.Umwelt,
 		Mutex:            &sync.Mutex{},
 		GitCommitMessage: "edit",
 	}

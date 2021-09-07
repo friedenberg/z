@@ -15,14 +15,14 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
-	return func(e *lib.FilesAndGit) (err error) {
+	return func(e lib.Umwelt) (err error) {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
 			&printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					FilesAndGit: e,
-					Actions:     editActions,
+					Umwelt:  e,
+					Actions: editActions,
 				},
 			},
 		)
@@ -30,7 +30,7 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 		processor.argNormalizer = func(_ int, p string) (normalizedArg string, err error) {
 			b := util.BaseNameNoSuffix(p)
 			p = b + ".md"
-			normalizedArg, err = e.GetNormalizedPath(p)
+			normalizedArg, err = e.FilesAndGit().GetNormalizedPath(p)
 			return
 		}
 

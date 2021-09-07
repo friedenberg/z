@@ -14,7 +14,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e *lib.FilesAndGit) (err error) {
+	return func(e lib.Umwelt) (err error) {
 		processor := MakeProcessor(
 			e,
 			f.Args(),
@@ -25,7 +25,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 			gitPrinter := &printer.GitPrinter{
 				Mutex:            &sync.Mutex{},
 				GitCommitMessage: n,
-				FilesAndGit:      e,
+				Umwelt:           e,
 			}
 
 			gitPrinter.SetShouldCommit()

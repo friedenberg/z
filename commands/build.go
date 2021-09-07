@@ -13,7 +13,7 @@ import (
 )
 
 func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
-	return func(e *lib.FilesAndGit) (err error) {
+	return func(e lib.Umwelt) (err error) {
 		actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 			shouldPrint = true
 
@@ -46,7 +46,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 
 		processor.actioner = actioner
 
-		buildPath := path.Join(e.BasePath, "build")
+		buildPath := path.Join(e.FilesAndGit().BasePath, "build")
 
 		os.RemoveAll(buildPath)
 		err = os.Mkdir(buildPath, 0700)
@@ -61,7 +61,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func symlinkZettel(e *lib.FilesAndGit, dir string, z *lib.Zettel) (err error) {
+func symlinkZettel(e lib.Umwelt, dir string, z *lib.Zettel) (err error) {
 	buildDir, err := makeDirectoryIfNecessary(e, dir)
 
 	if err != nil {
@@ -101,8 +101,8 @@ func symlinkZettel(e *lib.FilesAndGit, dir string, z *lib.Zettel) (err error) {
 	return
 }
 
-func makeDirectoryIfNecessary(e *lib.FilesAndGit, p string) (a string, err error) {
-	a = path.Join(e.BasePath, "build", p)
+func makeDirectoryIfNecessary(e lib.Umwelt, p string) (a string, err error) {
+	a = path.Join(e.FilesAndGit().BasePath, "build", p)
 	err = os.Mkdir(a, 0700)
 
 	if os.IsExist(err) {

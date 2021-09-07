@@ -21,7 +21,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&tagString, "tags", "", "parse the passed-in string as the metadata.")
 	f.StringVar(&kind, "kind", "", "treat the positional arguments as this kind.")
 
-	return func(e *lib.FilesAndGit) (err error) {
+	return func(e lib.Umwelt) (err error) {
 		currentTime := time.Now()
 
 		bootstrapZettel := func(i int, z *lib.Zettel, p string) (err error) {
@@ -53,7 +53,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				return lib.AddUrlOnWrite(p, t)
 			}
 			hydrator = func(i int, z *lib.Zettel, p string) (err error) {
-				indexItems := e.Index.ZettelsForUrl(p)
+				indexItems := e.FilesAndGit().Index.ZettelsForUrl(p)
 
 				if len(indexItems) > 1 {
 					err = fmt.Errorf("multiple zettels ('%q') with url: '%s'", indexItems, p)
@@ -61,7 +61,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				}
 
 				if len(indexItems) == 1 {
-					e.Index.HydrateZettel(z, indexItems[0])
+					e.FilesAndGit().Index.HydrateZettel(z, indexItems[0])
 				}
 
 				err = bootstrapZettel(i, z, p)
@@ -83,8 +83,8 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			f.Args(),
 			&printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					FilesAndGit: e,
-					Actions:     editActions,
+					Umwelt:  e,
+					Actions: editActions,
 				},
 			},
 		)

@@ -14,7 +14,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e *lib.FilesAndGit) (err error) {
+	return func(e lib.Umwelt) (err error) {
 		args := f.Args()
 
 		fromMoveInstruction, err := moveInstructionFromString(args[0])
@@ -31,7 +31,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 		gitPrinter := &printer.GitPrinter{
 			Mutex:            &sync.Mutex{},
 			GitCommitMessage: "mv",
-			FilesAndGit:      e,
+			Umwelt:           e,
 		}
 
 		gitPrinter.SetShouldCommit()

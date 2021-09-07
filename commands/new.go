@@ -24,10 +24,10 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
 	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
 
-	return func(e *lib.FilesAndGit) (err error) {
+	return func(e lib.Umwelt) (err error) {
 		currentTime := time.Now()
 
-		z := &lib.Zettel{FilesAndGit: e}
+		z := &lib.Zettel{FilesAndGit: e.FilesAndGit()}
 		z.InitFromTime(currentTime)
 
 		for {
@@ -110,8 +110,8 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		actionPrinter := printer.ActionZettelPrinter{
-			Actions:     editActions,
-			FilesAndGit: e,
+			Actions: editActions,
+			Umwelt:  e,
 		}
 
 		actionPrinter.Begin()

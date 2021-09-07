@@ -14,7 +14,7 @@ type HydrateFunc func(int, *lib.Zettel, string) error
 type ActionFunc func(int, *lib.Zettel) (bool, error)
 
 type Processor struct {
-	kasten        *lib.FilesAndGit
+	kasten        lib.Umwelt
 	files         []string
 	waitGroup     sync.WaitGroup
 	argNormalizer ArgNormalizeFunc
@@ -23,10 +23,10 @@ type Processor struct {
 	printer       printer.ZettelPrinter
 }
 
-func MakeProcessor(e *lib.FilesAndGit, files []string, zp printer.ZettelPrinter) (processor *Processor) {
+func MakeProcessor(e lib.Umwelt, files []string, zp printer.ZettelPrinter) (processor *Processor) {
 	if len(files) == 0 {
 		var err error
-		files, err = e.GetAll()
+		files, err = e.FilesAndGit().GetAll()
 
 		if err != nil {
 			panic(err)
@@ -45,7 +45,7 @@ func MakeProcessor(e *lib.FilesAndGit, files []string, zp printer.ZettelPrinter)
 func (p *Processor) init() {
 	if p.argNormalizer == nil {
 		p.argNormalizer = func(_ int, path string) (normalizedArg string, err error) {
-			normalizedArg, err = p.kasten.GetNormalizedPath(path)
+			normalizedArg, err = p.kasten.FilesAndGit().GetNormalizedPath(path)
 			return
 		}
 	}
@@ -104,7 +104,7 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	defer util.OpenFilesGuardInstance.Unlock()
 
 	z = &lib.Zettel{
-		FilesAndGit: p.kasten,
+		FilesAndGit: p.kasten.FilesAndGit(),
 	}
 
 	a, err := p.argNormalizer(i, path)

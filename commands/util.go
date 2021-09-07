@@ -7,7 +7,7 @@ import (
 	"github.com/friedenberg/z/lib"
 )
 
-func hydrateIndex(k *lib.FilesAndGit) error {
+func hydrateIndex(k lib.Umwelt) error {
 	indexProcessor := MakeProcessor(
 		k,
 		nil,
@@ -15,7 +15,7 @@ func hydrateIndex(k *lib.FilesAndGit) error {
 	)
 
 	indexProcessor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-		err = k.Index.Add(z)
+		err = k.FilesAndGit().Index.Add(z)
 		return
 	}
 
