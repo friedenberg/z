@@ -1,5 +1,5 @@
 package kasten
 
 type Implementation interface {
-	InitFromOptions(map[string]string) (err error)
+	InitFromOptions(map[string]interface{}) (err error)
 }

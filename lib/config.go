@@ -19,7 +19,7 @@ type KastenConfig struct {
 	ConfigTagForNewZettels
 
 	Implementation string `toml:"type"`
-	Options        map[string]string
+	Options        map[string]interface{}
 }
 
 type TagConfig struct {

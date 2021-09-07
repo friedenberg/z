@@ -18,11 +18,12 @@ func init() {
 }
 
 type FilesAndGit struct {
-	BasePath string
-	Index    Index
+	BasePath   string
+	Index      Index
+	GitEnabled bool
 }
 
-func (k *FilesAndGit) InitFromOptions(o map[string]string) (err error) {
+func (k *FilesAndGit) InitFromOptions(o map[string]interface{}) (err error) {
 	usr, err := user.Current()
 
 	if err != nil {
@@ -31,6 +32,15 @@ func (k *FilesAndGit) InitFromOptions(o map[string]string) (err error) {
 
 	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
 	k.Index = MakeIndex()
+
+	if s, ok := o["git-enabled"]; ok {
+		if sb, ok := s.(bool); ok {
+			k.GitEnabled = sb
+		} else {
+			//TODO
+			//https://github.com/mitchellh/mapstructure
+		}
+	}
 
 	return
 }

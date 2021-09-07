@@ -15,7 +15,11 @@ type GitPrinter struct {
 	files            []string
 }
 
-func (p *GitPrinter) Begin() {}
+func (p *GitPrinter) Begin() {
+	if !p.Umwelt.FilesAndGit().GitEnabled {
+		return
+	}
+}
 
 func (p *GitPrinter) SetShouldCommit() {
 	p.Lock()
@@ -24,6 +28,10 @@ func (p *GitPrinter) SetShouldCommit() {
 }
 
 func (p *GitPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
+	if !p.Umwelt.FilesAndGit().GitEnabled {
+		return
+	}
+
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -37,6 +45,10 @@ func (p *GitPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 }
 
 func (p *GitPrinter) End() {
+	if !p.Umwelt.FilesAndGit().GitEnabled {
+		return
+	}
+
 	var err error
 
 	if p.shouldCommit && len(p.files) > 0 {
