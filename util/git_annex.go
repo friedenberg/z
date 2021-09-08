@@ -2,17 +2,17 @@ package util
 
 import (
 	"fmt"
-	"os/exec"
 )
 
 type GitAnnex struct {
 	GitFilesToCommit
 }
 
-func (g *GitAnnex) Unlock() (err error) {
-	cmd := exec.Command(
+func (g GitAnnex) Unlock() (err error) {
+	cmd := ExecCommand(
 		"git",
-		append([]string{"annex", "unlock"}, g.Files...)...,
+		[]string{"annex", "unlock"},
+		g.Files,
 	)
 
 	cmd.Dir = g.Path
@@ -27,10 +27,11 @@ func (g *GitAnnex) Unlock() (err error) {
 	return
 }
 
-func (g *GitAnnex) Lock() (err error) {
-	cmd := exec.Command(
+func (g GitAnnex) Lock() (err error) {
+	cmd := ExecCommand(
 		"git",
-		append([]string{"annex", "lock"}, g.Files...)...,
+		[]string{"annex", "lock"},
+		g.Files,
 	)
 
 	cmd.Dir = g.Path

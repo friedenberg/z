@@ -12,13 +12,38 @@ import (
 type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
 	Actions     Actions
+	gitPrinter  *GitPrinter
 	zettels     []*lib.Zettel
-	zettelFiles []string
-	files       []string
+	zettelFiles util.GitAnnex
+	files       util.GitAnnex
 	urls        []string
 }
 
-func (p *ActionZettelPrinter) Begin() {}
+func (p *ActionZettelPrinter) Begin() {
+	git := util.Git{
+		Path: p.Umwelt.FilesAndGit().BasePath,
+	}
+
+	p.zettelFiles = util.GitAnnex{
+		GitFilesToCommit: util.GitFilesToCommit{
+			Git:   git,
+			Files: make([]string, 0),
+		},
+	}
+
+	p.files = util.GitAnnex{
+		GitFilesToCommit: util.GitFilesToCommit{
+			Git:   git,
+			Files: make([]string, 0),
+		},
+	}
+
+	p.gitPrinter = &GitPrinter{
+		Umwelt:           p.Umwelt,
+		Mutex:            &sync.Mutex{},
+		GitCommitMessage: "edit",
+	}
+}
 
 func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
@@ -27,10 +52,10 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	p.zettels = append(p.zettels, z)
-	p.zettelFiles = append(p.zettelFiles, z.Path)
+	p.zettelFiles.Files = append(p.zettelFiles.Files, z.Path)
 
 	if z.HasFile() {
-		p.files = append(p.files, z.FilePath())
+		p.files.Files = append(p.files.Files, z.FilePath())
 	}
 
 	if z.HasUrl() {
@@ -44,14 +69,8 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 }
 
 func (p *ActionZettelPrinter) End() {
-	gitPrinter := &GitPrinter{
-		Umwelt:           p.Umwelt,
-		Mutex:            &sync.Mutex{},
-		GitCommitMessage: "edit",
-	}
-
-	gitPrinter.Begin()
-	defer gitPrinter.End()
+	p.gitPrinter.Begin()
+	defer p.gitPrinter.End()
 
 	wg := &sync.WaitGroup{}
 
@@ -70,7 +89,7 @@ func (p *ActionZettelPrinter) End() {
 				return
 			}
 
-			gitPrinter.SetShouldCommit()
+			p.gitPrinter.SetShouldCommit()
 		}()
 	}
 
@@ -89,7 +108,7 @@ func (p *ActionZettelPrinter) End() {
 	wg.Wait()
 
 	for i, z := range p.zettels {
-		gitPrinter.PrintZettel(i, z, nil)
+		p.gitPrinter.PrintZettel(i, z, nil)
 	}
 
 	if err != nil {
@@ -103,29 +122,20 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 	}
 
 	if p.Umwelt.FilesAndGit().GitAnnexEnabled {
-		ga := &util.GitAnnex{
-			GitFilesToCommit: util.GitFilesToCommit{
-				Git: util.Git{
-					Path: p.Umwelt.FilesAndGit().BasePath,
-				},
-				Files: p.files,
-			},
-		}
-
-		err = ga.Unlock()
+		err = p.zettelFiles.Unlock()
 
 		if err != nil {
 			return
 		}
 
-		defer ga.Lock()
+		defer p.zettelFiles.Lock()
 	}
 
 	args := []string{"-f", "-p"}
 
 	cmd := exec.Command(
 		"mvim",
-		append(args, p.zettelFiles...)...,
+		append(args, p.zettelFiles.Files...)...,
 	)
 
 	output, err := cmd.CombinedOutput()
@@ -139,32 +149,24 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 }
 
 func (p *ActionZettelPrinter) openFiles() (err error) {
-	if len(p.files) == 0 {
+	if len(p.files.Files) == 0 {
 		return
 	}
 
 	if p.Umwelt.FilesAndGit().GitAnnexEnabled {
-		ga := &util.GitAnnex{
-			GitFilesToCommit: util.GitFilesToCommit{
-				Git: util.Git{
-					Path: p.Umwelt.FilesAndGit().BasePath,
-				},
-				Files: p.files,
-			},
-		}
-
-		err = ga.Unlock()
+		err = p.files.Unlock()
 
 		if err != nil {
 			return
 		}
 
-		defer ga.Lock()
+		defer p.files.Lock()
 	}
 
-	cmd := exec.Command(
+	cmd := util.ExecCommand(
 		"open",
-		append([]string{"-W"}, p.files...)...,
+		[]string{"-W"},
+		p.files.Files,
 	)
 
 	output, err := cmd.CombinedOutput()
@@ -189,9 +191,10 @@ func (p *ActionZettelPrinter) openUrls() (err error) {
 		"--new-window",
 	}
 
-	cmd := exec.Command(
+	cmd := util.ExecCommand(
 		"open",
-		append(args, p.urls...)...,
+		args,
+		p.urls,
 	)
 
 	output, err := cmd.CombinedOutput()

@@ -14,7 +14,7 @@ type GitFilesToCommit struct {
 	Files []string
 }
 
-func (g *Git) CheckDiff() (ok bool, err error) {
+func (g Git) CheckDiff() (ok bool, err error) {
 	cmd := exec.Command(
 		"git",
 		"diff",
@@ -36,7 +36,7 @@ func (g *Git) CheckDiff() (ok bool, err error) {
 	return
 }
 
-func (g *GitFilesToCommit) Add() (err error) {
+func (g GitFilesToCommit) Add() (err error) {
 	cmd := exec.Command(
 		"git",
 		append([]string{"add"}, g.Files...)...,
@@ -54,7 +54,7 @@ func (g *GitFilesToCommit) Add() (err error) {
 	return
 }
 
-func (g *GitFilesToCommit) Commit(msg string) (err error) {
+func (g GitFilesToCommit) Commit(msg string) (err error) {
 	cmd := exec.Command(
 		"git",
 		"commit",
@@ -74,7 +74,7 @@ func (g *GitFilesToCommit) Commit(msg string) (err error) {
 	return
 }
 
-func (g *GitFilesToCommit) AddAndCommit(msg string) (err error) {
+func (g GitFilesToCommit) AddAndCommit(msg string) (err error) {
 	err = g.Add()
 
 	if err != nil {
