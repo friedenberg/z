@@ -18,9 +18,22 @@ func init() {
 }
 
 type FilesAndGit struct {
-	BasePath   string
-	Index      Index
-	GitEnabled bool
+	BasePath        string
+	Index           Index
+	GitEnabled      bool
+	GitAnnexEnabled bool
+}
+
+func (f *FilesAndGit) getBoolOption(o map[string]interface{}, k string) bool {
+	if s, ok := o[k]; ok {
+		if sb, ok := s.(bool); ok {
+			return sb
+		}
+	}
+
+	//TODO
+	//https://github.com/mitchellh/mapstructure
+	return false
 }
 
 func (k *FilesAndGit) InitFromOptions(o map[string]interface{}) (err error) {
@@ -33,14 +46,8 @@ func (k *FilesAndGit) InitFromOptions(o map[string]interface{}) (err error) {
 	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
 	k.Index = MakeIndex()
 
-	if s, ok := o["git-enabled"]; ok {
-		if sb, ok := s.(bool); ok {
-			k.GitEnabled = sb
-		} else {
-			//TODO
-			//https://github.com/mitchellh/mapstructure
-		}
-	}
+	k.GitEnabled = k.getBoolOption(o, "git-enabled")
+	k.GitAnnexEnabled = k.getBoolOption(o, "git-annex-enabled")
 
 	return
 }

@@ -102,22 +102,24 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 		return
 	}
 
-	ga := &util.GitAnnex{
-		GitFilesToCommit: util.GitFilesToCommit{
-			Git: util.Git{
-				Path: p.Umwelt.FilesAndGit().BasePath,
+	if p.Umwelt.FilesAndGit().GitAnnexEnabled {
+		ga := &util.GitAnnex{
+			GitFilesToCommit: util.GitFilesToCommit{
+				Git: util.Git{
+					Path: p.Umwelt.FilesAndGit().BasePath,
+				},
+				Files: p.files,
 			},
-			Files: p.zettelFiles,
-		},
+		}
+
+		err = ga.Unlock()
+
+		if err != nil {
+			return
+		}
+
+		defer ga.Lock()
 	}
-
-	err = ga.Unlock()
-
-	if err != nil {
-		return
-	}
-
-	defer ga.Lock()
 
 	args := []string{"-f", "-p"}
 
@@ -141,22 +143,24 @@ func (p *ActionZettelPrinter) openFiles() (err error) {
 		return
 	}
 
-	ga := &util.GitAnnex{
-		GitFilesToCommit: util.GitFilesToCommit{
-			Git: util.Git{
-				Path: p.Umwelt.FilesAndGit().BasePath,
+	if p.Umwelt.FilesAndGit().GitAnnexEnabled {
+		ga := &util.GitAnnex{
+			GitFilesToCommit: util.GitFilesToCommit{
+				Git: util.Git{
+					Path: p.Umwelt.FilesAndGit().BasePath,
+				},
+				Files: p.files,
 			},
-			Files: p.files,
-		},
+		}
+
+		err = ga.Unlock()
+
+		if err != nil {
+			return
+		}
+
+		defer ga.Lock()
 	}
-
-	err = ga.Unlock()
-
-	if err != nil {
-		return
-	}
-
-	defer ga.Lock()
 
 	cmd := exec.Command(
 		"open",
