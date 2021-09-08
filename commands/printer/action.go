@@ -62,6 +62,7 @@ func (p *ActionZettelPrinter) End() {
 
 		go func() {
 			defer wg.Done()
+
 			err := actionFunc()
 
 			if err != nil {
@@ -85,11 +86,11 @@ func (p *ActionZettelPrinter) End() {
 		runAction(p.openUrls)
 	}
 
+	wg.Wait()
+
 	for i, z := range p.zettels {
 		gitPrinter.PrintZettel(i, z, nil)
 	}
-
-	wg.Wait()
 
 	if err != nil {
 		util.StdPrinterErr(err)
@@ -100,6 +101,23 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 	if len(p.zettels) == 0 {
 		return
 	}
+
+	ga := &util.GitAnnex{
+		GitFilesToCommit: util.GitFilesToCommit{
+			Git: util.Git{
+				Path: p.Umwelt.FilesAndGit().BasePath,
+			},
+			Files: p.zettelFiles,
+		},
+	}
+
+	err = ga.Unlock()
+
+	if err != nil {
+		return
+	}
+
+	defer ga.Lock()
 
 	args := []string{"-f", "-p"}
 
@@ -122,6 +140,23 @@ func (p *ActionZettelPrinter) openFiles() (err error) {
 	if len(p.files) == 0 {
 		return
 	}
+
+	ga := &util.GitAnnex{
+		GitFilesToCommit: util.GitFilesToCommit{
+			Git: util.Git{
+				Path: p.Umwelt.FilesAndGit().BasePath,
+			},
+			Files: p.files,
+		},
+	}
+
+	err = ga.Unlock()
+
+	if err != nil {
+		return
+	}
+
+	defer ga.Lock()
 
 	cmd := exec.Command(
 		"open",
