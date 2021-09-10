@@ -19,7 +19,6 @@ func init() {
 
 type FilesAndGit struct {
 	BasePath        string
-	Index           Index
 	GitEnabled      bool
 	GitAnnexEnabled bool
 }
@@ -44,7 +43,6 @@ func (k *FilesAndGit) InitFromOptions(o map[string]interface{}) (err error) {
 	}
 
 	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
-	k.Index = MakeIndex()
 
 	k.GitEnabled = k.getBoolOption(o, "git-enabled")
 	k.GitAnnexEnabled = k.getBoolOption(o, "git-annex-enabled")

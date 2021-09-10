@@ -104,6 +104,12 @@ func LoadDefaultConfig() (c Config, err error) {
 }
 
 func (c Config) Umwelt() (e Umwelt, err error) {
+	e, err = MakeUmwelt(c)
+
+	if err != nil {
+		return
+	}
+
 	e.Kasten = make(map[string]kasten.Implementation)
 
 	for n, kc := range c.Kasten {

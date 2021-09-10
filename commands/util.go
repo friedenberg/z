@@ -15,7 +15,7 @@ func hydrateIndex(k lib.Umwelt) error {
 	)
 
 	indexProcessor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-		err = k.FilesAndGit().Index.Add(z)
+		err = k.Index.Add(z)
 		return
 	}
 

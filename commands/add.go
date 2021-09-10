@@ -53,7 +53,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				return lib.AddUrlOnWrite(p, t)
 			}
 			hydrator = func(i int, z *lib.Zettel, p string) (err error) {
-				indexItems := e.FilesAndGit().Index.ZettelsForUrl(p)
+				indexItems := e.Index.ZettelsForUrl(p)
 
 				if len(indexItems) > 1 {
 					err = fmt.Errorf("multiple zettels ('%q') with url: '%s'", indexItems, p)
@@ -61,7 +61,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				}
 
 				if len(indexItems) == 1 {
-					e.FilesAndGit().Index.HydrateZettel(z, indexItems[0])
+					e.Index.HydrateZettel(z, indexItems[0])
 				}
 
 				err = bootstrapZettel(i, z, p)
