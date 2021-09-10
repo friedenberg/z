@@ -37,9 +37,10 @@ func (g Git) CheckDiff() (ok bool, err error) {
 }
 
 func (g GitFilesToCommit) Add() (err error) {
-	cmd := exec.Command(
+	cmd := ExecCommand(
 		"git",
-		append([]string{"add"}, g.Files...)...,
+		[]string{"add"},
+		g.Files,
 	)
 
 	cmd.Dir = g.Path

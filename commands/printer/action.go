@@ -2,7 +2,6 @@ package printer
 
 import (
 	"fmt"
-	"os/exec"
 	"sync"
 
 	"github.com/friedenberg/z/lib"
@@ -133,9 +132,10 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 
 	args := []string{"-f", "-p"}
 
-	cmd := exec.Command(
+	cmd := util.ExecCommand(
 		"mvim",
-		append(args, p.zettelFiles.Files...)...,
+		args,
+		p.zettelFiles.Files,
 	)
 
 	output, err := cmd.CombinedOutput()

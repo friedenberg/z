@@ -1,9 +1,11 @@
 package util
 
-import "os/exec"
+import (
+	"os/exec"
+)
 
 func ExecCommand(c string, args ...[]string) *exec.Cmd {
-	actualArgs := make([]string, len(args))
+	actualArgs := make([]string, 0, len(args))
 
 	for _, s := range args {
 		actualArgs = append(actualArgs, s...)
