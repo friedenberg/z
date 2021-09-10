@@ -1,9 +1,14 @@
 package lib
 
 import (
+	"encoding/gob"
 	"fmt"
+	"io"
+	"strconv"
 	"sync"
 )
+
+var thisFileSha1 string
 
 type IndexZettel struct {
 	Path     string
@@ -12,94 +17,122 @@ type IndexZettel struct {
 }
 
 type ZettelIdMap struct {
-	idMap map[string][]int64
-	*sync.Mutex
+	IdMap map[string][]int64
 }
 
 func MakeZettelIdMap() ZettelIdMap {
 	return ZettelIdMap{
-		idMap: make(map[string][]int64),
-		Mutex: &sync.Mutex{},
+		IdMap: make(map[string][]int64),
 	}
 }
 
-func (m ZettelIdMap) Get(k string) ([]int64, bool) {
-	m.Lock()
-	defer m.Unlock()
-	a, ok := m.idMap[k]
+func (m ZettelIdMap) Get(k string, l sync.Locker) ([]int64, bool) {
+	l.Lock()
+	defer l.Unlock()
+	a, ok := m.IdMap[k]
 	return a, ok
 }
 
-func (m ZettelIdMap) Set(k string, ids []int64) {
-	m.Lock()
-	defer m.Unlock()
-	m.idMap[k] = ids
+func (m ZettelIdMap) Set(k string, ids []int64, l sync.Locker) {
+	l.Lock()
+	defer l.Unlock()
+	m.IdMap[k] = ids
 }
 
-func (m ZettelIdMap) Add(k string, id int64) {
+func (m ZettelIdMap) Add(k string, id int64, l sync.Locker) {
 	var a []int64
 	ok := false
 
-	if a, ok = m.Get(k); !ok {
+	if a, ok = m.Get(k, l); !ok {
 		a = make([]int64, 0, 1)
 	}
 
 	a = append(a, id)
-	m.Set(k, a)
+	m.Set(k, a, l)
 }
 
-type Index struct {
-	Zettels map[int64]IndexZettel
+type SerializableIndex struct {
+	Version string
+	Zettels map[string]IndexZettel
 	Files   ZettelIdMap
 	Urls    ZettelIdMap
 	Tags    ZettelIdMap
+}
+
+type Index struct {
+	SerializableIndex
 	*sync.Mutex
 }
 
 func MakeIndex() Index {
 	return Index{
-		Zettels: make(map[int64]IndexZettel),
-		Files:   MakeZettelIdMap(),
-		Urls:    MakeZettelIdMap(),
-		Tags:    MakeZettelIdMap(),
-		Mutex:   &sync.Mutex{},
+		SerializableIndex: SerializableIndex{
+			Version: thisFileSha1,
+			Zettels: make(map[string]IndexZettel),
+			Files:   MakeZettelIdMap(),
+			Urls:    MakeZettelIdMap(),
+			Tags:    MakeZettelIdMap(),
+		},
+		Mutex: &sync.Mutex{},
 	}
 }
 
-func (m Index) Get(k int64) (IndexZettel, bool) {
+func (i Index) Read(r io.Reader) (err error) {
+	dec := gob.NewDecoder(r)
+	err = dec.Decode(&i.SerializableIndex)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (i Index) Write(w io.Writer) (err error) {
+	enc := gob.NewEncoder(w)
+	err = enc.Encode(i.SerializableIndex)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (m Index) Get(k string) (IndexZettel, bool) {
 	m.Lock()
 	defer m.Unlock()
 	a, ok := m.Zettels[k]
 	return a, ok
 }
 
-func (m Index) Set(k int64, z IndexZettel) {
+func (m Index) Set(k string, z IndexZettel) {
 	m.Lock()
 	defer m.Unlock()
 	m.Zettels[k] = z
 }
 
 func (i Index) Add(z *Zettel) error {
-	if _, ok := i.Get(z.Id); ok {
+	if _, ok := i.Get(strconv.FormatInt(z.Id, 10)); ok {
 		return fmt.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
 
-	i.Set(z.Id, IndexZettel{
+	i.Set(strconv.FormatInt(z.Id, 10), IndexZettel{
 		Path:     z.Path,
 		Id:       z.Id,
 		Metadata: z.Metadata,
 	})
 
 	if z.HasFile() {
-		i.Files.Add(z.FilePath(), z.Id)
+		i.Files.Add(z.FilePath(), z.Id, i)
 	}
 
 	if z.HasUrl() {
-		i.Urls.Add(z.Metadata.Url, z.Id)
+		i.Urls.Add(z.Metadata.Url, z.Id, i)
 	}
 
 	for _, t := range z.Metadata.Tags {
-		i.Tags.Add(t, z.Id)
+		i.Tags.Add(t, z.Id, i)
 	}
 
 	return nil
@@ -113,14 +146,14 @@ func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 
 func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
 	//TODO normalize url
-	ids, ok := i.Urls.Get(u)
+	ids, ok := i.Urls.Get(u, i)
 
 	if !ok {
 		return
 	}
 
 	for _, id := range ids {
-		if zi, ok := i.Zettels[id]; ok {
+		if zi, ok := i.Zettels[strconv.FormatInt(id, 10)]; ok {
 			o = append(o, zi)
 		}
 	}

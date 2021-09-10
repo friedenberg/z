@@ -24,15 +24,6 @@ type Processor struct {
 }
 
 func MakeProcessor(e lib.Umwelt, files []string, zp printer.ZettelPrinter) (processor *Processor) {
-	if len(files) == 0 {
-		var err error
-		files, err = e.FilesAndGit().GetAll()
-
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	processor = &Processor{
 		kasten:  e,
 		files:   files,
@@ -42,20 +33,38 @@ func MakeProcessor(e lib.Umwelt, files []string, zp printer.ZettelPrinter) (proc
 	return
 }
 
-func (p *Processor) init() {
-	if p.argNormalizer == nil {
-		p.argNormalizer = func(_ int, path string) (normalizedArg string, err error) {
-			normalizedArg, err = p.kasten.FilesAndGit().GetNormalizedPath(path)
+func (p *Processor) init() (err error) {
+	if len(p.files) == 0 {
+		p.files, err = p.getDefaultFiles()
+
+		if err != nil {
 			return
 		}
 	}
 
+	if p.argNormalizer == nil {
+		p.argNormalizer = DefaultArgNormalizer(p.kasten)
+	}
+
 	if p.hydrator == nil {
-		p.hydrator = func(_ int, z *lib.Zettel, path string) error {
-			z.Path = path
-			return z.Hydrate(false)
+		if p.kasten.Config.UseIndexCache {
+			p.hydrator = HydrateFromIndexFunc(p.kasten)
+		} else {
+			p.hydrator = HydrateFromFileFunc(p.kasten)
 		}
 	}
+
+	return
+}
+
+func (p *Processor) getDefaultFiles() (files []string, err error) {
+	if p.kasten.Config.UseIndexCache {
+		files = p.kasten.GetAll()
+	} else {
+		files, err = p.kasten.FilesAndGit().GetAll()
+	}
+
+	return
 }
 
 func (p *Processor) SetPrinter(printer printer.ZettelPrinter) {
@@ -63,7 +72,11 @@ func (p *Processor) SetPrinter(printer printer.ZettelPrinter) {
 }
 
 func (p *Processor) Run() (err error) {
-	p.init()
+	err = p.init()
+
+	if err != nil {
+		return
+	}
 
 	runRead := func() {
 		for i, file := range p.files {

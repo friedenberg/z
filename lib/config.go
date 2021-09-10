@@ -33,6 +33,7 @@ type Config struct {
 	Tags          map[string]TagConfig
 	Kasten        map[string]KastenConfig
 	DefaultKasten string `toml:"default-kasten"`
+	UseIndexCache bool   `toml:"use-index-cache"`
 }
 
 func DefaultConfigPath() (p string, err error) {

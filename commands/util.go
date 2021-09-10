@@ -7,19 +7,33 @@ import (
 	"github.com/friedenberg/z/lib"
 )
 
-func hydrateIndex(k lib.Umwelt) error {
+func hydrateIndex(k lib.Umwelt) (err error) {
+	allFiles, err := k.FilesAndGit().GetAll()
+
+	if err != nil {
+		return
+	}
+
 	indexProcessor := MakeProcessor(
 		k,
-		nil,
+		allFiles,
 		&printer.NullZettelPrinter{},
 	)
+
+	// indexProcessor.hydrator = HydrateFromIndexFunc(k)
 
 	indexProcessor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
 		err = k.Index.Add(z)
 		return
 	}
 
-	return indexProcessor.Run()
+	err = indexProcessor.Run()
+
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func uniqueAndSortTags(tags []string) (o []string) {
