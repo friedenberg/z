@@ -77,7 +77,7 @@ func run() int {
 	env, err := c.Umwelt()
 
 	if err != nil {
-		util.StdPrinterErr(err)
+		util.StdPrinterError(err)
 		return 1
 	}
 
@@ -85,7 +85,7 @@ func run() int {
 	err = cmd.runFunc(env)
 
 	if err != nil {
-		util.StdPrinterErr(err)
+		util.StdPrinterError(err)
 	}
 
 	return 0

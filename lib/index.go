@@ -2,7 +2,6 @@ package lib
 
 import (
 	"encoding/gob"
-	"fmt"
 	"io"
 	"strconv"
 	"sync"

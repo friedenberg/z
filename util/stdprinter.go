@@ -30,6 +30,13 @@ func init() {
 	}()
 }
 
+func StdPrinterError(err error) {
+	printerChannel <- printerLine{
+		file: os.Stderr,
+		line: fmt.Sprintf("%+v", err),
+	}
+}
+
 func StdPrinterErrf(f string, a ...interface{}) {
 	printerChannel <- printerLine{
 		file: os.Stderr,
