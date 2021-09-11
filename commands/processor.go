@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
 
@@ -77,34 +78,33 @@ func (p *Processor) Run() (err error) {
 		return
 	}
 
-	runRead := func() {
-		for i, file := range p.files {
-			go func(i int, f string) {
-				defer p.waitGroup.Done()
-				z, err := p.HydrateFile(i, f)
+	iter := func(i int, f string) (iterErr error) {
+		z, iterErr := p.HydrateFile(i, f)
 
-				if err != nil {
-					err = xerrors.Errorf("%s: failed to hydrate: %w", f, err)
-					p.printer.PrintZettel(i, z, err)
-					return
-				}
-
-				err = p.ActionZettel(i, z)
-
-				if err != nil {
-					err = xerrors.Errorf("%s:\n\t%w", f, err)
-					p.printer.PrintZettel(i, z, err)
-				}
-			}(i, file)
+		if iterErr != nil {
+			iterErr = xerrors.Errorf("%s: failed to hydrate: %w", f, iterErr)
+			return
 		}
+
+		iterErr = p.ActionZettel(i, z)
+
+		if iterErr != nil {
+			return
+			iterErr = xerrors.Errorf("%s:\n\t%w", f, iterErr)
+		}
+
+		p.printer.PrintZettel(i, z, nil)
+
+		return
 	}
 
-	p.waitGroup.Add(len(p.files))
+	errIter := func(i int, s string, err error) {
+		p.printer.PrintZettel(i, nil, err)
+	}
 
 	p.printer.Begin()
-
-	go runRead()
-	p.waitGroup.Wait()
+	par := util.Parallelizer{Args: p.files}
+	par.Run(iter, errIter)
 	p.printer.End()
 
 	return nil

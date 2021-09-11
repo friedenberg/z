@@ -7,10 +7,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var (
-	HydrateFromIndex HydrateFunc
-)
-
 func DefaultArgNormalizer(u lib.Umwelt) ArgNormalizeFunc {
 	return func(_ int, path string) (normalizedArg string, err error) {
 		normalizedArg, err = u.FilesAndGit().GetNormalizedPath(path)

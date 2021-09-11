@@ -8,75 +8,74 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/util"
 )
 
-type outputFormatFunc func() (printer.ZettelPrinter, ActionFunc)
-type outputFormatPrinter struct {
+type outputFormat struct {
 	printer printer.ZettelPrinter
-	filter  func(int, *lib.Zettel) (bool, error)
+	filter  func(int, *lib.Zettel) bool
 }
 
 var (
-	outputFormats    map[string]outputFormatPrinter
+	outputFormats    map[string]outputFormat
 	outputFormatKeys []string
 )
 
 func init() {
-	outputFormats = map[string]outputFormatPrinter{
-		"alfred-json": outputFormatPrinter{
+	outputFormats = map[string]outputFormat{
+		"alfred-json": outputFormat{
 			printer: &printer.AlfredJsonZettelPrinter{},
 		},
-		"alfred-json-files": outputFormatPrinter{
+		"alfred-json-files": outputFormat{
 			printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelFiles,
 			},
-			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-				shouldPrint = z.HasFile()
-				return
+			filter: func(i int, z *lib.Zettel) bool {
+				return z.HasFile()
 			},
 		},
-		"alfred-json-urls": outputFormatPrinter{
+		"alfred-json-urls": outputFormat{
 			printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelUrls,
 			},
-			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-				shouldPrint = z.HasUrl()
-				return
+			filter: func(i int, z *lib.Zettel) bool {
+				return z.HasUrl()
 			},
 		},
-		"alfred-json-all": outputFormatPrinter{
+		"alfred-json-all": outputFormat{
 			printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelAll,
 			},
 		},
-		"alfred-json-snippets": outputFormatPrinter{
+		"alfred-json-snippets": outputFormat{
 			//TODO
 			printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelSnippets,
 			},
-			filter: func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
+			filter: func(i int, z *lib.Zettel) bool {
 				for _, t := range z.Metadata.Tags {
 					if strings.Contains(t, "t-snippet") {
-						shouldPrint = true
+						return true
 					}
 				}
 
-				return
+				return false
 			},
 		},
-		"metadata-json": outputFormatPrinter{
+		"metadata-json": outputFormat{
 			printer: &printer.JsonZettelPrinter{},
 		},
-		"alfred-tags": outputFormatPrinter{
+		"alfred-tags": outputFormat{
 			printer: &printer.Tags{},
 		},
-		"alfred-expanded-tags": outputFormatPrinter{
+		"alfred-expanded-tags": outputFormat{
 			printer: &printer.Tags{ShouldExpand: true},
 		},
-		"full": outputFormatPrinter{
+		"full": outputFormat{
 			printer: &printer.FullZettelPrinter{},
 		},
-		"filename": outputFormatPrinter{
+		"filename": outputFormat{
 			printer: &printer.FilenameZettelPrinter{},
 		},
 	}
@@ -88,52 +87,112 @@ func init() {
 	sort.Slice(outputFormatKeys, func(i, j int) bool { return outputFormatKeys[i] < outputFormatKeys[j] })
 }
 
+func (a *outputFormat) String() string {
+	//TODO
+	return ""
+}
+
+func (a *outputFormat) Set(s string) (err error) {
+	if format, ok := outputFormats[s]; ok {
+		*a = format
+	} else {
+		if s == "" {
+			*a = outputFormat{
+				printer: &printer.FullZettelPrinter{},
+			}
+		} else {
+			*a = outputFormat{
+				printer: &printer.FormatZettelPrinter{
+					Formatter: lib.MakePrintfFormatter(s),
+				},
+			}
+		}
+	}
+
+	a.printer = &printer.MultiplexingZettelPrinter{Printer: a.printer}
+
+	return
+}
+
 func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
-	var outputFormat, query string
-	f.StringVar(&outputFormat, "output-format", "full", fmt.Sprintf("One of %q", outputFormatKeys))
+	var of outputFormat
+	var query string
+	f.Var(&of, "output-format", fmt.Sprintf("One of %q", outputFormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
 
 	return func(e lib.Umwelt) (err error) {
-		var p printer.ZettelPrinter
-		var actioner ActionFunc
+		args := f.Args()
+		var iter util.ParallelizerIterFunc
 
-		if format, ok := outputFormats[outputFormat]; ok {
-			p = format.printer
-			actioner = format.filter
-		} else {
-			p = &printer.FormatZettelPrinter{
-				Formatter: lib.MakePrintfFormatter(outputFormat),
-			}
-		}
-
-		processor := MakeProcessor(
-			e,
-			f.Args(),
-			p,
-		)
-
-		//TODO if cache, use ID arg normalizer
-		//TODO if file, use file arg normalizer
 		if e.Config.UseIndexCache {
-			processor.hydrator = HydrateFromIndexFunc(e)
-		} else {
-			//TODO determine if body is necessary based on type
-			processor.hydrator = HydrateFromFileFunc(e, true)
-		}
-
-		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-			if actioner != nil {
-				shouldPrint, err = actioner(i, z)
-				shouldPrint = shouldPrint && doesZettelMatchQuery(z, query)
-			} else {
-				shouldPrint = doesZettelMatchQuery(z, query)
+			if len(args) == 0 {
+				args = e.GetAll()
 			}
 
+			iter = cachedIteration(e, query, of)
+		} else {
+			if len(args) == 0 {
+				args, err = e.FilesAndGit().GetAll()
+
+				if err != nil {
+					return
+				}
+			}
+
+			iter = filesystemIteration(e, query, of)
+		}
+
+		par := util.Parallelizer{Args: args}
+		of.printer.Begin()
+		defer of.printer.End()
+		par.Run(iter, errIterartion(of))
+
+		return
+	}
+}
+
+func printIfNecessary(u lib.Umwelt, i int, z *lib.Zettel, q string, o outputFormat) {
+	if (o.filter == nil || o.filter(i, z)) && doesZettelMatchQuery(z, q) {
+		o.printer.PrintZettel(i, z, nil)
+	}
+}
+
+func cachedIteration(u lib.Umwelt, q string, o outputFormat) util.ParallelizerIterFunc {
+	return func(i int, s string) (err error) {
+		z, err := pipeline.HydrateFromIndex(u, s)
+
+		if err != nil {
 			return
 		}
 
-		err = processor.Run()
+		printIfNecessary(u, i, z, q, o)
 
 		return
+	}
+}
+
+func filesystemIteration(u lib.Umwelt, q string, o outputFormat) util.ParallelizerIterFunc {
+	return func(i int, s string) (err error) {
+		p, err := pipeline.NormalizePath(u, s)
+
+		if err != nil {
+			return
+		}
+		//TODO determine if body read is necessary
+		z, err := pipeline.HydrateFromFile(u, p, true)
+
+		if err != nil {
+			return
+		}
+
+		printIfNecessary(u, i, z, q, o)
+
+		return
+	}
+}
+
+func errIterartion(o outputFormat) util.ParallelizerErrorFunc {
+	return func(i int, s string, err error) {
+		o.printer.PrintZettel(i, nil, err)
 	}
 }
