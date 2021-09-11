@@ -27,9 +27,7 @@ func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
 			return xerrors.Errorf("missing zettel in index for id '%s'", path)
 		}
 
-		z.Id = zi.Id
-		z.Path = zi.Path
-		z.Metadata = zi.Metadata
+		u.Index.HydrateZettel(z, zi)
 
 		return nil
 	}

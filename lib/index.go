@@ -14,6 +14,7 @@ type IndexZettel struct {
 	Path     string
 	Id       int64
 	Metadata Metadata
+	Body     string
 }
 
 type ZettelIdMap struct {
@@ -119,6 +120,7 @@ func (i Index) Add(z *Zettel) error {
 		Path:     z.Path,
 		Id:       z.Id,
 		Metadata: z.Metadata,
+		Body:     z.Body,
 	})
 
 	if z.HasFile() {
@@ -140,6 +142,7 @@ func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 	z.Metadata = zb.Metadata
 	z.Id = zb.Id
 	z.Path = zb.Path
+	z.Body = zb.Body
 }
 
 func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
