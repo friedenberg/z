@@ -70,8 +70,6 @@ func cleanZettelFunc(dryRun bool, name string, cleanAction lib.CleanAction) Acti
 		}
 
 		if shouldWrite {
-			util.OpenFilesGuardInstance.Lock()
-			defer util.OpenFilesGuardInstance.Unlock()
 			err = z.Write(nil)
 		}
 

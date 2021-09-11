@@ -7,6 +7,7 @@ import (
 	"path"
 
 	"github.com/friedenberg/z/lib/kasten"
+	"github.com/friedenberg/z/util"
 	"github.com/pelletier/go-toml/v2"
 	"golang.org/x/xerrors"
 )
@@ -54,13 +55,12 @@ func DefaultConfigPath() (p string, err error) {
 }
 
 func LoadConfig(p string) (c Config, err error) {
-	f, err := os.Open(p)
+	f, err := util.OpenFilesGuardInstance.Open(p)
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	if err != nil {
 		return
 	}
-
-	defer f.Close()
 
 	doc, err := ioutil.ReadAll(f)
 

@@ -58,7 +58,8 @@ func (u Umwelt) GetAll() (files []string) {
 }
 
 func (u Umwelt) LoadIndexFromCache() (err error) {
-	f, err := os.Open(u.GetIndexPath())
+	f, err := util.OpenFilesGuardInstance.Open(u.GetIndexPath())
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	if err != nil && os.IsNotExist(err) {
 		err = nil
@@ -68,8 +69,6 @@ func (u Umwelt) LoadIndexFromCache() (err error) {
 	if err != nil {
 		return
 	}
-
-	defer f.Close()
 
 	err = u.Index.Read(f)
 
@@ -87,7 +86,7 @@ func (e Umwelt) CacheIndex() (err error) {
 		return
 	}
 
-	defer f.Close()
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	err = e.Index.Write(f)
 

@@ -44,8 +44,6 @@ func GetCleanActions() map[string]CleanAction {
 				return oldYaml != z.Data.MetadataYaml
 			},
 			func(z *Zettel) (shouldWrite bool, err error) {
-				util.OpenFilesGuardInstance.Lock()
-				defer util.OpenFilesGuardInstance.Unlock()
 				shouldWrite = true
 				return
 			},

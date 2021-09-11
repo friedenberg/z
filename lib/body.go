@@ -3,12 +3,13 @@ package lib
 import (
 	"bufio"
 	"bytes"
-	"os"
+
+	"github.com/friedenberg/z/util"
 )
 
 func (zettel *Zettel) ReadMetadataAndBody() (err error) {
-	f, err := os.Open(zettel.Path)
-	defer f.Close()
+	f, err := util.OpenFilesGuardInstance.Open(zettel.Path)
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	if err != nil {
 		return

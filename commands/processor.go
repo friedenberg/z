@@ -5,7 +5,6 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
 
@@ -112,10 +111,6 @@ func (p *Processor) Run() (err error) {
 }
 
 func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
-	//TODO move to read site
-	util.OpenFilesGuardInstance.Lock()
-	defer util.OpenFilesGuardInstance.Unlock()
-
 	z = &lib.Zettel{
 		Umwelt: p.kasten,
 	}

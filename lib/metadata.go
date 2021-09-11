@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"io"
 	"net/url"
-	"os"
 	"path"
 	"regexp"
 	"sort"
@@ -65,8 +64,8 @@ func (id Metadata) ToMetadata() (md MetadataList) {
 }
 
 func (zettel *Zettel) ReadMetadata() (err error) {
-	f, err := os.Open(zettel.Path)
-	defer f.Close()
+	f, err := util.OpenFilesGuardInstance.Open(zettel.Path)
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	if err != nil {
 		return

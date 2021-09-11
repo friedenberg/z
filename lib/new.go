@@ -105,7 +105,7 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 		chromeCommand.Start()
 		pandocCommand.Start()
 		chromeCommand.Wait()
-		w.Close()
+		util.OpenFilesGuardInstance.Close(w)
 		pandocCommand.Wait()
 
 		z.Body = md.String()

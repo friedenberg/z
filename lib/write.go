@@ -34,11 +34,8 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		return
 	}
 
-	//TODO
-	util.OpenFilesGuardInstance.Lock()
-	f, err := os.OpenFile(z.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-	defer f.Close()
-	defer util.OpenFilesGuardInstance.Unlock()
+	f, err := util.OpenFilesGuardInstance.OpenFile(z.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	if err != nil {
 		err = xerrors.Errorf("opening zettel file: %w", err)
