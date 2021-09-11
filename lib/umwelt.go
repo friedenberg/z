@@ -60,6 +60,11 @@ func (u Umwelt) GetAll() (files []string) {
 func (u Umwelt) LoadIndexFromCache() (err error) {
 	f, err := os.Open(u.GetIndexPath())
 
+	if err != nil && os.IsNotExist(err) {
+		err = nil
+		return
+	}
+
 	if err != nil {
 		return
 	}
