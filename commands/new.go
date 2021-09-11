@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
@@ -73,7 +73,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			err = json.Unmarshal([]byte(metadata_json), &z.Metadata)
 
 			if err != nil {
-				err = fmt.Errorf("parsing metadata json: %w", err)
+				err = xerrors.Errorf("parsing metadata json: %w", err)
 				return
 			}
 		}

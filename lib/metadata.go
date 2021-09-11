@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -111,7 +111,7 @@ func (z *Zettel) ParseMetadata() (err error) {
 	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &md)
 
 	if err != nil {
-		err = fmt.Errorf("parse metadata: %w", err)
+		err = xerrors.Errorf("parse metadata: %w", err)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 
 		if util.FileExists(filePath) {
 			if z.Metadata.File != "" {
-				err = fmt.Errorf(
+				err = xerrors.Errorf(
 					"zettel has more than one valid file: '%s' and '%s'",
 					v,
 					z.Metadata.File,
@@ -146,7 +146,7 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 
 		if e == nil && url.Hostname() != "" {
 			if z.Metadata.Url != "" {
-				err = fmt.Errorf(
+				err = xerrors.Errorf(
 					"zettel has more than one valid url: '%s' and '%s'",
 					v,
 					z.Metadata.Url,
@@ -166,7 +166,7 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 	t, err = TimeFromPath(z.Path)
 
 	if err != nil {
-		err = fmt.Errorf("parse metadata: %w", err)
+		err = xerrors.Errorf("parse metadata: %w", err)
 		return
 	}
 

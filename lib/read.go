@@ -1,10 +1,11 @@
 package lib
 
 import (
-	"fmt"
 	"path"
 	"strconv"
 	"strings"
+
+	"golang.org/x/xerrors"
 )
 
 func (z *Zettel) Hydrate(readBody bool) (err error) {
@@ -12,7 +13,7 @@ func (z *Zettel) Hydrate(readBody bool) (err error) {
 	idInt, err := strconv.ParseInt(id, 10, 64)
 
 	if err != nil {
-		err = fmt.Errorf("extracting id from filename: %w", err)
+		err = xerrors.Errorf("extracting id from filename: %w", err)
 		return
 	}
 
@@ -25,14 +26,14 @@ func (z *Zettel) Hydrate(readBody bool) (err error) {
 	}
 
 	if err != nil {
-		err = fmt.Errorf("reading metadata: %w", err)
+		err = xerrors.Errorf("reading metadata: %w", err)
 		return
 	}
 
 	err = z.ParseMetadata()
 
 	if err != nil {
-		err = fmt.Errorf("reading parsing: %w", err)
+		err = xerrors.Errorf("reading parsing: %w", err)
 		return
 	}
 

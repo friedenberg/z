@@ -6,9 +6,9 @@ import (
 	"io"
 	"strconv"
 	"sync"
-)
 
-var thisFileSha1 string
+	"golang.org/x/xerrors"
+)
 
 type IndexZettel struct {
 	Path     string
@@ -52,7 +52,6 @@ func (m ZettelIdMap) Add(k string, id int64, l sync.Locker) {
 }
 
 type SerializableIndex struct {
-	Version string
 	Zettels map[string]IndexZettel
 	Files   ZettelIdMap
 	Urls    ZettelIdMap
@@ -67,7 +66,6 @@ type Index struct {
 func MakeIndex() Index {
 	return Index{
 		SerializableIndex: SerializableIndex{
-			Version: thisFileSha1,
 			Zettels: make(map[string]IndexZettel),
 			Files:   MakeZettelIdMap(),
 			Urls:    MakeZettelIdMap(),
@@ -114,7 +112,7 @@ func (m Index) Set(k string, z IndexZettel) {
 
 func (i Index) Add(z *Zettel) error {
 	if _, ok := i.Get(strconv.FormatInt(z.Id, 10)); ok {
-		return fmt.Errorf("zettel with id '%d' already exists in index", z.Id)
+		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
 
 	i.Set(strconv.FormatInt(z.Id, 10), IndexZettel{

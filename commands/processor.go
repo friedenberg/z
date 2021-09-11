@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 type ArgNormalizeFunc func(int, string) (string, error)
@@ -85,7 +85,7 @@ func (p *Processor) Run() (err error) {
 				z, err := p.HydrateFile(i, f)
 
 				if err != nil {
-					err = fmt.Errorf("%s: failed to hydrate: %w", f, err)
+					err = xerrors.Errorf("%s: failed to hydrate: %w", f, err)
 					p.printer.PrintZettel(i, z, err)
 					return
 				}
@@ -93,7 +93,7 @@ func (p *Processor) Run() (err error) {
 				err = p.ActionZettel(i, z)
 
 				if err != nil {
-					err = fmt.Errorf("%s:\n\t%w", f, err)
+					err = xerrors.Errorf("%s:\n\t%w", f, err)
 					p.printer.PrintZettel(i, z, err)
 				}
 			}(i, file)

@@ -2,7 +2,6 @@ package commands
 
 import (
 	"flag"
-	"fmt"
 	"path"
 	"strconv"
 	"strings"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"golang.org/x/xerrors"
 )
 
 func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
@@ -56,7 +56,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				indexItems := e.Index.ZettelsForUrl(p)
 
 				if len(indexItems) > 1 {
-					err = fmt.Errorf("multiple zettels ('%q') with url: '%s'", indexItems, p)
+					err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", indexItems, p)
 					return
 				}
 
@@ -68,7 +68,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				return
 			}
 		default:
-			err = fmt.Errorf("unsupported kind: '%s'", kind)
+			err = xerrors.Errorf("unsupported kind: '%s'", kind)
 			return
 		}
 
@@ -115,7 +115,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			err = z.Write(onWrite)
 
 			if err != nil {
-				err = fmt.Errorf("failed to write: %w", err)
+				err = xerrors.Errorf("failed to write: %w", err)
 			}
 
 			return

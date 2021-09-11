@@ -1,13 +1,13 @@
 package printer
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 func MakeAlfredMatches(z *lib.Zettel) string {
@@ -24,7 +24,7 @@ func MakeAlfredMatches(z *lib.Zettel) string {
 	t, err := lib.TimeFromPath(z.Path)
 
 	if err != nil {
-		panic(fmt.Errorf("make alfred match field: %w", err))
+		panic(xerrors.Errorf("make alfred match field: %w", err))
 	}
 
 	addMatch(m.Description)

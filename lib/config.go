@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/friedenberg/z/lib/kasten"
 	"github.com/pelletier/go-toml/v2"
+	"golang.org/x/xerrors"
 )
 
 type ConfigTagForNewZettels struct {
@@ -67,7 +67,7 @@ func LoadConfig(p string) (c Config, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			c = Config{}
-			err = fmt.Errorf("toml unmarshalling paniced: %q", r)
+			err = xerrors.Errorf("toml unmarshalling paniced: %q", r)
 		}
 	}()
 
@@ -120,7 +120,7 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 			//TODO
 			e.DefaultKasten = i
 		} else {
-			err = fmt.Errorf("missing implementation for kasten from config: '%s'", n)
+			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
 			return
 		}
 	}
@@ -129,7 +129,7 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 		if i, ok := e.Kasten[c.DefaultKasten]; ok {
 			e.DefaultKasten = i
 		} else {
-			err = fmt.Errorf(
+			err = xerrors.Errorf(
 				"no kasten matching name '%s' for default",
 				c.DefaultKasten,
 			)

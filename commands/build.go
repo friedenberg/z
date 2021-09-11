@@ -2,7 +2,6 @@ package commands
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"golang.org/x/xerrors"
 )
 
 func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
@@ -21,7 +21,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 				actionErr = symlinkZettel(e, t, z)
 
 				if actionErr != nil {
-					actionErr = fmt.Errorf("symlinking zettel to tag: %w", actionErr)
+					actionErr = xerrors.Errorf("symlinking zettel to tag: %w", actionErr)
 					return
 				}
 			}
@@ -30,7 +30,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 				actionErr = symlinkZettel(e, "untagged", z)
 
 				if actionErr != nil {
-					actionErr = fmt.Errorf("symlinking zettel: %w", actionErr)
+					actionErr = xerrors.Errorf("symlinking zettel: %w", actionErr)
 					return
 				}
 			}
@@ -65,7 +65,7 @@ func symlinkZettel(e lib.Umwelt, dir string, z *lib.Zettel) (err error) {
 	buildDir, err := makeDirectoryIfNecessary(e, dir)
 
 	if err != nil {
-		err = fmt.Errorf("making directory: %s: %w", dir, err)
+		err = xerrors.Errorf("making directory: %s: %w", dir, err)
 		return
 	}
 
@@ -75,14 +75,14 @@ func symlinkZettel(e lib.Umwelt, dir string, z *lib.Zettel) (err error) {
 		// fmt.Println(newFilename)
 
 		if err != nil {
-			return fmt.Errorf("making zettel symlink: %s: %w", originalPath, err)
+			return xerrors.Errorf("making zettel symlink: %s: %w", originalPath, err)
 		}
 
 		symPath := path.Join(buildDir, newFilename)
 		err = syscall.Link(originalPath, symPath)
 
 		if err != nil && !os.IsExist(err) {
-			return fmt.Errorf("linking zettel: %s: %w", symPath, err)
+			return xerrors.Errorf("linking zettel: %s: %w", symPath, err)
 		}
 
 		return nil

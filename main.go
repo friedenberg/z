@@ -11,6 +11,7 @@ import (
 	"github.com/friedenberg/z/commands"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 type subcommand struct {
@@ -62,7 +63,7 @@ func run() int {
 	cmd, ok := subcommands[specifiedSubcommand]
 
 	if !ok {
-		return printUsage(fmt.Errorf("No subcommand '%s'", specifiedSubcommand))
+		return printUsage(xerrors.Errorf("No subcommand '%s'", specifiedSubcommand))
 	}
 
 	var err error

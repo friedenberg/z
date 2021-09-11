@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
+	"golang.org/x/xerrors"
 )
 
 var (
@@ -24,7 +24,7 @@ func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
 		zi, ok := u.Index.Get(id)
 
 		if !ok {
-			return fmt.Errorf("missing zettel in index for id '%s'", path)
+			return xerrors.Errorf("missing zettel in index for id '%s'", path)
 		}
 
 		z.Id = zi.Id

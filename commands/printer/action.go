@@ -1,11 +1,11 @@
 package printer
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 type ActionZettelPrinter struct {
@@ -141,7 +141,7 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("opening zettels ('%q'): %s", p.zettels, output)
+		err = xerrors.Errorf("opening zettels ('%q'): %s", p.zettels, output)
 		return
 	}
 
@@ -172,7 +172,7 @@ func (p *ActionZettelPrinter) openFiles() (err error) {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("opening files ('%q'): %s", p.files, output)
+		err = xerrors.Errorf("opening files ('%q'): %s", p.files, output)
 		return
 	}
 
@@ -200,7 +200,7 @@ func (p *ActionZettelPrinter) openUrls() (err error) {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("opening urls ('%q'): %s", p.urls, output)
+		err = xerrors.Errorf("opening urls ('%q'): %s", p.urls, output)
 		return
 	}
 

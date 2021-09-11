@@ -1,8 +1,9 @@
 package util
 
 import (
-	"fmt"
 	"os/exec"
+
+	"golang.org/x/xerrors"
 )
 
 type Git struct {
@@ -48,7 +49,7 @@ func (g GitFilesToCommit) Add() (err error) {
 	o, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("git add: %w: %s", err, o)
+		err = xerrors.Errorf("git add: %w: %s", err, o)
 		return
 	}
 
@@ -68,7 +69,7 @@ func (g GitFilesToCommit) Commit(msg string) (err error) {
 	o, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("git commit: %w: %s", err, o)
+		err = xerrors.Errorf("git commit: %w: %s", err, o)
 		return
 	}
 

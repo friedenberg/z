@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 func (z *Zettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err error) {
@@ -126,7 +126,7 @@ func AddFileOnWrite(oldPath string) OnZettelWriteFunc {
 		// errOut = cmd.Run()
 
 		if errOut != nil {
-			errOut = fmt.Errorf("cp file: %w", errOut)
+			errOut = xerrors.Errorf("cp file: %w", errOut)
 		}
 
 		return

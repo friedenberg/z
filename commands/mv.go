@@ -2,11 +2,11 @@ package commands
 
 import (
 	"flag"
-	"fmt"
 	"sync"
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"golang.org/x/xerrors"
 )
 
 func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
@@ -76,7 +76,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			}
 
 			if err != nil {
-				err = fmt.Errorf("failed to write: %w", err)
+				err = xerrors.Errorf("failed to write: %w", err)
 				return
 			}
 

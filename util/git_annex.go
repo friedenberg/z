@@ -1,8 +1,6 @@
 package util
 
-import (
-	"fmt"
-)
+import "golang.org/x/xerrors"
 
 type GitAnnex struct {
 	GitFilesToCommit
@@ -20,7 +18,7 @@ func (g GitAnnex) Unlock() (err error) {
 	o, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("git annex unlock: %w: %s", err, o)
+		err = xerrors.Errorf("git annex unlock: %w: %s", err, o)
 		return
 	}
 
@@ -39,7 +37,7 @@ func (g GitAnnex) Lock() (err error) {
 	o, err := cmd.CombinedOutput()
 
 	if err != nil {
-		err = fmt.Errorf("git annex unlock: %w: %s", err, o)
+		err = xerrors.Errorf("git annex unlock: %w: %s", err, o)
 		return
 	}
 

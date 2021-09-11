@@ -1,10 +1,11 @@
 package lib
 
 import (
-	"fmt"
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"golang.org/x/xerrors"
 )
 
 func TimeFromPath(path string) (t time.Time, err error) {
@@ -15,7 +16,7 @@ func TimeFromPath(path string) (t time.Time, err error) {
 	i, err := strconv.ParseInt(base, 10, 64)
 
 	if err != nil {
-		err = fmt.Errorf("time from path: %w", err)
+		err = xerrors.Errorf("time from path: %w", err)
 		return
 	}
 
@@ -28,7 +29,7 @@ func ZettelIdFromPath(path string) (zi string, err error) {
 	t, err := TimeFromPath(path)
 
 	if err != nil {
-		err = fmt.Errorf("zettel id from path: %w", err)
+		err = xerrors.Errorf("zettel id from path: %w", err)
 		return
 	}
 

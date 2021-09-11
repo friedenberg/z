@@ -1,6 +1,6 @@
 package kasten
 
-import "fmt"
+import "golang.org/x/xerrors"
 
 type TRegistry map[string]Implementation
 
@@ -14,7 +14,7 @@ func init() {
 
 func (r TRegistry) Register(n string, i Implementation) (err error) {
 	if _, ok := map[string]Implementation(r)[n]; ok {
-		err = fmt.Errorf("Multiple implementations with name: '%s'", n)
+		err = xerrors.Errorf("Multiple implementations with name: '%s'", n)
 		return
 	}
 
