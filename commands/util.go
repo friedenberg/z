@@ -20,7 +20,7 @@ func hydrateIndex(k lib.Umwelt) (err error) {
 		&printer.NullZettelPrinter{},
 	)
 
-	// indexProcessor.hydrator = HydrateFromIndexFunc(k)
+	indexProcessor.hydrator = HydrateFromFileFunc(k, true)
 
 	indexProcessor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
 		err = k.Index.Add(z)

@@ -112,10 +112,13 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 			p,
 		)
 
+		//TODO if cache, use ID arg normalizer
+		//TODO if file, use file arg normalizer
 		if e.Config.UseIndexCache {
 			processor.hydrator = HydrateFromIndexFunc(e)
 		} else {
-			processor.hydrator = HydrateFromFileFunc(e)
+			//TODO determine if body is necessary based on type
+			processor.hydrator = HydrateFromFileFunc(e, true)
 		}
 
 		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {

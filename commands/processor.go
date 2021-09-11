@@ -50,7 +50,7 @@ func (p *Processor) init() (err error) {
 		if p.kasten.Config.UseIndexCache {
 			p.hydrator = HydrateFromIndexFunc(p.kasten)
 		} else {
-			p.hydrator = HydrateFromFileFunc(p.kasten)
+			p.hydrator = HydrateFromFileFunc(p.kasten, false)
 		}
 	}
 

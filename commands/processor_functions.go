@@ -35,9 +35,9 @@ func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
 	}
 }
 
-func HydrateFromFileFunc(u lib.Umwelt) HydrateFunc {
+func HydrateFromFileFunc(u lib.Umwelt, includeBody bool) HydrateFunc {
 	return func(_ int, z *lib.Zettel, path string) error {
 		z.Path = path
-		return z.Hydrate(true)
+		return z.Hydrate(includeBody)
 	}
 }
