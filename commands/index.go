@@ -15,10 +15,6 @@ func GetSubcommandIndex(f *flag.FlagSet) CommandRunFunc {
 			return
 		}
 
-		if err != nil {
-			return
-		}
-
 		err = e.CacheIndex()
 
 		if err != nil {

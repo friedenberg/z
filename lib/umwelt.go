@@ -80,13 +80,13 @@ func (u Umwelt) LoadIndexFromCache() (err error) {
 }
 
 func (e Umwelt) CacheIndex() (err error) {
-	f, err := os.Create(e.GetIndexPath())
+	f, err := util.OpenFilesGuardInstance.Create((e.GetIndexPath()))
+	defer util.OpenFilesGuardInstance.Close(f)
 
 	if err != nil {
 		return
 	}
 
-	defer util.OpenFilesGuardInstance.Close(f)
 
 	err = e.Index.Write(f)
 
