@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
 )
 
 type multiplexPrintLine struct {
@@ -13,7 +14,7 @@ type multiplexPrintLine struct {
 }
 
 type MultiplexingZettelPrinter struct {
-	Printer   ZettelPrinter
+	Printer   pipeline.Printer
 	channel   chan multiplexPrintLine
 	waitGroup *sync.WaitGroup
 }

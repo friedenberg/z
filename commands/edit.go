@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/util"
 )
 
@@ -16,30 +17,41 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	return func(e lib.Umwelt) (err error) {
-		processor := MakeProcessor(
-			e,
-			f.Args(),
-			&printer.MultiplexingZettelPrinter{
+		fp := pipeline.FilterPrinter{
+			Filter: MatchQuery(query),
+			Printer: &printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
 					Umwelt:  e,
 					Actions: editActions,
 				},
 			},
-		)
-
-		processor.argNormalizer = func(_ int, p string) (normalizedArg string, err error) {
-			b := util.BaseNameNoSuffix(p)
-			p = b + ".md"
-			normalizedArg, err = e.FilesAndGit().GetNormalizedPath(p)
-			return
 		}
 
-		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
-			shouldPrint = doesZettelMatchQuery(z, query)
-			return
+		args := f.Args()
+		var iter util.ParallelizerIterFunc
+
+		if e.Config.UseIndexCache {
+			if len(args) == 0 {
+				args = e.GetAll()
+			}
+
+			iter = cachedIteration(e, query, fp)
+		} else {
+			if len(args) == 0 {
+				args, err = e.FilesAndGit().GetAll()
+
+				if err != nil {
+					return
+				}
+			}
+
+			iter = filesystemIteration(e, query, fp)
 		}
 
-		err = processor.Run()
+		par := util.Parallelizer{Args: args}
+		fp.Printer.Begin()
+		defer fp.Printer.End()
+		par.Run(iter, errIterartion(fp.Printer))
 
 		return
 	}

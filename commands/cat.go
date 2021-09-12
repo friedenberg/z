@@ -12,10 +12,7 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-type outputFormat struct {
-	printer printer.ZettelPrinter
-	filter  func(int, *lib.Zettel) bool
-}
+type outputFormat pipeline.FilterPrinter
 
 var (
 	outputFormats    map[string]outputFormat
@@ -25,35 +22,31 @@ var (
 func init() {
 	outputFormats = map[string]outputFormat{
 		"alfred-json": outputFormat{
-			printer: &printer.AlfredJsonZettelPrinter{},
+			Printer: &printer.AlfredJsonZettelPrinter{},
 		},
 		"alfred-json-files": outputFormat{
-			printer: &printer.AlfredJsonZettelPrinter{
-				ItemFunc: printer.AlfredItemsFromZettelFiles,
-			},
-			filter: func(i int, z *lib.Zettel) bool {
+			Filter: func(i int, z *lib.Zettel) bool {
 				return z.HasFile()
+			},
+			Printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelFiles,
 			},
 		},
 		"alfred-json-urls": outputFormat{
-			printer: &printer.AlfredJsonZettelPrinter{
-				ItemFunc: printer.AlfredItemsFromZettelUrls,
-			},
-			filter: func(i int, z *lib.Zettel) bool {
+			Filter: func(i int, z *lib.Zettel) bool {
 				return z.HasUrl()
+			},
+			Printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelUrls,
 			},
 		},
 		"alfred-json-all": outputFormat{
-			printer: &printer.AlfredJsonZettelPrinter{
+			Printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelAll,
 			},
 		},
 		"alfred-json-snippets": outputFormat{
-			//TODO
-			printer: &printer.AlfredJsonZettelPrinter{
-				ItemFunc: printer.AlfredItemsFromZettelSnippets,
-			},
-			filter: func(i int, z *lib.Zettel) bool {
+			Filter: func(i int, z *lib.Zettel) bool {
 				for _, t := range z.Metadata.Tags {
 					if strings.Contains(t, "t-snippet") {
 						return true
@@ -62,21 +55,25 @@ func init() {
 
 				return false
 			},
+			//TODO
+			Printer: &printer.AlfredJsonZettelPrinter{
+				ItemFunc: printer.AlfredItemsFromZettelSnippets,
+			},
 		},
 		"metadata-json": outputFormat{
-			printer: &printer.JsonZettelPrinter{},
+			Printer: &printer.JsonZettelPrinter{},
 		},
 		"alfred-tags": outputFormat{
-			printer: &printer.Tags{},
+			Printer: &printer.Tags{},
 		},
 		"alfred-expanded-tags": outputFormat{
-			printer: &printer.Tags{ShouldExpand: true},
+			Printer: &printer.Tags{ShouldExpand: true},
 		},
 		"full": outputFormat{
-			printer: &printer.FullZettelPrinter{},
+			Printer: &printer.FullZettelPrinter{},
 		},
 		"filename": outputFormat{
-			printer: &printer.FilenameZettelPrinter{},
+			Printer: &printer.FilenameZettelPrinter{},
 		},
 	}
 
@@ -98,18 +95,18 @@ func (a *outputFormat) Set(s string) (err error) {
 	} else {
 		if s == "" {
 			*a = outputFormat{
-				printer: &printer.FullZettelPrinter{},
+				Printer: &printer.FullZettelPrinter{},
 			}
 		} else {
 			*a = outputFormat{
-				printer: &printer.FormatZettelPrinter{
+				Printer: &printer.FormatZettelPrinter{
 					Formatter: lib.MakePrintfFormatter(s),
 				},
 			}
 		}
 	}
 
-	a.printer = &printer.MultiplexingZettelPrinter{Printer: a.printer}
+	a.Printer = &printer.MultiplexingZettelPrinter{Printer: a.Printer}
 
 	return
 }
@@ -129,7 +126,7 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 				args = e.GetAll()
 			}
 
-			iter = cachedIteration(e, query, of)
+			iter = cachedIteration(e, query, pipeline.FilterPrinter(of))
 		} else {
 			if len(args) == 0 {
 				args, err = e.FilesAndGit().GetAll()
@@ -139,60 +136,14 @@ func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
 				}
 			}
 
-			iter = filesystemIteration(e, query, of)
+			iter = filesystemIteration(e, query, pipeline.FilterPrinter(of))
 		}
 
 		par := util.Parallelizer{Args: args}
-		of.printer.Begin()
-		defer of.printer.End()
-		par.Run(iter, errIterartion(of))
+		of.Printer.Begin()
+		defer of.Printer.End()
+		par.Run(iter, errIterartion(of.Printer))
 
 		return
-	}
-}
-
-func printIfNecessary(u lib.Umwelt, i int, z *lib.Zettel, q string, o outputFormat) {
-	if (o.filter == nil || o.filter(i, z)) && doesZettelMatchQuery(z, q) {
-		o.printer.PrintZettel(i, z, nil)
-	}
-}
-
-func cachedIteration(u lib.Umwelt, q string, o outputFormat) util.ParallelizerIterFunc {
-	return func(i int, s string) (err error) {
-		z, err := pipeline.HydrateFromIndex(u, s)
-
-		if err != nil {
-			return
-		}
-
-		printIfNecessary(u, i, z, q, o)
-
-		return
-	}
-}
-
-func filesystemIteration(u lib.Umwelt, q string, o outputFormat) util.ParallelizerIterFunc {
-	return func(i int, s string) (err error) {
-		p, err := pipeline.NormalizePath(u, s)
-
-		if err != nil {
-			return
-		}
-		//TODO determine if body read is necessary
-		z, err := pipeline.HydrateFromFile(u, p, true)
-
-		if err != nil {
-			return
-		}
-
-		printIfNecessary(u, i, z, q, o)
-
-		return
-	}
-}
-
-func errIterartion(o outputFormat) util.ParallelizerErrorFunc {
-	return func(i int, s string, err error) {
-		o.printer.PrintZettel(i, nil, err)
 	}
 }

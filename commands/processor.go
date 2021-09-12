@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
@@ -20,10 +21,10 @@ type Processor struct {
 	argNormalizer ArgNormalizeFunc
 	hydrator      HydrateFunc
 	actioner      ActionFunc
-	printer       printer.ZettelPrinter
+	printer       pipeline.Printer
 }
 
-func MakeProcessor(e lib.Umwelt, files []string, zp printer.ZettelPrinter) (processor *Processor) {
+func MakeProcessor(e lib.Umwelt, files []string, zp pipeline.Printer) (processor *Processor) {
 	processor = &Processor{
 		kasten:  e,
 		files:   files,
@@ -67,7 +68,7 @@ func (p *Processor) getDefaultFiles() (files []string, err error) {
 	return
 }
 
-func (p *Processor) SetPrinter(printer printer.ZettelPrinter) {
+func (p *Processor) SetPrinter(printer pipeline.Printer) {
 	p.printer = printer
 }
 

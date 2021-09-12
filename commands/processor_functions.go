@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
 	"golang.org/x/xerrors"
 )
 
@@ -33,5 +34,11 @@ func HydrateFromFileFunc(u lib.Umwelt, includeBody bool) HydrateFunc {
 	return func(_ int, z *lib.Zettel, path string) error {
 		z.Path = path
 		return z.Hydrate(includeBody)
+	}
+}
+
+func MatchQuery(q string) pipeline.Filter {
+	return func(i int, z *lib.Zettel) bool {
+		return doesZettelMatchQuery(z, q)
 	}
 }
