@@ -53,3 +53,26 @@ func uniqueAndSortTags(tags []string) (o []string) {
 
 	return
 }
+
+//TODO refactor
+func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
+	if q == "" {
+		return true
+	}
+
+	if z.Metadata.File == q {
+		return true
+	}
+
+	if z.Metadata.Url == q {
+		return true
+	}
+
+	for _, t := range z.Metadata.ExpandedTags {
+		if t == q {
+			return true
+		}
+	}
+
+	return false
+}
