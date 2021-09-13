@@ -88,7 +88,6 @@ func (e Umwelt) CacheIndex() (err error) {
 		return
 	}
 
-
 	err = e.Index.Write(f)
 
 	if err != nil {

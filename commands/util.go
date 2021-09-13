@@ -93,6 +93,7 @@ func printIfNecessary(i int, z *lib.Zettel, q string, fp pipeline.FilterPrinter)
 
 func cachedIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util.ParallelizerIterFunc {
 	return func(i int, s string) (err error) {
+		s = util.BaseNameNoSuffix(s)
 		z, err := pipeline.HydrateFromIndex(u, s)
 
 		if err != nil {
@@ -108,6 +109,7 @@ func cachedIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util.Par
 func filesystemIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util.ParallelizerIterFunc {
 	return func(i int, s string) (err error) {
 		p, err := pipeline.NormalizePath(u, s)
+		p = util.EverythingExceptExtension(p) + ".md"
 
 		if err != nil {
 			return
