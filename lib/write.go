@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
@@ -34,8 +34,8 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		return
 	}
 
-	f, err := util.OpenFilesGuardInstance.OpenFile(z.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-	defer util.OpenFilesGuardInstance.Close(f)
+	f, err := files_guard.OpenFile(z.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	defer files_guard.Close(f)
 
 	if err != nil {
 		err = xerrors.Errorf("opening zettel file: %w", err)

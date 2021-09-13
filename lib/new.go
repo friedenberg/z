@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
 )
 
@@ -105,7 +106,7 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 		chromeCommand.Start()
 		pandocCommand.Start()
 		chromeCommand.Wait()
-		util.OpenFilesGuardInstance.Close(w)
+		files_guard.Close(w)
 		pandocCommand.Wait()
 
 		z.Body = md.String()

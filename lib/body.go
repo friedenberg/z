@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"bytes"
 
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/files_guard"
 )
 
 func (zettel *Zettel) ReadMetadataAndBody() (err error) {
-	f, err := util.OpenFilesGuardInstance.Open(zettel.Path)
-	defer util.OpenFilesGuardInstance.Close(f)
+	f, err := files_guard.Open(zettel.Path)
+	defer files_guard.Close(f)
 
 	if err != nil {
 		return

@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/friedenberg/z/lib/kasten"
+	"github.com/friedenberg/z/util/files_guard"
 )
 
 type Umwelt struct {
@@ -58,8 +59,8 @@ func (u Umwelt) GetAll() (files []string) {
 }
 
 func (u Umwelt) LoadIndexFromCache() (err error) {
-	f, err := util.OpenFilesGuardInstance.Open(u.GetIndexPath())
-	defer util.OpenFilesGuardInstance.Close(f)
+	f, err := files_guard.Open(u.GetIndexPath())
+	defer files_guard.Close(f)
 
 	if err != nil && os.IsNotExist(err) {
 		err = nil
@@ -80,8 +81,8 @@ func (u Umwelt) LoadIndexFromCache() (err error) {
 }
 
 func (e Umwelt) CacheIndex() (err error) {
-	f, err := util.OpenFilesGuardInstance.Create((e.GetIndexPath()))
-	defer util.OpenFilesGuardInstance.Close(f)
+	f, err := files_guard.Create((e.GetIndexPath()))
+	defer files_guard.Close(f)
 
 	if err != nil {
 		return

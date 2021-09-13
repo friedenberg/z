@@ -7,7 +7,7 @@ import (
 	"path"
 
 	"github.com/friedenberg/z/lib/kasten"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/files_guard"
 	"github.com/pelletier/go-toml/v2"
 	"golang.org/x/xerrors"
 )
@@ -55,8 +55,8 @@ func DefaultConfigPath() (p string, err error) {
 }
 
 func LoadConfig(p string) (c Config, err error) {
-	f, err := util.OpenFilesGuardInstance.Open(p)
-	defer util.OpenFilesGuardInstance.Close(f)
+	f, err := files_guard.Open(p)
+	defer files_guard.Close(f)
 
 	if err != nil {
 		return
