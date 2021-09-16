@@ -1,59 +1,51 @@
 package lib
 
 import (
-	"path"
-	"strconv"
+	"bufio"
+	"io"
 	"strings"
-
-	"golang.org/x/xerrors"
 )
 
-func (z *Zettel) Hydrate(readBody bool) (err error) {
-	id := strings.TrimSuffix(path.Base(z.Path), path.Ext(z.Path))
-	idInt, err := strconv.ParseInt(id, 10, 64)
+const (
+	MetadataStartSequence = "---\n"
+	MetadataEndSequence   = "...\n"
+)
 
-	if err != nil {
-		err = xerrors.Errorf("extracting id from filename: %w", err)
-		return
+func (z *Zettel) ReadFrom(r1 io.Reader, includeBody bool) (err error) {
+	r := bufio.NewReader(r1)
+	sb := strings.Builder{}
+	within := false
+
+	for {
+		var s string
+		s, err = r.ReadString('\n')
+
+		if err == io.EOF {
+			err = nil
+			break
+		}
+
+		if err != nil {
+			return
+		}
+
+		if !within && s == MetadataStartSequence {
+			within = true
+		} else if within && s == MetadataEndSequence {
+			err = z.Metadata.Set(sb.String())
+
+			if err != nil || !includeBody {
+				return
+			}
+
+			sb.Reset()
+			within = false
+		} else {
+			sb.WriteString(s)
+		}
 	}
 
-	z.Id = idInt
-
-	if readBody {
-		err = z.ReadMetadataAndBody()
-	} else {
-		err = z.ReadMetadata()
-	}
-
-	if err != nil {
-		err = xerrors.Errorf("reading metadata: %w", err)
-		return
-	}
-
-	err = z.ParseMetadata()
-
-	if err != nil {
-		err = xerrors.Errorf("reading parsing: %w", err)
-		return
-	}
+	z.Note.Body = strings.TrimSpace(sb.String())
 
 	return
 }
-
-// func (z *Zettel) GenerateAlfredItemData(f AlfredItemFormat) (err error) {
-// 	err = z.AddAlfredItem(f)
-
-// 	if err != nil {
-// 		err = fmt.Errorf("adding alfred item: %w", err)
-// 		return
-// 	}
-
-// 	err = z.GenerateAlfredJson()
-
-// 	if err != nil {
-// 		err = fmt.Errorf("generating alfred json: %w", err)
-// 		return
-// 	}
-
-// 	return
-// }

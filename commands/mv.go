@@ -2,111 +2,25 @@ package commands
 
 import (
 	"flag"
-	"sync"
 
-	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
-	"golang.org/x/xerrors"
 )
 
-func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
+func init() {
+	makeAndRegisterCommand(
+		"mv",
+		GetSubcommandMv,
+	)
+}
+
+func GetSubcommandMv(f *flag.FlagSet) lib.Transactor {
 	isDryRun := false
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e lib.Umwelt) (err error) {
-		args := f.Args()
-
-		fromMoveInstruction, err := moveInstructionFromString(args[0])
-		if err != nil {
-			return
-		}
-
-		toMoveInstruction, err := moveInstructionFromString(args[1])
-
-		if err != nil {
-			return
-		}
-
-		gitPrinter := &printer.GitPrinter{
-			Mutex:            &sync.Mutex{},
-			GitCommitMessage: "mv",
-			Umwelt:           e,
-		}
-
-		gitPrinter.SetShouldCommit()
-
-		processor := MakeProcessor(
-			e,
-			args[2:],
-			gitPrinter,
-		)
-
-		processor.hydrator = func(_ int, z *lib.Zettel, path string) (err error) {
-			z.Path = path
-			return z.Hydrate(true)
-		}
-
-		processor.actioner = func(_ int, z *lib.Zettel) (shouldPrint bool, err error) {
-			shouldPrint = true
-			found := -1
-			values := fromMoveInstruction.fieldReadWriter.ValueGetFunc(z)
-
-			for i, v := range values {
-				if v == fromMoveInstruction.value {
-					found = i
-					break
-				}
-			}
-
-			if found < 0 {
-				shouldPrint = false
-				return
-			}
-
-			values = append(values[:found], values[found+1:]...)
-			fromMoveInstruction.fieldReadWriter.ValueSetFunc(z, values)
-
-			values = toMoveInstruction.fieldReadWriter.ValueGetFunc(z)
-			values = append(values, toMoveInstruction.value)
-			toMoveInstruction.fieldReadWriter.ValueSetFunc(z, values)
-
-			if !isDryRun {
-				err = z.Write(func(_ *lib.Zettel, _ error) error { return nil })
-			}
-
-			if err != nil {
-				err = xerrors.Errorf("failed to write: %w", err)
-				return
-			}
-
-			return
-		}
-
-		err = processor.Run()
+	return func(u lib.Umwelt) (err error) {
+		//TODO
 
 		return
 	}
-}
-
-type moveInstruction struct {
-	fieldReadWriter lib.MetadataFieldReadWriterArray
-	value           string
-}
-
-func moveInstructionFromString(s string) (m moveInstruction, err error) {
-	if s == "" {
-		m = moveInstruction{
-			fieldReadWriter: lib.GetMetadataFieldReadWriterNull(),
-		}
-
-		return
-	}
-
-	m = moveInstruction{
-		value:           s,
-		fieldReadWriter: lib.GetMetadataFieldReadWriterTags(),
-	}
-
-	return
 }

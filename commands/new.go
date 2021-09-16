@@ -1,122 +1,75 @@
 package commands
 
 import (
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
-	"time"
+	"strings"
 
-	"github.com/friedenberg/z/commands/printer"
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
-	"golang.org/x/xerrors"
+	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/pipeline/modifier"
+	"github.com/friedenberg/z/lib/pipeline/reader"
 )
 
-func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
-	var metadata_json, content, urlToAdd, filePathToAdd string
-	editActions := printer.Actions(printer.ActionEdit)
+func init() {
+	makeAndRegisterCommand(
+		"new",
+		GetSubcommandNew,
+	)
+}
+
+func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
+	var tags, content string
+	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
-	//TODO convert to action
-	f.StringVar(&urlToAdd, "with-url", "", "include the passed-in URL in the zettel")
-	f.StringVar(&filePathToAdd, "with-file", "", "move the passed-in file into zettel control")
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
-	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
+	f.StringVar(&tags, "tags", "", "use the passed-in space-separated string as tags")
 
-	return func(e lib.Umwelt) (err error) {
-		currentTime := time.Now()
+	return func(u lib.Umwelt) (err error) {
+		p := pipeline.Pipeline{
+			Arguments: []string{""},
+			Reader:    reader.New(),
+			Modifier: modifier.Chain(
+				modifier.Make(
+					func(i int, z *lib.Zettel) (err error) {
+						if tags != "" {
+							z.Note.Metadata.SetStringTags(strings.Split(tags, " "))
+						}
 
-		z := &lib.Zettel{Umwelt: e}
-		z.InitFromTime(currentTime)
+						if content == "-" {
+							var b []byte
+							b, err = ioutil.ReadAll(os.Stdin)
 
-		for {
-			if util.FileExists(z.Path) {
-				d, err := time.ParseDuration("1s")
+							if err != nil {
+								return
+							}
 
-				if err != nil {
-					panic(err)
-				}
+							z.Body = "\n" + string(b)
+						} else {
+							z.Body = content
+						}
 
-				currentTime = currentTime.Add(d)
-				z.InitFromTime(currentTime)
-			} else {
-				break
-			}
+						return
+					},
+				),
+				modifier.Make(
+					func(i int, z *lib.Zettel) (err error) {
+						err = z.Write(nil)
+						return
+					},
+				),
+				&modifier.Action{
+					Umwelt:  u,
+					Actions: editActions,
+				},
+				u.Add,
+			),
 		}
 
-		if err != nil {
-			return
-		}
-
-		if urlToAdd != "" {
-			err = lib.AddUrlOnWrite(urlToAdd, currentTime)(z, nil)
-
-			if err != nil {
-				return
-			}
-		}
-
-		if filePathToAdd != "" {
-			err = lib.AddFileOnWrite(filePathToAdd)(z, nil)
-
-			if err != nil {
-				return
-			}
-
-			if err != nil {
-				return
-			}
-		}
-
-		if metadata_json != "" {
-			err = json.Unmarshal([]byte(metadata_json), &z.Metadata)
-
-			if err != nil {
-				err = xerrors.Errorf("parsing metadata json: %w", err)
-				return
-			}
-		}
-
-		z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
-
-		if content == "-" {
-			var b []byte
-			b, err = ioutil.ReadAll(os.Stdin)
-
-			if err != nil {
-				return
-			}
-
-			z.Body = "\n" + string(b)
-		} else {
-			z.Body = content
-		}
-
-		err = z.Write(func(z *lib.Zettel, errIn error) (errOut error) {
-			if errIn != nil {
-				if z.HasFile() {
-					errOut = os.Remove(z.FilePath())
-				}
-
-				return
-			}
-
-			return
-		})
-
-		if err != nil {
-			return
-		}
-
-		actionPrinter := printer.ActionZettelPrinter{
-			Actions: editActions,
-			Umwelt:  e,
-		}
-
-		actionPrinter.Begin()
-		actionPrinter.PrintZettel(0, z, nil)
-		actionPrinter.End()
+		p.Run(u)
 
 		return
 	}

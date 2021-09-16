@@ -2,57 +2,56 @@ package lib
 
 import (
 	"os"
-	"os/user"
 	"path"
 
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/util/files_guard"
 )
 
 type Umwelt struct {
-	DefaultKasten kasten.Implementation
-	Kasten        map[string]kasten.Implementation
-	Index         Index
-	BasePath      string
-	Config        Config
+	Kasten            Kasten
+	Index             *Index
+	BasePath          string
+	Config            Config
+	TagsForNewZettels []string
+	Transaction
 }
 
 func MakeUmwelt(c Config) (k Umwelt, err error) {
 	k.Config = c
 
-	usr, err := user.Current()
+	wd, err := os.Getwd()
 
 	if err != nil {
 		return
 	}
 
-	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
+	k.BasePath = wd
 	k.Index = MakeIndex()
 
-	if c.UseIndexCache {
-		err = k.LoadIndexFromCache()
+	//find all caches
+	//remove any older-version caches
+	//try to load from correct version cache
+	//or exit if it doesn't exist
+	err = k.LoadIndexFromCache()
 
-		if err != nil && !os.IsNotExist(err) {
-			return
-		}
+	if err != nil && !os.IsNotExist(err) {
+		return
 	}
 
-	return
-}
+	k.Transaction = MakeTransaction()
 
-func (u Umwelt) FilesAndGit() *FilesAndGit {
-	return u.DefaultKasten.(*FilesAndGit)
+	return
 }
 
 func (e Umwelt) GetIndexPath() string {
 	return path.Join(e.BasePath, ".zettel-cache")
 }
 
-func (u Umwelt) GetAll() (files []string) {
-	files = make([]string, 0, len(u.Index.Zettels))
+func (u Umwelt) GetAll() (ids []string) {
+	ids = make([]string, 0, len(u.Index.Zettels))
 
-	for f, _ := range u.Index.Zettels {
-		files = append(files, f)
+	for id, _ := range u.Index.Zettels {
+		ids = append(ids, id.String())
 	}
 
 	return
@@ -80,6 +79,7 @@ func (u Umwelt) LoadIndexFromCache() (err error) {
 	return
 }
 
+//TODO-P2 add lock like git: git add: exit status 128: fatal: Unable to create '/Users/sasha/Zettelkasten/.git/index.lock': File exists.
 func (e Umwelt) CacheIndex() (err error) {
 	f, err := files_guard.Create((e.GetIndexPath()))
 	defer files_guard.Close(f)

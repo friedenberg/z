@@ -2,36 +2,34 @@ package commands
 
 import (
 	"flag"
-	"os"
 
-	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
+	"golang.org/x/xerrors"
 )
 
-func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
-	return func(e lib.Umwelt) (err error) {
-		processor := MakeProcessor(
-			e,
-			f.Args(),
-			&printer.NullZettelPrinter{},
-		)
+func init() {
+	makeAndRegisterCommand(
+		"rm",
+		GetSubcommandRm,
+	)
+}
 
-		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
-			shouldPrint = true
-			actionErr = os.Remove(z.Path)
+func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
+	return func(u lib.Umwelt) (err error) {
+		args := f.Args()
 
-			if actionErr != nil {
-				return
-			}
-
-			if z.HasFile() {
-				actionErr = os.Remove(z.FilePath())
-			}
-
+		if len(args) == 0 {
+			err = xerrors.Errorf("no zettels included for deletion")
 			return
 		}
 
-		err = processor.Run()
+		p := pipeline.Pipeline{
+			Arguments: args,
+			Modifier:  u.Del,
+		}
+
+		p.Run(u)
 
 		return
 	}

@@ -2,126 +2,77 @@ package commands
 
 import (
 	"flag"
-	"path"
-	"strconv"
 	"strings"
-	"time"
 
-	"github.com/friedenberg/z/commands/printer"
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
-	"golang.org/x/xerrors"
+	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/pipeline/modifier"
 )
 
-func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
-	var tagString, kind string
-	editActions := printer.Actions(printer.ActionEdit)
+func init() {
+	makeAndRegisterCommand(
+		"add",
+		GetSubcommandAdd,
+	)
+}
+
+func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
+	var tagString string
+	var description string
+	var kind attachmentKind
+	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	f.StringVar(&tagString, "tags", "", "parse the passed-in string as the metadata.")
-	f.StringVar(&kind, "kind", "", "treat the positional arguments as this kind.")
+	f.StringVar(&description, "description", "", "use this string as the zettel description")
+	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
-	return func(e lib.Umwelt) (err error) {
-		currentTime := time.Now()
+	return func(u lib.Umwelt) (err error) {
+		p := pipeline.Pipeline{
+			Arguments: f.Args(),
+			Reader:    kind,
+			Modifier: modifier.Chain(
+				modifier.Make(
+					func(i int, z *lib.Zettel) (err error) {
+						tags := strings.Split(tagString, " ")
+						z.Metadata.AddStringTags(tags...)
 
-		bootstrapZettel := func(i int, z *lib.Zettel, p string) (err error) {
-			if z.Id == 0 {
-				err = z.InitAndAssignUniqueId(currentTime, i)
+						if description != "" {
+							z.Metadata.SetDescription(description)
+						}
 
-				if err != nil {
-					panic(err)
-				}
-			}
-
-			return
+						return
+					},
+				),
+				u.Add,
+			),
 		}
 
-		var add func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc
-		var hydrator func(i int, z *lib.Zettel, p string) (err error)
+		p.Run(u)
 
-		switch kind {
-		case "files":
-			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-				z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
-				return lib.AddFileOnWrite(p)
-			}
-			hydrator = bootstrapZettel
-		case "urls":
-			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-				//TODO normalize
-				z.Metadata.Url = p
-				return lib.AddUrlOnWrite(p, t)
-			}
-			hydrator = func(i int, z *lib.Zettel, p string) (err error) {
-				indexItems := e.Index.ZettelsForUrl(p)
+		added := u.Added().Paths()
 
-				if len(indexItems) > 1 {
-					err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", indexItems, p)
-					return
-				}
-
-				if len(indexItems) == 1 {
-					e.Index.HydrateZettel(z, indexItems[0])
-				}
-
-				err = bootstrapZettel(i, z, p)
-				return
-			}
-		default:
-			err = xerrors.Errorf("unsupported kind: '%s'", kind)
-			return
-		}
-
-		err = hydrateIndex(e)
+		err = u.RunTransaction(nil)
 
 		if err != nil {
 			return
 		}
 
-		processor := MakeProcessor(
-			e,
-			f.Args(),
-			&printer.MultiplexingZettelPrinter{
-				Printer: &printer.ActionZettelPrinter{
-					Umwelt:  e,
-					Actions: editActions,
-				},
+		//TODO-P4 check why this is re-using added zettels rather than modifying new
+		//ones
+		u.Transaction = lib.MakeTransaction()
+
+		p = pipeline.Pipeline{
+			Arguments: added,
+			Modifier: &modifier.Action{
+				Umwelt:  u,
+				Actions: editActions,
 			},
-		)
-
-		processor.argNormalizer = func(i int, arg string) (normalizedArg string, err error) {
-			normalizedArg = arg
-			return
 		}
 
-		processor.hydrator = func(i int, z *lib.Zettel, p string) (err error) {
-			err = hydrator(i, z, p)
-
-			if err != nil {
-				return
-			}
-
-			if tagString != "" {
-				tags := strings.Split(tagString, " ")
-				z.Metadata.Tags = append(z.Metadata.Tags, tags...)
-			} else {
-				z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
-			}
-
-			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
-
-			onWrite := add(z, currentTime, p)
-
-			err = z.Write(onWrite)
-
-			if err != nil {
-				err = xerrors.Errorf("failed to write: %w", err)
-			}
-
-			return
-		}
-
-		err = processor.Run()
+		p.Run(u)
 
 		return
 	}

@@ -4,22 +4,35 @@ import (
 	"flag"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/pipeline/reader"
 )
 
-func GetSubcommandIndex(f *flag.FlagSet) CommandRunFunc {
-	return func(e lib.Umwelt) (err error) {
-		e.Index = lib.MakeIndex()
-		err = hydrateIndex(e)
+func init() {
+	makeAndRegisterCommand(
+		"index",
+		GetSubcommandIndex,
+	)
+}
+
+func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
+	return func(u lib.Umwelt) (err error) {
+		u.ShouldSkipCommit = true
+		u.Index = lib.MakeIndex()
+
+		args, err := u.Kasten.GetAll()
 
 		if err != nil {
 			return
 		}
 
-		err = e.CacheIndex()
-
-		if err != nil {
-			return
+		p := pipeline.Pipeline{
+			Arguments: args,
+			Reader:    reader.FromFile(true),
+			Modifier:  u.Add,
 		}
+
+		p.Run(u)
 
 		return
 	}

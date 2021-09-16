@@ -3,55 +3,48 @@ package commands
 import (
 	"flag"
 
-	"github.com/friedenberg/z/commands/printer"
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/lib/pipeline/filter"
+	"github.com/friedenberg/z/lib/pipeline/modifier"
 )
 
-func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
+func init() {
+	makeAndRegisterCommand(
+		"edit",
+		GetSubcommandEdit,
+	)
+}
+
+func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 	var query string
-	editActions := printer.Actions(printer.ActionEdit)
+	editActions := options.Actions(options.ActionEdit)
 
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
-	return func(e lib.Umwelt) (err error) {
-		fp := pipeline.FilterPrinter{
-			Filter: MatchQuery(query),
-			Printer: &printer.MultiplexingZettelPrinter{
-				Printer: &printer.ActionZettelPrinter{
-					Umwelt:  e,
+	return func(u lib.Umwelt) (err error) {
+		args := f.Args()
+
+		if len(args) == 0 {
+			//TODO-P3 does it make sense to edit all zettels on no args?
+			args = u.GetAll()
+		}
+
+		p := pipeline.Pipeline{
+			Arguments: args,
+			Filter:    filter.MatchQuery(query),
+			Modifier: modifier.Chain(
+				&modifier.Action{
+					Umwelt:  u,
 					Actions: editActions,
 				},
-			},
+				u.Mod,
+			),
 		}
 
-		args := f.Args()
-		var iter util.ParallelizerIterFunc
-
-		if e.Config.UseIndexCache {
-			if len(args) == 0 {
-				args = e.GetAll()
-			}
-
-			iter = cachedIteration(e, query, fp)
-		} else {
-			if len(args) == 0 {
-				args, err = e.FilesAndGit().GetAll()
-
-				if err != nil {
-					return
-				}
-			}
-
-			iter = filesystemIteration(e, query, fp)
-		}
-
-		par := util.Parallelizer{Args: args}
-		fp.Printer.Begin()
-		defer fp.Printer.End()
-		par.Run(iter, errIterartion(fp.Printer))
+		p.Run(u)
 
 		return
 	}

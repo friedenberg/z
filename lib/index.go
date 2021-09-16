@@ -1,58 +1,26 @@
 package lib
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"io"
-	"strconv"
 	"sync"
 
+	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"golang.org/x/xerrors"
 )
 
 type IndexZettel struct {
 	Path     string
 	Id       int64
-	Metadata Metadata
-	Body     string
+	Metadata metadata.Metadata
+	//TODO-P2 remove
+	Body string
 }
 
-type ZettelIdMap struct {
-	IdMap map[string][]int64
-}
-
-func MakeZettelIdMap() ZettelIdMap {
-	return ZettelIdMap{
-		IdMap: make(map[string][]int64),
-	}
-}
-
-func (m ZettelIdMap) Get(k string, l sync.Locker) ([]int64, bool) {
-	l.Lock()
-	defer l.Unlock()
-	a, ok := m.IdMap[k]
-	return a, ok
-}
-
-func (m ZettelIdMap) Set(k string, ids []int64, l sync.Locker) {
-	l.Lock()
-	defer l.Unlock()
-	m.IdMap[k] = ids
-}
-
-func (m ZettelIdMap) Add(k string, id int64, l sync.Locker) {
-	var a []int64
-	ok := false
-
-	if a, ok = m.Get(k, l); !ok {
-		a = make([]int64, 0, 1)
-	}
-
-	a = append(a, id)
-	m.Set(k, a, l)
-}
-
+//TODO-P4 move into index and use unmarshal methods
 type SerializableIndex struct {
-	Zettels map[string]IndexZettel
+	Zettels map[zettel.Id]IndexZettel
 	Files   ZettelIdMap
 	Urls    ZettelIdMap
 	Tags    ZettelIdMap
@@ -63,10 +31,10 @@ type Index struct {
 	*sync.Mutex
 }
 
-func MakeIndex() Index {
-	return Index{
+func MakeIndex() *Index {
+	return &Index{
 		SerializableIndex: SerializableIndex{
-			Zettels: make(map[string]IndexZettel),
+			Zettels: make(map[zettel.Id]IndexZettel),
 			Files:   MakeZettelIdMap(),
 			Urls:    MakeZettelIdMap(),
 			Tags:    MakeZettelIdMap(),
@@ -76,7 +44,8 @@ func MakeIndex() Index {
 }
 
 func (i Index) Read(r io.Reader) (err error) {
-	dec := gob.NewDecoder(r)
+	dec := json.NewDecoder(r)
+	// dec := gob.NewDecoder(r)
 	err = dec.Decode(&i.SerializableIndex)
 
 	if err != nil {
@@ -87,7 +56,8 @@ func (i Index) Read(r io.Reader) (err error) {
 }
 
 func (i Index) Write(w io.Writer) (err error) {
-	enc := gob.NewEncoder(w)
+	enc := json.NewEncoder(w)
+	// enc := gob.NewEncoder(w)
 	err = enc.Encode(i.SerializableIndex)
 
 	if err != nil {
@@ -97,44 +67,69 @@ func (i Index) Write(w io.Writer) (err error) {
 	return
 }
 
-func (m Index) Get(k string) (IndexZettel, bool) {
+func (m Index) Get(k zettel.Id) (IndexZettel, bool) {
+	if m.Mutex == nil {
+		panic("mutex was not initalized")
+	}
+
 	m.Lock()
 	defer m.Unlock()
 	a, ok := m.Zettels[k]
 	return a, ok
 }
 
-func (m Index) Set(k string, z IndexZettel) {
+func (m Index) set(k zettel.Id, z IndexZettel) {
 	m.Lock()
 	defer m.Unlock()
 	m.Zettels[k] = z
 }
 
 func (i Index) Add(z *Zettel) error {
-	if _, ok := i.Get(strconv.FormatInt(z.Id, 10)); ok {
+	if _, ok := i.Get(zettel.Id(z.Id)); ok {
 		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
 
-	i.Set(strconv.FormatInt(z.Id, 10), IndexZettel{
+	i.set(zettel.Id(z.Id), IndexZettel{
 		Path:     z.Path,
-		Id:       z.Id,
+		Id:       int64(z.Id),
 		Metadata: z.Metadata,
 		Body:     z.Body,
 	})
 
-	if z.HasFile() {
-		i.Files.Add(z.FilePath(), z.Id, i)
+	if f, ok := z.Note.Metadata.LocalFile(); ok {
+		i.Files.Add(f.FileName(), zettel.Id(z.Id), i)
 	}
 
-	if z.HasUrl() {
-		i.Urls.Add(z.Metadata.Url, z.Id, i)
+	if u, ok := z.Metadata.Url(); ok {
+		i.Urls.Add(u.String(), zettel.Id(z.Id), i)
 	}
 
-	for _, t := range z.Metadata.Tags {
-		i.Tags.Add(t, z.Id, i)
+	for _, t := range z.Metadata.TagStrings() {
+		i.Tags.Add(t, zettel.Id(z.Id), i)
 	}
 
 	return nil
+}
+
+func (i Index) Update(z *Zettel) (err error) {
+	err = i.Delete(z)
+
+	if err != nil {
+		return err
+	}
+
+	err = i.Add(z)
+
+	return
+}
+
+func (i Index) Delete(z *Zettel) (err error) {
+	id := zettel.Id(z.Id)
+	delete(i.Zettels, id)
+	i.Files.Delete(id, i)
+	i.Urls.Delete(id, i)
+	i.Tags.Delete(id, i)
+	return
 }
 
 func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
@@ -145,15 +140,15 @@ func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 }
 
 func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
-	//TODO normalize url
+	//TODO-P3 normalize url
 	ids, ok := i.Urls.Get(u, i)
 
 	if !ok {
 		return
 	}
 
-	for _, id := range ids {
-		if zi, ok := i.Zettels[strconv.FormatInt(id, 10)]; ok {
+	for _, id := range ids.Slice() {
+		if zi, ok := i.Zettels[zettel.Id(id)]; ok {
 			o = append(o, zi)
 		}
 	}

@@ -6,7 +6,6 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/util/files_guard"
 	"github.com/pelletier/go-toml/v2"
 	"golang.org/x/xerrors"
@@ -16,25 +15,25 @@ type ConfigTagForNewZettels struct {
 	TagForNewZettels string `toml:"tag-for-new-zettels"`
 }
 
-type KastenConfig struct {
-	ConfigTagForNewZettels
-
-	Implementation string `toml:"type"`
-	Options        map[string]interface{}
+type ConfigTag struct {
+	kasten          string
+	AutoTags        []string `toml:"auto-tags"`
+	AddToNewZettels bool     `toml:"add-to-new-zettels"`
 }
 
-type TagConfig struct {
-	kasten   string
-	autoTags []string `toml:"auto-tags"`
+type ConfigRemoteScript struct {
+	Push RemoteScript
+	Pull RemoteScript
 }
 
 type Config struct {
 	ConfigTagForNewZettels
 
-	Tags          map[string]TagConfig
-	Kasten        map[string]KastenConfig
-	DefaultKasten string `toml:"default-kasten"`
-	UseIndexCache bool   `toml:"use-index-cache"`
+	Path           string                        `toml:"path"`
+	GitEnabled     bool                          `toml:"git-enabled"`
+	GitSignCommits bool                          `toml:"git-sign-commits"`
+	RemoteScripts  map[string]ConfigRemoteScript `toml:"remote-scripts"`
+	Tags           map[string]ConfigTag
 }
 
 func DefaultConfigPath() (p string, err error) {
@@ -81,7 +80,7 @@ func LoadConfig(p string) (c Config, err error) {
 }
 
 func DefaultConfig() (c Config, err error) {
-	//TODO
+	//TODO-P2
 	return
 }
 
@@ -104,37 +103,42 @@ func LoadDefaultConfig() (c Config, err error) {
 	return
 }
 
-func (c Config) Umwelt() (e Umwelt, err error) {
-	e, err = MakeUmwelt(c)
+func (c Config) Umwelt() (u Umwelt, err error) {
+	u, err = MakeUmwelt(c)
 
 	if err != nil {
 		return
 	}
 
-	e.Kasten = make(map[string]kasten.Implementation)
+	wd, err := os.Getwd()
 
-	for n, kc := range c.Kasten {
-		if i, ok := kasten.Registry.Get(kc.Implementation); ok {
-			i.InitFromOptions(kc.Options)
-			e.Kasten[n] = i
-			//TODO
-			e.DefaultKasten = i
-		} else {
-			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
-			return
-		}
+	if err != nil {
+		return
 	}
 
-	if c.DefaultKasten != "" {
-		if i, ok := e.Kasten[c.DefaultKasten]; ok {
-			e.DefaultKasten = i
-		} else {
-			err = xerrors.Errorf(
-				"no kasten matching name '%s' for default",
-				c.DefaultKasten,
-			)
+	fs := &FileStore{
+		//TODO-P2 use cwd or config if available
+		basePath: wd,
+	}
 
-			return
+	err = fs.Init(u, nil)
+
+	if err != nil {
+		return
+	}
+
+	if c.GitEnabled {
+		u.Kasten = &GitStore{
+			FileStore:   *fs,
+			SignCommits: c.GitSignCommits,
+		}
+	} else {
+		u.Kasten = fs
+	}
+
+	for t, tc := range c.Tags {
+		if tc.AddToNewZettels {
+			u.TagsForNewZettels = append(u.TagsForNewZettels, t)
 		}
 	}
 
