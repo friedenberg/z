@@ -25,11 +25,25 @@ func (a attachmentKind) String() string {
 }
 
 func (a *attachmentKind) Set(s string) (err error) {
+	fileAdder := func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+		z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
+		return lib.AddFileOnWrite(p)
+	}
+
 	switch s {
+	case "files-copy":
+		*a = attachmentKind{
+			adder: fileAdder,
+			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+				return pipeline.NewOrFoundForFile(u, urlString, true)
+			},
+		}
 	case "files":
-		a.adder = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-			z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
-			return lib.AddFileOnWrite(p)
+		*a = attachmentKind{
+			adder: fileAdder,
+			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+				return pipeline.NewOrFoundForFile(u, urlString, false)
+			},
 		}
 	case "urls":
 		*a = attachmentKind{

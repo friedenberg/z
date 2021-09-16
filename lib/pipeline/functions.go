@@ -2,6 +2,10 @@ package pipeline
 
 import (
 	"net/url"
+	"os"
+	"os/exec"
+	"path"
+	"strconv"
 
 	"github.com/friedenberg/z/lib"
 	"golang.org/x/xerrors"
@@ -68,36 +72,42 @@ func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
 	return
 }
 
-//func NewOrFoundForFile(u lib.Umwelt, file string) (z *lib.Zettel, err error) {
-//	//TODO check if file exists on disk
-//	//TODO check if file sha exists in cache
-//	_, err = url.Parse(urlString)
+func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zettel, err error) {
+	//TODO check if file exists on disk
+	//TODO check if file sha exists in cache
+	z, err = New(u)
 
-//	if err != nil {
-//		return
-//	}
+	if err != nil {
+		return
+	}
 
-//	ids, ok := u.Index.Urls.Get(urlString, u.Index)
+	fileName := strconv.FormatInt(z.Id, 10) + path.Ext(file)
+	fileName, err = NormalizePath(u, fileName)
 
-//	if ok && len(ids) > 1 {
-//		err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", ids, urlString)
-//		return
-//	} else if ok && len(ids) == 1 {
-//		z, err = HydrateFromIndex(u, ids[0].String())
-//		return
-//	}
+	if err != nil {
+		return
+	}
 
-//	z, err = New(u)
+	if shouldCopy {
+		cmd := exec.Command("cp", "-R", file, fileName)
+		msg, err := cmd.CombinedOutput()
 
-//	if err != nil {
-//		return
-//	}
+		if err != nil {
+			err = xerrors.Errorf("%w: %s", err, msg)
+		}
+	} else {
+		err = os.Rename(file, fileName)
+	}
 
-//	//TODO check if Metadata exists
-//	z.Metadata.Url = urlString
+	if err != nil {
+		return
+	}
 
-//	return
-//}
+	//TODO check if Metadata exists
+	z.Metadata.File = fileName
+
+	return
+}
 
 func New(u lib.Umwelt) (z *lib.Zettel, err error) {
 	id, err := u.FilesAndGit().NewId()
@@ -114,19 +124,3 @@ func New(u lib.Umwelt) (z *lib.Zettel, err error) {
 
 	return
 }
-
-// func New(u lib.Umwelt) (z *lib.Zettel, err error) {
-// 	id, err := u.FilesAndGit().NewId()
-
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	z = &lib.Zettel{
-// 		Umwelt: u,
-// 		Id:     id.Int(),
-// 		Path:   lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
-// 	}
-
-// 	return
-// }
