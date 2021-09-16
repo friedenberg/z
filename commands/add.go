@@ -9,93 +9,69 @@ import (
 
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
 
+type attachmentKind struct {
+	adder    func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc
+	hydrator func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
+}
+
+func (a attachmentKind) String() string {
+	//TODO
+	return ""
+}
+
+func (a *attachmentKind) Set(s string) (err error) {
+	switch s {
+	case "files":
+		a.adder = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+			z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
+			return lib.AddFileOnWrite(p)
+		}
+	case "urls":
+		*a = attachmentKind{
+			adder: func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+				//TODO normalize
+				z.Metadata.Url = p
+				return lib.AddUrlOnWrite(p, t)
+			},
+			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+				return pipeline.NewOrFoundForUrl(u, urlString)
+			},
+		}
+	default:
+		err = xerrors.Errorf("unsupported type: '%s'", s)
+		return
+	}
+
+	return
+}
+
 func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
-	var tagString, kind string
+	var tagString string
+	var kind attachmentKind
 	editActions := printer.Actions(printer.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	f.StringVar(&tagString, "tags", "", "parse the passed-in string as the metadata.")
-	f.StringVar(&kind, "kind", "", "treat the positional arguments as this kind.")
+	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
 	return func(e lib.Umwelt) (err error) {
 		currentTime := time.Now()
 
-		bootstrapZettel := func(i int, z *lib.Zettel, p string) (err error) {
-			if z.Id == 0 {
-				err = z.InitAndAssignUniqueId(currentTime, i)
-
-				if err != nil {
-					panic(err)
-				}
-			}
-
-			return
-		}
-
-		var add func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc
-		var hydrator func(i int, z *lib.Zettel, p string) (err error)
-
-		switch kind {
-		case "files":
-			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-				z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
-				return lib.AddFileOnWrite(p)
-			}
-			hydrator = bootstrapZettel
-		case "urls":
-			add = func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-				//TODO normalize
-				z.Metadata.Url = p
-				return lib.AddUrlOnWrite(p, t)
-			}
-			hydrator = func(i int, z *lib.Zettel, p string) (err error) {
-				indexItems := e.Index.ZettelsForUrl(p)
-
-				if len(indexItems) > 1 {
-					err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", indexItems, p)
-					return
-				}
-
-				if len(indexItems) == 1 {
-					e.Index.HydrateZettel(z, indexItems[0])
-				}
-
-				err = bootstrapZettel(i, z, p)
-				return
-			}
-		default:
-			err = xerrors.Errorf("unsupported kind: '%s'", kind)
-			return
-		}
-
-		err = hydrateIndex(e)
-
-		if err != nil {
-			return
-		}
-
-		processor := MakeProcessor(
-			e,
-			f.Args(),
-			&printer.MultiplexingZettelPrinter{
-				Printer: &printer.ActionZettelPrinter{
-					Umwelt:  e,
-					Actions: editActions,
-				},
+		pr := &printer.MultiplexingZettelPrinter{
+			Printer: &printer.ActionZettelPrinter{
+				Umwelt:  e,
+				Actions: editActions,
 			},
-		)
-
-		processor.argNormalizer = func(i int, arg string) (normalizedArg string, err error) {
-			normalizedArg = arg
-			return
 		}
 
-		processor.hydrator = func(i int, z *lib.Zettel, p string) (err error) {
-			err = hydrator(i, z, p)
+		iter := func(i int, a string) (err error) {
+			z, err := kind.hydrator(e, a)
 
 			if err != nil {
 				return
@@ -110,7 +86,7 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 
 			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
 
-			onWrite := add(z, currentTime, p)
+			onWrite := kind.adder(z, currentTime, a)
 
 			err = z.Write(onWrite)
 
@@ -121,7 +97,10 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 			return
 		}
 
-		err = processor.Run()
+		par := util.Parallelizer{Args: f.Args()}
+		pr.Printer.Begin()
+		defer pr.Printer.End()
+		par.Run(iter, errIterartion(pr.Printer))
 
 		return
 	}

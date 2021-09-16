@@ -19,5 +19,5 @@ func (p *FormatZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	//TODO should empty strings be printed?
-	util.StdPrinterOut(p.Formatter.Format(z))
+	util.StdPrinterOutf("%s", p.Formatter.Format(z))
 }

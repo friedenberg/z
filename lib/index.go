@@ -3,7 +3,6 @@ package lib
 import (
 	"encoding/gob"
 	"io"
-	"strconv"
 	"sync"
 
 	"golang.org/x/xerrors"
@@ -17,34 +16,34 @@ type IndexZettel struct {
 }
 
 type ZettelIdMap struct {
-	IdMap map[string][]int64
+	IdMap map[string][]Id
 }
 
 func MakeZettelIdMap() ZettelIdMap {
 	return ZettelIdMap{
-		IdMap: make(map[string][]int64),
+		IdMap: make(map[string][]Id),
 	}
 }
 
-func (m ZettelIdMap) Get(k string, l sync.Locker) ([]int64, bool) {
+func (m ZettelIdMap) Get(k string, l sync.Locker) ([]Id, bool) {
 	l.Lock()
 	defer l.Unlock()
 	a, ok := m.IdMap[k]
 	return a, ok
 }
 
-func (m ZettelIdMap) Set(k string, ids []int64, l sync.Locker) {
+func (m ZettelIdMap) Set(k string, ids []Id, l sync.Locker) {
 	l.Lock()
 	defer l.Unlock()
 	m.IdMap[k] = ids
 }
 
-func (m ZettelIdMap) Add(k string, id int64, l sync.Locker) {
-	var a []int64
+func (m ZettelIdMap) Add(k string, id Id, l sync.Locker) {
+	var a []Id
 	ok := false
 
 	if a, ok = m.Get(k, l); !ok {
-		a = make([]int64, 0, 1)
+		a = make([]Id, 0, 1)
 	}
 
 	a = append(a, id)
@@ -52,7 +51,7 @@ func (m ZettelIdMap) Add(k string, id int64, l sync.Locker) {
 }
 
 type SerializableIndex struct {
-	Zettels map[string]IndexZettel
+	Zettels map[Id]IndexZettel
 	Files   ZettelIdMap
 	Urls    ZettelIdMap
 	Tags    ZettelIdMap
@@ -66,7 +65,7 @@ type Index struct {
 func MakeIndex() Index {
 	return Index{
 		SerializableIndex: SerializableIndex{
-			Zettels: make(map[string]IndexZettel),
+			Zettels: make(map[Id]IndexZettel),
 			Files:   MakeZettelIdMap(),
 			Urls:    MakeZettelIdMap(),
 			Tags:    MakeZettelIdMap(),
@@ -97,41 +96,41 @@ func (i Index) Write(w io.Writer) (err error) {
 	return
 }
 
-func (m Index) Get(k string) (IndexZettel, bool) {
+func (m Index) Get(k Id) (IndexZettel, bool) {
 	m.Lock()
 	defer m.Unlock()
 	a, ok := m.Zettels[k]
 	return a, ok
 }
 
-func (m Index) Set(k string, z IndexZettel) {
+func (m Index) Set(k Id, z IndexZettel) {
 	m.Lock()
 	defer m.Unlock()
 	m.Zettels[k] = z
 }
 
 func (i Index) Add(z *Zettel) error {
-	if _, ok := i.Get(strconv.FormatInt(z.Id, 10)); ok {
+	if _, ok := i.Get(Id(z.Id)); ok {
 		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
 
-	i.Set(strconv.FormatInt(z.Id, 10), IndexZettel{
+	i.Set(Id(z.Id), IndexZettel{
 		Path:     z.Path,
-		Id:       z.Id,
+		Id:       int64(z.Id),
 		Metadata: z.Metadata,
 		Body:     z.Body,
 	})
 
 	if z.HasFile() {
-		i.Files.Add(z.FilePath(), z.Id, i)
+		i.Files.Add(z.FilePath(), Id(z.Id), i)
 	}
 
 	if z.HasUrl() {
-		i.Urls.Add(z.Metadata.Url, z.Id, i)
+		i.Urls.Add(z.Metadata.Url, Id(z.Id), i)
 	}
 
 	for _, t := range z.Metadata.Tags {
-		i.Tags.Add(t, z.Id, i)
+		i.Tags.Add(t, Id(z.Id), i)
 	}
 
 	return nil
@@ -153,7 +152,7 @@ func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
 	}
 
 	for _, id := range ids {
-		if zi, ok := i.Zettels[strconv.FormatInt(id, 10)]; ok {
+		if zi, ok := i.Zettels[Id(id)]; ok {
 			o = append(o, zi)
 		}
 	}

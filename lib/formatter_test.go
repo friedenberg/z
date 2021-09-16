@@ -76,6 +76,18 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 			format: "%w, %t",
 			output: "2021-07-26, some-tag",
 		},
+		printfFormatterTestCase{
+			name: "body",
+			makeZettel: func() (z *Zettel) {
+				z = makeZettelWithDate()
+				z.Body = `
+90210
+				`
+				return
+			},
+			format: "%b",
+			output: "90210",
+		},
 	}
 }
 

@@ -4,8 +4,10 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/friedenberg/z/lib/kasten"
+	"github.com/friedenberg/z/util"
 )
 
 var (
@@ -61,6 +63,29 @@ func (e *FilesAndGit) GetNormalizedPath(a string) (b string, err error) {
 		b = a
 	} else {
 		b, err = filepath.Abs(path.Join(e.BasePath, a))
+	}
+
+	return
+}
+
+func (k *FilesAndGit) NewId() (id Id, err error) {
+	currentTime := time.Now()
+
+	for {
+		p := MakePathFromTime(k.BasePath, currentTime)
+
+		if util.FileExists(p) {
+			d, err := time.ParseDuration("1s")
+
+			if err != nil {
+				panic(err)
+			}
+
+			currentTime = currentTime.Add(d)
+		} else {
+			id = Id(currentTime.Unix())
+			return
+		}
 	}
 
 	return

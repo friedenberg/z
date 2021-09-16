@@ -18,7 +18,14 @@ func DefaultArgNormalizer(u lib.Umwelt) ArgNormalizeFunc {
 func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
 	return func(_ int, z *lib.Zettel, path string) error {
 		id := filepath.Base(path)
-		zi, ok := u.Index.Get(id)
+
+		idId, err := lib.IdFromString(id)
+
+		if err != nil {
+			return err
+		}
+
+		zi, ok := u.Index.Get(idId)
 
 		if !ok {
 			return xerrors.Errorf("missing zettel in index for id '%s'", path)

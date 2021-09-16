@@ -2,6 +2,7 @@ package printer
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -65,7 +66,15 @@ func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
 	//TODO set to url icon
 	// i.Icon.Path = z.FilePath()
 	i.Arg = z.Metadata.Url
-	i.Title = z.Metadata.Url
+
+	url, err := url.Parse(z.Metadata.Url)
+
+	if err != nil {
+		//TODO
+	}
+
+	//TODO move to tags
+	i.Title = fmt.Sprintf("%s: %s", url.Host, z.Metadata.Description)
 	i.Uid = i.Uid + ".url"
 	i.Match = i.Match + "i-u"
 	a = append(a, i)

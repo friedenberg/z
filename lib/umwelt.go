@@ -10,11 +10,12 @@ import (
 )
 
 type Umwelt struct {
-	DefaultKasten kasten.Implementation
-	Kasten        map[string]kasten.Implementation
-	Index         Index
-	BasePath      string
-	Config        Config
+	DefaultKasten  kasten.Implementation
+	Kasten         map[string]kasten.Implementation
+	Index          Index
+	BasePath       string
+	Config         Config
+	indexLoadState IndexLoadState
 }
 
 func MakeUmwelt(c Config) (k Umwelt, err error) {
@@ -30,11 +31,17 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 	k.Index = MakeIndex()
 
 	if c.UseIndexCache {
+		//find all caches
+		//remove any older-version caches
+		//try to load from correct version cache
+		//or exit if it doesn't exist
 		err = k.LoadIndexFromCache()
 
 		if err != nil && !os.IsNotExist(err) {
 			return
 		}
+
+		k.indexLoadState = IndexLoadStateLoaded
 	}
 
 	return
@@ -48,11 +55,11 @@ func (e Umwelt) GetIndexPath() string {
 	return path.Join(e.BasePath, ".zettel-cache")
 }
 
-func (u Umwelt) GetAll() (files []string) {
-	files = make([]string, 0, len(u.Index.Zettels))
+func (u Umwelt) GetAll() (ids []string) {
+	ids = make([]string, 0, len(u.Index.Zettels))
 
-	for f, _ := range u.Index.Zettels {
-		files = append(files, f)
+	for id, _ := range u.Index.Zettels {
+		ids = append(ids, id.String())
 	}
 
 	return

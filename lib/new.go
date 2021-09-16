@@ -15,6 +15,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
+//TODO deprecate
 func (z *Zettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err error) {
 	d, err := time.ParseDuration(strconv.Itoa(i) + "s")
 
@@ -54,11 +55,13 @@ func (z *Zettel) InitFromTime(t time.Time) {
 	return
 }
 
+func MakePathFromId(basePath, id string) string {
+	return path.Join(basePath, id+".md")
+}
+
 func MakePathFromTime(basePath string, t time.Time) (filename string) {
 	unixTime := t.Unix()
-	filename = path.Join(basePath, strconv.FormatInt(unixTime, 10)+".md")
-
-	return
+	return MakePathFromId(basePath, strconv.FormatInt(unixTime, 10))
 }
 
 func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
