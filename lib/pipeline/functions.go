@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"golang.org/x/xerrors"
 )
 
@@ -19,7 +20,7 @@ func NormalizePath(u lib.Umwelt, p string) (n string, err error) {
 func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.Zettel, err error) {
 	z = &lib.Zettel{Umwelt: u}
 
-	id, err := lib.IdFromString(s)
+	id, err := zettel.IdFromString(s)
 
 	if err != nil {
 		return

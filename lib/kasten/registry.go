@@ -2,28 +2,38 @@ package kasten
 
 import "golang.org/x/xerrors"
 
-type TRegistry map[string]Implementation
+type factory func() RemoteImplementation
 
 var (
-	Registry TRegistry
+	registryInstance map[string]factory
 )
 
 func init() {
-	Registry = TRegistry(make(map[string]Implementation))
+	registryInstance = make(map[string]factory)
+	Register("files", func() RemoteImplementation { return &Files{} })
 }
 
-func (r TRegistry) Register(n string, i Implementation) (err error) {
-	if _, ok := map[string]Implementation(r)[n]; ok {
+func Register(n string, f factory) (err error) {
+	if _, ok := registryInstance[n]; ok {
 		err = xerrors.Errorf("Multiple implementations with name: '%s'", n)
 		return
 	}
 
-	map[string]Implementation(r)[n] = i
+	registryInstance[n] = f
 
 	return
 }
 
-func (r TRegistry) Get(n string) (i Implementation, ok bool) {
-	i, ok = map[string]Implementation(r)[n]
+func GetLocal(n string) (i LocalImplementation, ok bool) {
+	ir, ok := GetRemote(n)
+	i, ok = ir.(LocalImplementation)
+
+	return
+}
+
+func GetRemote(n string) (i RemoteImplementation, ok bool) {
+	//TODO normalize n
+	f, ok := registryInstance[n]
+	i = f()
 	return
 }

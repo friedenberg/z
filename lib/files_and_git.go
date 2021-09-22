@@ -7,18 +7,18 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/lib/kasten"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util"
 )
 
-var (
-	FilesAndGitInstance *FilesAndGit
-)
-
 func init() {
-	FilesAndGitInstance = &FilesAndGit{}
-	kasten.Registry.Register("files-and-git", FilesAndGitInstance)
+	kasten.Register(
+		"files-and-git",
+		func() kasten.RemoteImplementation { return &FilesAndGit{} },
+	)
 }
 
+//TODO move to lib/kasten
 type FilesAndGit struct {
 	BasePath        string
 	GitEnabled      bool
@@ -68,7 +68,7 @@ func (e *FilesAndGit) GetNormalizedPath(a string) (b string, err error) {
 	return
 }
 
-func (k *FilesAndGit) NewId() (id Id, err error) {
+func (k *FilesAndGit) NewId() (id zettel.Id, err error) {
 	currentTime := time.Now()
 
 	for {
@@ -83,7 +83,7 @@ func (k *FilesAndGit) NewId() (id Id, err error) {
 
 			currentTime = currentTime.Add(d)
 		} else {
-			id = Id(currentTime.Unix())
+			id = zettel.Id(currentTime.Unix())
 			return
 		}
 	}

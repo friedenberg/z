@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/zettel"
 	"golang.org/x/xerrors"
 )
 
@@ -19,7 +20,7 @@ func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
 	return func(_ int, z *lib.Zettel, path string) error {
 		id := filepath.Base(path)
 
-		idId, err := lib.IdFromString(id)
+		idId, err := zettel.IdFromString(id)
 
 		if err != nil {
 			return err

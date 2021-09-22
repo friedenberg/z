@@ -10,8 +10,8 @@ import (
 )
 
 type Umwelt struct {
-	DefaultKasten  kasten.Implementation
-	Kasten         map[string]kasten.Implementation
+	LocalKasten    kasten.LocalImplementation
+	RemoteKasten   map[string]kasten.RemoteImplementation
 	Index          Index
 	BasePath       string
 	Config         Config
@@ -48,7 +48,7 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 }
 
 func (u Umwelt) FilesAndGit() *FilesAndGit {
-	return u.DefaultKasten.(*FilesAndGit)
+	return u.LocalKasten.(*FilesAndGit)
 }
 
 func (e Umwelt) GetIndexPath() string {

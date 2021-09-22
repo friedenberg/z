@@ -32,9 +32,9 @@ type Config struct {
 	ConfigTagForNewZettels
 
 	Tags          map[string]TagConfig
-	Kasten        map[string]KastenConfig
-	DefaultKasten string `toml:"default-kasten"`
-	UseIndexCache bool   `toml:"use-index-cache"`
+	LocalKasten   KastenConfig            `toml:"local-kasten"`
+	RemoteKasten  map[string]KastenConfig `toml:"remote-kasten"`
+	UseIndexCache bool                    `toml:"use-index-cache"`
 }
 
 func DefaultConfigPath() (p string, err error) {
@@ -111,29 +111,42 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 		return
 	}
 
-	e.Kasten = make(map[string]kasten.Implementation)
+	lk, ok := kasten.GetLocal(c.LocalKasten.Implementation)
 
-	for n, kc := range c.Kasten {
-		if i, ok := kasten.Registry.Get(kc.Implementation); ok {
-			i.InitFromOptions(kc.Options)
-			e.Kasten[n] = i
-			//TODO
-			e.DefaultKasten = i
-		} else {
-			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
-			return
-		}
+	if ok {
+		e.LocalKasten = lk
+		e.LocalKasten.InitFromOptions(c.LocalKasten.Options)
+	} else {
+		err = xerrors.Errorf(
+			"no implementation found for local kasten: '%s'",
+			c.LocalKasten.Implementation,
+		)
+
+		return
 	}
 
-	if c.DefaultKasten != "" {
-		if i, ok := e.Kasten[c.DefaultKasten]; ok {
-			e.DefaultKasten = i
-		} else {
-			err = xerrors.Errorf(
-				"no kasten matching name '%s' for default",
-				c.DefaultKasten,
-			)
+	e.RemoteKasten = make(map[string]kasten.RemoteImplementation)
 
+	//TODO primary kasten validation
+	// if c.LocalKasten != "" {
+	// 	if i, ok := e.Kasten[c.DefaultKasten]; ok {
+	// 		e.DefaultKasten = i
+	// 	} else {
+	// 		err = xerrors.Errorf(
+	// 			"no kasten matching name '%s' for default",
+	// 			c.DefaultKasten,
+	// 		)
+
+	// 		return
+	// 	}
+	// }
+
+	for n, kc := range c.RemoteKasten {
+		if i, ok := kasten.GetRemote(kc.Implementation); ok {
+			i.InitFromOptions(kc.Options)
+			e.RemoteKasten[n] = i
+		} else {
+			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
 			return
 		}
 	}
