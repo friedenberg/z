@@ -75,15 +75,16 @@ func run() int {
 		return 1
 	}
 
-	env, err := c.Umwelt()
+	umwelt, err := c.Umwelt()
 
 	if err != nil {
 		util.StdPrinterError(err)
 		return 1
 	}
 
+	//TODO refactor to be command too
 	cmd.flags.Parse(os.Args[2:])
-	err = cmd.runFunc(env)
+	err = cmd.runFunc(umwelt)
 
 	if err != nil {
 		util.StdPrinterError(err)

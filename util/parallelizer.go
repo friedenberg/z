@@ -23,7 +23,7 @@ func (p Parallelizer) Run(f ParallelizerIterFunc, e ParallelizerErrorFunc) {
 				err := f(i, s)
 
 				if err != nil {
-					err = xerrors.Errorf("%s:\n\t%w", s, err)
+					err = xerrors.Errorf("%s: %w", s, err)
 					e(i, s, err)
 				}
 			}(i, file)
