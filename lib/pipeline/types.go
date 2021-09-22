@@ -11,3 +11,8 @@ type Printer interface {
 	PrintZettel(int, *lib.Zettel, error)
 	End()
 }
+
+type FilterPrinter struct {
+	Filter  Filter
+	Printer Printer
+}
