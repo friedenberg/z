@@ -28,13 +28,17 @@ type TagConfig struct {
 	autoTags []string `toml:"auto-tags"`
 }
 
+type KastenTable struct {
+	Local  KastenConfig
+	Remote map[string]KastenConfig
+}
+
 type Config struct {
 	ConfigTagForNewZettels
 
 	Tags          map[string]TagConfig
-	LocalKasten   KastenConfig            `toml:"local-kasten"`
-	RemoteKasten  map[string]KastenConfig `toml:"remote-kasten"`
-	UseIndexCache bool                    `toml:"use-index-cache"`
+	Kasten        KastenTable
+	UseIndexCache bool `toml:"use-index-cache"`
 }
 
 func DefaultConfigPath() (p string, err error) {
@@ -111,15 +115,15 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 		return
 	}
 
-	lk, ok := kasten.GetLocal(c.LocalKasten.Implementation)
+	lk, ok := kasten.GetLocal(c.Kasten.Local.Implementation)
 
 	if ok {
 		e.LocalKasten = lk
-		e.LocalKasten.InitFromOptions(c.LocalKasten.Options)
+		e.LocalKasten.InitFromOptions(c.Kasten.Local.Options)
 	} else {
 		err = xerrors.Errorf(
 			"no implementation found for local kasten: '%s'",
-			c.LocalKasten.Implementation,
+			c.Kasten.Local.Implementation,
 		)
 
 		return
@@ -141,7 +145,7 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 	// 	}
 	// }
 
-	for n, kc := range c.RemoteKasten {
+	for n, kc := range c.Kasten.Remote {
 		if i, ok := kasten.GetRemote(kc.Implementation); ok {
 			i.InitFromOptions(kc.Options)
 			e.RemoteKasten[n] = i
