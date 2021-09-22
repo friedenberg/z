@@ -45,6 +45,7 @@ func init() {
 	makeSubcommand("index", commands.GetSubcommandIndex)
 	makeSubcommand("mv", commands.GetSubcommandMv)
 	makeSubcommand("new", commands.GetSubcommandNew)
+	makeSubcommand("remote", commands.GetSubcommandRemote)
 	makeSubcommand("rm", commands.GetSubcommandRm)
 }
 

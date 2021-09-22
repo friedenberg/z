@@ -20,6 +20,7 @@ func init() {
 
 //TODO move to lib/kasten
 type FilesAndGit struct {
+	kasten.Files
 	BasePath        string
 	GitEnabled      bool
 	GitAnnexEnabled bool
