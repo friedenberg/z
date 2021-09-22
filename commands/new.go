@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
@@ -15,7 +16,7 @@ import (
 
 func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 	var metadata_json, content, urlToAdd, filePathToAdd string
-	editActions := printer.Actions(printer.ActionEdit)
+	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 	//TODO convert to action

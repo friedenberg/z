@@ -3,6 +3,7 @@ package commands
 import (
 	"flag"
 
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
@@ -11,7 +12,7 @@ import (
 
 func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 	var query string
-	editActions := printer.Actions(printer.ActionEdit)
+	editActions := options.Actions(options.ActionEdit)
 
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")

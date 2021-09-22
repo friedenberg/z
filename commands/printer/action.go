@@ -3,6 +3,7 @@ package printer
 import (
 	"sync"
 
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
@@ -10,7 +11,7 @@ import (
 
 type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
-	Actions     Actions
+	Actions     options.Actions
 	gitPrinter  *GitPrinter
 	zettels     []*lib.Zettel
 	zettelFiles util.GitAnnex
@@ -61,7 +62,7 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		p.urls = append(p.urls, z.Metadata.Url)
 	}
 
-	if p.Actions&ActionPrintZettelPath != 0 {
+	if p.Actions&options.ActionPrintZettelPath != 0 {
 		//TODO full path
 		util.StdPrinterOut(z.Path)
 	}
@@ -92,15 +93,15 @@ func (p *ActionZettelPrinter) End() {
 		}()
 	}
 
-	if p.Actions&ActionEdit != 0 {
+	if p.Actions&options.ActionEdit != 0 {
 		runAction(p.openZettels)
 	}
 
-	if p.Actions&ActionOpenFile != 0 {
+	if p.Actions&options.ActionOpenFile != 0 {
 		runAction(p.openFiles)
 	}
 
-	if p.Actions&ActionOpenUrl != 0 {
+	if p.Actions&options.ActionOpenUrl != 0 {
 		runAction(p.openUrls)
 	}
 

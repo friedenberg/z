@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
@@ -67,7 +68,7 @@ func (a *attachmentKind) Set(s string) (err error) {
 func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	var tagString string
 	var kind attachmentKind
-	editActions := printer.Actions(printer.ActionEdit)
+	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
