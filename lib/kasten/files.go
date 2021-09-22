@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/friedenberg/z/lib/zettel"
 	"golang.org/x/xerrors"
 )
 
@@ -22,8 +23,8 @@ func (k *Files) InitFromOptions(o map[string]interface{}) (err error) {
 	return
 }
 
-func (k *Files) CopyFileTo(localPath string, h RemoteFileHandle) (err error) {
-	remotePath := path.Join(k.BasePath, h.FileName())
+func (k *Files) CopyFileTo(localPath string, fd zettel.FileDescriptor) (err error) {
+	remotePath := path.Join(k.BasePath, fd.FileName())
 
 	cmd := exec.Command("cp", "-R", localPath, remotePath)
 	out, err := cmd.CombinedOutput()
@@ -36,8 +37,8 @@ func (k *Files) CopyFileTo(localPath string, h RemoteFileHandle) (err error) {
 	return
 }
 
-func (k *Files) CopyFileFrom(localPath string, h RemoteFileHandle) (err error) {
-	remotePath := path.Join(k.BasePath, h.FileName())
+func (k *Files) CopyFileFrom(localPath string, fd zettel.FileDescriptor) (err error) {
+	remotePath := path.Join(k.BasePath, fd.FileName())
 
 	cmd := exec.Command("cp", "-R", remotePath, localPath)
 	out, err := cmd.CombinedOutput()

@@ -1,8 +1,6 @@
 package printer
 
 import (
-	"path"
-
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/kasten"
@@ -27,26 +25,25 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
+	fd := z.FileDescriptor()
+
+	if fd == nil {
+		util.StdPrinterError(xerrors.Errorf("zettel ('%s') has no file descriptors", z.Id))
+		return
+	}
+
 	var err error
 
 	switch p.Command {
 	case options.RemoteCommandPull:
 
 		util.StdPrinterErrf("%s: copy start\n", z.FilePath())
-
-		err = p.Remote.CopyFileFrom(
-			z.FilePath(),
-			kasten.RemoteFileHandle{z.Id, path.Ext(z.FilePath())},
-		)
+		err = p.Remote.CopyFileFrom(z.FilePath(), *fd)
 
 	case options.RemoteCommandPush:
 
 		util.StdPrinterErrf("%s: copy start\n", z.FilePath())
-
-		err = p.Remote.CopyFileTo(
-			z.FilePath(),
-			kasten.RemoteFileHandle{z.Id, path.Ext(z.FilePath())},
-		)
+		err = p.Remote.CopyFileTo(z.FilePath(), *fd)
 
 	default:
 		panic(xerrors.Errorf("unsupported remote command: '%s'", p.Command))

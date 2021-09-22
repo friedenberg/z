@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util"
 	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
@@ -185,6 +186,18 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 
 	if z.HasUrl() {
 		z.Metadata.ExpandedTags = append(z.Metadata.ExpandedTags, "h-u")
+	}
+
+	return
+}
+
+func (z *Zettel) FileDescriptor() (fd *zettel.FileDescriptor) {
+	if !z.HasFile() {
+		return
+	}
+	fd = &zettel.FileDescriptor{
+		ZettelId: zettel.Id(z.Id),
+		Ext:      path.Ext(z.FilePath()),
 	}
 
 	return
