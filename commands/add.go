@@ -16,8 +16,8 @@ import (
 )
 
 type attachmentKind struct {
-	adder    func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc
-	hydrator func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
+	adder    func(z *lib.KastenZettel, t time.Time, p string) lib.OnZettelWriteFunc
+	hydrator func(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err error)
 }
 
 func (a attachmentKind) String() string {
@@ -26,7 +26,7 @@ func (a attachmentKind) String() string {
 }
 
 func (a *attachmentKind) Set(s string) (err error) {
-	fileAdder := func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+	fileAdder := func(z *lib.KastenZettel, t time.Time, p string) lib.OnZettelWriteFunc {
 		z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
 		return lib.AddFileOnWrite(p)
 	}
@@ -35,25 +35,25 @@ func (a *attachmentKind) Set(s string) (err error) {
 	case "files-copy":
 		*a = attachmentKind{
 			adder: fileAdder,
-			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+			hydrator: func(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err error) {
 				return pipeline.NewOrFoundForFile(u, urlString, true)
 			},
 		}
 	case "files":
 		*a = attachmentKind{
 			adder: fileAdder,
-			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+			hydrator: func(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err error) {
 				return pipeline.NewOrFoundForFile(u, urlString, false)
 			},
 		}
 	case "urls":
 		*a = attachmentKind{
-			adder: func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
+			adder: func(z *lib.KastenZettel, t time.Time, p string) lib.OnZettelWriteFunc {
 				//TODO normalize
 				z.Metadata.Url = p
 				return lib.AddUrlOnWrite(p, t)
 			},
-			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+			hydrator: func(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err error) {
 				return pipeline.NewOrFoundForUrl(u, urlString)
 			},
 		}

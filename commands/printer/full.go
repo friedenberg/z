@@ -12,7 +12,7 @@ type FullZettelPrinter struct{}
 func (p *FullZettelPrinter) Begin() {}
 func (p *FullZettelPrinter) End()   {}
 
-func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
+func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.KastenZettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return

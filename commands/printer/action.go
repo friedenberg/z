@@ -13,7 +13,7 @@ type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
 	Actions     options.Actions
 	gitPrinter  *GitPrinter
-	zettels     []*lib.Zettel
+	zettels     []*lib.KastenZettel
 	zettelFiles util.GitAnnex
 	files       util.GitAnnex
 	urls        []string
@@ -21,7 +21,7 @@ type ActionZettelPrinter struct {
 
 func (p *ActionZettelPrinter) Begin() {
 	git := util.Git{
-		Path: p.Umwelt.FilesAndGit().BasePath,
+		Path: p.Umwelt.Kasten.Local.BasePath,
 	}
 
 	p.zettelFiles = util.GitAnnex{
@@ -45,7 +45,7 @@ func (p *ActionZettelPrinter) Begin() {
 	}
 }
 
-func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
+func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return
@@ -121,7 +121,7 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 		return
 	}
 
-	if p.Umwelt.FilesAndGit().GitAnnexEnabled {
+	if p.Umwelt.Kasten.Local.GitAnnexEnabled {
 		err = p.zettelFiles.Unlock()
 
 		if err != nil {
@@ -154,7 +154,7 @@ func (p *ActionZettelPrinter) openFiles() (err error) {
 		return
 	}
 
-	if p.Umwelt.FilesAndGit().GitAnnexEnabled {
+	if p.Umwelt.Kasten.Local.GitAnnexEnabled {
 		err = p.files.Unlock()
 
 		if err != nil {

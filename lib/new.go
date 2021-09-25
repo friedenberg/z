@@ -41,7 +41,7 @@ func (z *KastenZettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err 
 }
 
 func (z *KastenZettel) InitFromTime(t time.Time) {
-	z.Path = MakePathFromTime(z.Umwelt.FilesAndGit().BasePath, t)
+	z.Path = MakePathFromTime(z.Kasten.Local.BasePath, t)
 	z.Id = t.Unix()
 
 	z.Metadata = Metadata{

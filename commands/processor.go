@@ -11,8 +11,8 @@ import (
 )
 
 type ArgNormalizeFunc func(int, string) (string, error)
-type HydrateFunc func(int, *lib.Zettel, string) error
-type ActionFunc func(int, *lib.Zettel) (bool, error)
+type HydrateFunc func(int, *lib.KastenZettel, string) error
+type ActionFunc func(int, *lib.KastenZettel) (bool, error)
 
 type Processor struct {
 	kasten        lib.Umwelt
@@ -111,9 +111,10 @@ func (p *Processor) Run() (err error) {
 	return nil
 }
 
-func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
-	z = &lib.Zettel{
-		Umwelt: p.kasten,
+func (p *Processor) HydrateFile(i int, path string) (z *lib.KastenZettel, err error) {
+	z = &lib.KastenZettel{
+		Zettel: lib.Zettel{},
+		Kasten: p.kasten.Kasten,
 	}
 
 	a, err := p.argNormalizer(i, path)
@@ -127,7 +128,7 @@ func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	return
 }
 
-func (p *Processor) ActionZettel(i int, z *lib.Zettel) (err error) {
+func (p *Processor) ActionZettel(i int, z *lib.KastenZettel) (err error) {
 	shouldPrint := true
 
 	if p.actioner != nil {

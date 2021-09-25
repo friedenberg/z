@@ -12,7 +12,7 @@ type FormatZettelPrinter struct {
 func (p *FormatZettelPrinter) Begin() {}
 func (p *FormatZettelPrinter) End()   {}
 
-func (p *FormatZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
+func (p *FormatZettelPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return

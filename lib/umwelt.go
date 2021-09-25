@@ -5,16 +5,14 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/util/files_guard"
 )
 
 type Umwelt struct {
-	Kasten       Kasten
-	RemoteKasten map[string]kasten.RemoteImplementation
-	Index        Index
-	BasePath     string
-	Config       Config
+	Kasten
+	Index    Index
+	BasePath string
+	Config   Config
 }
 
 func MakeUmwelt(c Config) (k Umwelt, err error) {
@@ -45,7 +43,7 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 }
 
 func (u Umwelt) FilesAndGit() *FilesAndGit {
-	return u.Kasten.LocalImplementation.(*FilesAndGit)
+	return u.Kasten.Local
 }
 
 func (e Umwelt) GetIndexPath() string {

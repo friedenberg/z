@@ -16,7 +16,7 @@ type GitPrinter struct {
 }
 
 func (p *GitPrinter) Begin() {
-	if !p.Umwelt.FilesAndGit().GitEnabled {
+	if !p.Umwelt.Kasten.Local.GitEnabled {
 		return
 	}
 }
@@ -27,8 +27,8 @@ func (p *GitPrinter) SetShouldCommit() {
 	p.shouldCommit = true
 }
 
-func (p *GitPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
-	if !p.Umwelt.FilesAndGit().GitEnabled {
+func (p *GitPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
+	if !p.Umwelt.Kasten.Local.GitEnabled {
 		return
 	}
 
@@ -45,7 +45,7 @@ func (p *GitPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 }
 
 func (p *GitPrinter) End() {
-	if !p.Umwelt.FilesAndGit().GitEnabled {
+	if !p.Umwelt.Kasten.Local.GitEnabled {
 		return
 	}
 
@@ -54,7 +54,7 @@ func (p *GitPrinter) End() {
 	if p.shouldCommit && len(p.files) > 0 {
 		git := util.GitFilesToCommit{
 			Git: util.Git{
-				Path: p.Umwelt.FilesAndGit().BasePath,
+				Path: p.Umwelt.Kasten.Local.BasePath,
 			},
 			Files: p.files,
 		}

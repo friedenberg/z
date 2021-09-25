@@ -16,7 +16,10 @@ type ConfigTagForNewZettels struct {
 	TagForNewZettels string `toml:"tag-for-new-zettels"`
 }
 
-type KastenConfig struct {
+type KastenLocalConfig struct {
+}
+
+type KastenRemoteConfig struct {
 	ConfigTagForNewZettels
 
 	Implementation string `toml:"type"`
@@ -29,8 +32,10 @@ type TagConfig struct {
 }
 
 type KastenTable struct {
-	Local  KastenConfig
-	Remote map[string]KastenConfig
+	ConfigTagForNewZettels
+	Path       string `toml:"path"`
+	GitEnabled bool   `toml:"git-enabled"`
+	Remote     map[string]KastenRemoteConfig
 }
 
 type Config struct {
@@ -108,37 +113,24 @@ func LoadDefaultConfig() (c Config, err error) {
 	return
 }
 
-func (c Config) Umwelt() (e Umwelt, err error) {
-	e, err = MakeUmwelt(c)
+func (c Config) Umwelt() (u Umwelt, err error) {
+	u, err = MakeUmwelt(c)
 
 	if err != nil {
 		return
 	}
 
-	lk, ok := kasten.GetLocal(c.Kasten.Local.Implementation)
-
-	if ok {
-		e.Kasten = Kasten{
-			Umwelt:              &e,
-			LocalImplementation: lk,
-		}
-
-		e.Kasten.InitFromOptions(c.Kasten.Local.Options)
-	} else {
-		err = xerrors.Errorf(
-			"no implementation found for local kasten: '%s'",
-			c.Kasten.Local.Implementation,
-		)
-
-		return
+	u.Kasten.Local = &FilesAndGit{
+		GitEnabled: c.Kasten.GitEnabled,
+		BasePath:   c.Kasten.Path,
 	}
 
-	e.RemoteKasten = make(map[string]kasten.RemoteImplementation)
+	u.Kasten.Remotes = make(map[string]kasten.RemoteImplementation)
 
 	//TODO primary kasten validation
 	// if c.LocalKasten != "" {
-	// 	if i, ok := e.Kasten[c.DefaultKasten]; ok {
-	// 		e.DefaultKasten = i
+	// 	if i, ok := u.Kasten[c.DefaultKasten]; ok {
+	// 		u.DefaultKasten = i
 	// 	} else {
 	// 		err = xerrors.Errorf(
 	// 			"no kasten matching name '%s' for default",
@@ -152,7 +144,7 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 	for n, kc := range c.Kasten.Remote {
 		if i, ok := kasten.GetRemote(kc.Implementation); ok {
 			i.InitFromOptions(kc.Options)
-			e.RemoteKasten[n] = i
+			u.Kasten.Remotes[n] = i
 		} else {
 			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
 			return

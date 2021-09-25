@@ -9,7 +9,7 @@ import (
 
 type multiplexPrintLine struct {
 	i int
-	z *lib.Zettel
+	z *lib.KastenZettel
 	e error
 }
 
@@ -34,7 +34,7 @@ func (p *MultiplexingZettelPrinter) Begin() {
 	}()
 }
 
-func (p *MultiplexingZettelPrinter) PrintZettel(i int, z *lib.Zettel, e error) {
+func (p *MultiplexingZettelPrinter) PrintZettel(i int, z *lib.KastenZettel, e error) {
 	p.channel <- multiplexPrintLine{i, z, e}
 }
 

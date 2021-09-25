@@ -25,7 +25,7 @@ func init() {
 			Printer: &printer.AlfredJsonZettelPrinter{},
 		},
 		"alfred-json-files": outputFormat{
-			Filter: func(i int, z *lib.Zettel) bool {
+			Filter: func(i int, z *lib.KastenZettel) bool {
 				return z.HasFile()
 			},
 			Printer: &printer.AlfredJsonZettelPrinter{
@@ -33,7 +33,7 @@ func init() {
 			},
 		},
 		"alfred-json-urls": outputFormat{
-			Filter: func(i int, z *lib.Zettel) bool {
+			Filter: func(i int, z *lib.KastenZettel) bool {
 				return z.HasUrl()
 			},
 			Printer: &printer.AlfredJsonZettelPrinter{
@@ -46,7 +46,7 @@ func init() {
 			},
 		},
 		"alfred-json-snippets": outputFormat{
-			Filter: func(i int, z *lib.Zettel) bool {
+			Filter: func(i int, z *lib.KastenZettel) bool {
 				for _, t := range z.Metadata.Tags {
 					if strings.Contains(t, "t-snippet") {
 						return true

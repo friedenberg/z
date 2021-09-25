@@ -12,7 +12,7 @@ type JsonZettelPrinter struct{}
 func (p *JsonZettelPrinter) Begin() {}
 func (p *JsonZettelPrinter) End()   {}
 
-func (p *JsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
+func (p *JsonZettelPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return

@@ -32,7 +32,7 @@ func GetSubcommandRemote(f *flag.FlagSet) CommandRunFunc {
 		var remote kasten.RemoteImplementation
 		var ok bool
 
-		if remote, ok = u.RemoteKasten[args[0]]; !ok {
+		if remote, ok = u.Kasten.Remotes[args[0]]; !ok {
 			err = xerrors.Errorf("invalid remote kasten: '%s'", args[1])
 			return
 		}

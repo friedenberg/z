@@ -3,8 +3,8 @@ package lib
 import "github.com/friedenberg/z/lib/kasten"
 
 type Kasten struct {
-	*Umwelt
-	kasten.LocalImplementation
+	Local   *FilesAndGit
+	Remotes map[string]kasten.RemoteImplementation
 }
 
 type KastenZettel struct {
@@ -13,12 +13,17 @@ type KastenZettel struct {
 }
 
 type Zettel struct {
-	Id       int64
-	Metadata Metadata
-	Body     string
+
+	Id int64
+	Note
 
 	Path string
 	Data ZettelData
+}
+
+type Note struct {
+	Metadata
+	Body string
 }
 
 type ZettelData struct {

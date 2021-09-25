@@ -20,9 +20,7 @@ func NormalizePath(u lib.Umwelt, p string) (n string, err error) {
 func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.KastenZettel, err error) {
 	z = &lib.KastenZettel{
 		Zettel: lib.Zettel{},
-		Kasten: lib.Kasten{
-			Umwelt: &u,
-		},
+		Kasten: u.Kasten,
 	}
 
 	id, err := zettel.IdFromString(s)
@@ -45,9 +43,7 @@ func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.KastenZettel, err error) {
 func HydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.KastenZettel, err error) {
 	z = &lib.KastenZettel{
 		Zettel: lib.Zettel{},
-		Kasten: lib.Kasten{
-			Umwelt: &u,
-		},
+		Kasten: u.Kasten,
 	}
 	z.Path = p
 	err = z.Hydrate(includeBody)
@@ -132,9 +128,7 @@ func New(u lib.Umwelt) (z *lib.KastenZettel, err error) {
 			Id:   id.Int(),
 			Path: lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
 		},
-		Kasten: lib.Kasten{
-			Umwelt: &u,
-		},
+		Kasten: u.Kasten,
 	}
 
 	return

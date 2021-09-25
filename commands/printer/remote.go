@@ -14,7 +14,7 @@ type RemotePrinter struct {
 	Umwelt       lib.Umwelt
 	Command      options.RemoteCommand
 	Remote       kasten.RemoteImplementation
-	zettels      []*lib.Zettel
+	zettels      []*lib.KastenZettel
 	rsyncPrinter *Rsync
 }
 
@@ -34,11 +34,11 @@ func (p *RemotePrinter) Begin() {
 		panic(xerrors.Errorf("unsupported remote command: '%s'", p.Command))
 	}
 
-	p.zettels = make([]*lib.Zettel, 0)
+	p.zettels = make([]*lib.KastenZettel, 0)
 	p.rsyncPrinter.Begin()
 }
 
-func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
+func (p *RemotePrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterError(errIn)
 		return

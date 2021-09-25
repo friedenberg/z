@@ -16,7 +16,7 @@ func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
 			&printer.NullZettelPrinter{},
 		)
 
-		processor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
+		processor.actioner = func(i int, z *lib.KastenZettel) (shouldPrint bool, actionErr error) {
 			shouldPrint = true
 			actionErr = os.Remove(z.Path)
 
