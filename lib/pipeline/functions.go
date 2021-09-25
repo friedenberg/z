@@ -17,8 +17,13 @@ func NormalizePath(u lib.Umwelt, p string) (n string, err error) {
 	return
 }
 
-func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.Zettel, err error) {
-	z = &lib.Zettel{Umwelt: u}
+func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.KastenZettel, err error) {
+	z = &lib.KastenZettel{
+		Zettel: lib.Zettel{},
+		Kasten: lib.Kasten{
+			Umwelt: &u,
+		},
+	}
 
 	id, err := zettel.IdFromString(s)
 
@@ -37,14 +42,19 @@ func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.Zettel, err error) {
 	return
 }
 
-func HydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.Zettel, err error) {
-	z = &lib.Zettel{Umwelt: u}
+func HydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.KastenZettel, err error) {
+	z = &lib.KastenZettel{
+		Zettel: lib.Zettel{},
+		Kasten: lib.Kasten{
+			Umwelt: &u,
+		},
+	}
 	z.Path = p
 	err = z.Hydrate(includeBody)
 	return
 }
 
-func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
+func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err error) {
 	_, err = url.Parse(urlString)
 
 	if err != nil {
@@ -73,7 +83,7 @@ func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
 	return
 }
 
-func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zettel, err error) {
+func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.KastenZettel, err error) {
 	//TODO check if file exists on disk
 	//TODO check if file sha exists in cache
 	z, err = New(u)
@@ -110,17 +120,21 @@ func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zette
 	return
 }
 
-func New(u lib.Umwelt) (z *lib.Zettel, err error) {
+func New(u lib.Umwelt) (z *lib.KastenZettel, err error) {
 	id, err := u.FilesAndGit().NewId()
 
 	if err != nil {
 		return
 	}
 
-	z = &lib.Zettel{
-		Umwelt: u,
-		Id:     id.Int(),
-		Path:   lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
+	z = &lib.KastenZettel{
+		Zettel: lib.Zettel{
+			Id:   id.Int(),
+			Path: lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
+		},
+		Kasten: lib.Kasten{
+			Umwelt: &u,
+		},
 	}
 
 	return

@@ -7,7 +7,7 @@ import (
 	"github.com/friedenberg/z/util/files_guard"
 )
 
-func (zettel *Zettel) ReadMetadataAndBody() (err error) {
+func (zettel *KastenZettel) ReadMetadataAndBody() (err error) {
 	f, err := files_guard.Open(zettel.Path)
 	defer files_guard.Close(f)
 
@@ -27,7 +27,7 @@ func (zettel *Zettel) ReadMetadataAndBody() (err error) {
 	return
 }
 
-func (z *Zettel) readBodyFromReader(r *bufio.Reader) (err error) {
+func (z *KastenZettel) readBodyFromReader(r *bufio.Reader) (err error) {
 	body := &bytes.Buffer{}
 	_, err = r.WriteTo(body)
 

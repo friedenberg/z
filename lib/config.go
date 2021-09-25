@@ -118,8 +118,12 @@ func (c Config) Umwelt() (e Umwelt, err error) {
 	lk, ok := kasten.GetLocal(c.Kasten.Local.Implementation)
 
 	if ok {
-		e.LocalKasten = lk
-		e.LocalKasten.InitFromOptions(c.Kasten.Local.Options)
+		e.Kasten = Kasten{
+			Umwelt:              &e,
+			LocalImplementation: lk,
+		}
+
+		e.Kasten.InitFromOptions(c.Kasten.Local.Options)
 	} else {
 		err = xerrors.Errorf(
 			"no implementation found for local kasten: '%s'",

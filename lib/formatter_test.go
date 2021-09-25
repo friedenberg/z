@@ -7,7 +7,7 @@ import (
 	"github.com/friedenberg/z/lib/kasten"
 )
 
-type printFormatterTestCaseMakeZettelFunc func() *Zettel
+type printFormatterTestCaseMakeZettelFunc func() *KastenZettel
 
 type printfFormatterTestCase struct {
 	name       string
@@ -25,14 +25,14 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 		},
 	}
 
-	makeZettelWithDate := func() (z *Zettel) {
+	makeZettelWithDate := func() (z *KastenZettel) {
 		time, err := time.Parse("2006-01-02", "2021-07-26")
 
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		z = &Zettel{
+		z = &KastenZettel{
 			Umwelt: umwelt,
 		}
 
@@ -68,7 +68,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 		},
 		printfFormatterTestCase{
 			name: "date then tags",
-			makeZettel: func() (z *Zettel) {
+			makeZettel: func() (z *KastenZettel) {
 				z = makeZettelWithDate()
 				z.Metadata.Tags = []string{"some-tag"}
 				return
@@ -78,7 +78,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 		},
 		printfFormatterTestCase{
 			name: "body",
-			makeZettel: func() (z *Zettel) {
+			makeZettel: func() (z *KastenZettel) {
 				z = makeZettelWithDate()
 				z.Body = `
 90210

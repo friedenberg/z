@@ -9,7 +9,6 @@ type FileDescriptor struct {
 }
 
 type RemoteFileDescriptor struct {
-	Version FileVersion
 	FileDescriptor
 }
 

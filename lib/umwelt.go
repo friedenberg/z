@@ -10,12 +10,11 @@ import (
 )
 
 type Umwelt struct {
-	LocalKasten    kasten.LocalImplementation
-	RemoteKasten   map[string]kasten.RemoteImplementation
-	Index          Index
-	BasePath       string
-	Config         Config
-	indexLoadState IndexLoadState
+	Kasten       Kasten
+	RemoteKasten map[string]kasten.RemoteImplementation
+	Index        Index
+	BasePath     string
+	Config       Config
 }
 
 func MakeUmwelt(c Config) (k Umwelt, err error) {
@@ -40,15 +39,13 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 		if err != nil && !os.IsNotExist(err) {
 			return
 		}
-
-		k.indexLoadState = IndexLoadStateLoaded
 	}
 
 	return
 }
 
 func (u Umwelt) FilesAndGit() *FilesAndGit {
-	return u.LocalKasten.(*FilesAndGit)
+	return u.Kasten.LocalImplementation.(*FilesAndGit)
 }
 
 func (e Umwelt) GetIndexPath() string {

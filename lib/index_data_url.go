@@ -1,5 +1,5 @@
 package lib
 
-func (z *Zettel) HasUrl() bool {
+func (z *KastenZettel) HasUrl() bool {
 	return z.Metadata.Url != ""
 }

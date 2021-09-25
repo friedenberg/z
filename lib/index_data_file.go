@@ -4,11 +4,11 @@ import (
 	"path"
 )
 
-func (z *Zettel) HasFile() bool {
+func (z *KastenZettel) HasFile() bool {
 	return z.Metadata.File != ""
 }
 
-func (z *Zettel) FilePath() string {
+func (z *KastenZettel) FilePath() string {
 	if !z.HasFile() {
 		return ""
 	}

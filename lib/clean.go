@@ -8,8 +8,8 @@ import (
 )
 
 //TODO swithch to p rintable description
-type CleanActionCheck func(z *Zettel) bool
-type CleanActionPerform func(z *Zettel) (bool, error)
+type CleanActionCheck func(z *KastenZettel) bool
+type CleanActionPerform func(z *KastenZettel) (bool, error)
 
 type CleanAction struct {
 	Check   CleanActionCheck
@@ -20,7 +20,7 @@ func GetCleanActions() map[string]CleanAction {
 	return map[string]CleanAction{
 		"delete_if_missing_file": CleanAction{shouldDeleteIfMissingFile, deleteIfMissingFile},
 		"normalize_file": CleanAction{
-			func(z *Zettel) bool {
+			func(z *KastenZettel) bool {
 				if z.HasFile() {
 					return false
 				}
@@ -29,21 +29,21 @@ func GetCleanActions() map[string]CleanAction {
 
 				return normalizedFile != z.Metadata.File
 			},
-			func(z *Zettel) (shouldWrite bool, err error) {
+			func(z *KastenZettel) (shouldWrite bool, err error) {
 				z.Metadata.File = path.Base(z.Metadata.File)
 				shouldWrite = true
 				return
 			},
 		},
 		"rewrite_metadata": CleanAction{
-			func(z *Zettel) bool {
+			func(z *KastenZettel) bool {
 				oldYaml := z.Data.MetadataYaml
 				//TODO handle err
 				z.generateMetadataYaml()
 
 				return oldYaml != z.Data.MetadataYaml
 			},
-			func(z *Zettel) (shouldWrite bool, err error) {
+			func(z *KastenZettel) (shouldWrite bool, err error) {
 				shouldWrite = true
 				return
 			},
@@ -58,7 +58,7 @@ func GetCleanActions() map[string]CleanAction {
 	}
 }
 
-func shouldDeleteIfMissingFile(z *Zettel) bool {
+func shouldDeleteIfMissingFile(z *KastenZettel) bool {
 	if !z.HasFile() {
 		return false
 	}
@@ -66,7 +66,7 @@ func shouldDeleteIfMissingFile(z *Zettel) bool {
 	return !util.FileExists(z.FilePath())
 }
 
-func deleteIfMissingFile(z *Zettel) (shouldWrite bool, err error) {
+func deleteIfMissingFile(z *KastenZettel) (shouldWrite bool, err error) {
 	err = os.Remove(z.Path)
 	return
 }

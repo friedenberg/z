@@ -1,7 +1,18 @@
 package lib
 
+import "github.com/friedenberg/z/lib/kasten"
+
+type Kasten struct {
+	*Umwelt
+	kasten.LocalImplementation
+}
+
+type KastenZettel struct {
+	Kasten
+	Zettel
+}
+
 type Zettel struct {
-	Umwelt   Umwelt
 	Id       int64
 	Metadata Metadata
 	Body     string
