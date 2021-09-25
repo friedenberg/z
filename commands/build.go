@@ -14,7 +14,7 @@ import (
 
 func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 	return func(e lib.Umwelt) (err error) {
-		actioner := func(i int, z *lib.KastenZettel) (shouldPrint bool, actionErr error) {
+		actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 			shouldPrint = true
 
 			for _, t := range z.Metadata.Tags {
@@ -61,7 +61,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func symlinkZettel(e lib.Umwelt, dir string, z *lib.KastenZettel) (err error) {
+func symlinkZettel(e lib.Umwelt, dir string, z *lib.Zettel) (err error) {
 	buildDir, err := makeDirectoryIfNecessary(e, dir)
 
 	if err != nil {
@@ -112,7 +112,7 @@ func makeDirectoryIfNecessary(e lib.Umwelt, p string) (a string, err error) {
 	return
 }
 
-func getZettelBuildFileName(z *lib.KastenZettel, ext string) (path string, err error) {
+func getZettelBuildFileName(z *lib.Zettel, ext string) (path string, err error) {
 	sb := &strings.Builder{}
 	t, err := lib.TimeFromPath(z.Path)
 

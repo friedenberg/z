@@ -24,7 +24,7 @@ func hydrateIndex(k lib.Umwelt) (err error) {
 
 	indexProcessor.hydrator = HydrateFromFileFunc(k, true)
 
-	indexProcessor.actioner = func(i int, z *lib.KastenZettel) (shouldPrint bool, err error) {
+	indexProcessor.actioner = func(i int, z *lib.Zettel) (shouldPrint bool, err error) {
 		err = k.Index.Add(z)
 		return
 	}
@@ -57,7 +57,7 @@ func uniqueAndSortTags(tags []string) (o []string) {
 }
 
 //TODO refactor
-func doesZettelMatchQuery(z *lib.KastenZettel, q string) bool {
+func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
 	if q == "" {
 		return true
 	}
@@ -85,7 +85,7 @@ func errIterartion(p pipeline.Printer) util.ParallelizerErrorFunc {
 	}
 }
 
-func printIfNecessary(i int, z *lib.KastenZettel, q string, fp pipeline.FilterPrinter) {
+func printIfNecessary(i int, z *lib.Zettel, q string, fp pipeline.FilterPrinter) {
 	if (fp.Filter == nil || fp.Filter(i, z)) && doesZettelMatchQuery(z, q) {
 		fp.Printer.PrintZettel(i, z, nil)
 	}

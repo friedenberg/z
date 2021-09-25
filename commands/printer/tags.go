@@ -18,7 +18,7 @@ func (p *Tags) Begin() {
 	p.tags = make(map[string]tagCounts)
 }
 
-func (p *Tags) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
+func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return

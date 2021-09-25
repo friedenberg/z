@@ -7,12 +7,8 @@ type Kasten struct {
 	Remotes map[string]kasten.RemoteImplementation
 }
 
-type KastenZettel struct {
-	Kasten
-	Zettel
-}
-
 type Zettel struct {
+	*Umwelt
 
 	Id int64
 	Note

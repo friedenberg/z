@@ -1,6 +1,6 @@
 package lib
 
-type OnZettelWriteFunc func(*KastenZettel, error) error
+type OnZettelWriteFunc func(*Zettel, error) error
 
 type KastenImplementation interface {
 	GetAll() (zs []int64, err error)

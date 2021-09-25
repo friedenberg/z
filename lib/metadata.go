@@ -65,7 +65,7 @@ func (id Metadata) ToMetadata() (md MetadataList) {
 	return
 }
 
-func (zettel *KastenZettel) ReadMetadata() (err error) {
+func (zettel *Zettel) ReadMetadata() (err error) {
 	f, err := files_guard.Open(zettel.Path)
 	defer files_guard.Close(f)
 
@@ -78,7 +78,7 @@ func (zettel *KastenZettel) ReadMetadata() (err error) {
 	return zettel.readMetadataFromReader(r)
 }
 
-func (z *KastenZettel) readMetadataFromReader(r *bufio.Reader) (err error) {
+func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 	sb := strings.Builder{}
 	within := false
 
@@ -107,7 +107,7 @@ func (z *KastenZettel) readMetadataFromReader(r *bufio.Reader) (err error) {
 	return
 }
 
-func (z *KastenZettel) ParseMetadata() (err error) {
+func (z *Zettel) ParseMetadata() (err error) {
 	var md MetadataList
 	err = yaml.Unmarshal([]byte(z.Data.MetadataYaml), &md)
 
@@ -119,7 +119,7 @@ func (z *KastenZettel) ParseMetadata() (err error) {
 	return z.FromMetadata(md)
 }
 
-func (z *KastenZettel) FromMetadata(md MetadataList) (err error) {
+func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 	for i, v := range md {
 		if i == 0 && !RegexTag.MatchString(v) {
 			z.Metadata.Description = v
@@ -191,7 +191,7 @@ func (z *KastenZettel) FromMetadata(md MetadataList) (err error) {
 	return
 }
 
-func (z *KastenZettel) FileDescriptor() (fd *zettel.FileDescriptor) {
+func (z *Zettel) FileDescriptor() (fd *zettel.FileDescriptor) {
 	if !z.HasFile() {
 		return
 	}

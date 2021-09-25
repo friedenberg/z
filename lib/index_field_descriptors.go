@@ -1,26 +1,26 @@
 package lib
 
 type MetadataFieldReadWriterArray struct {
-	ValueGetFunc func(z *KastenZettel) []string
-	ValueSetFunc func(z *KastenZettel, v []string)
+	ValueGetFunc func(z *Zettel) []string
+	ValueSetFunc func(z *Zettel, v []string)
 }
 
 func GetMetadataFieldReadWriterNull() MetadataFieldReadWriterArray {
 	return MetadataFieldReadWriterArray{
-		ValueGetFunc: func(_ *KastenZettel) []string {
+		ValueGetFunc: func(_ *Zettel) []string {
 			return []string{}
 		},
-		ValueSetFunc: func(_ *KastenZettel, _ []string) {
+		ValueSetFunc: func(_ *Zettel, _ []string) {
 		},
 	}
 }
 
 func GetMetadataFieldReadWriterTags() MetadataFieldReadWriterArray {
 	return MetadataFieldReadWriterArray{
-		ValueGetFunc: func(z *KastenZettel) []string {
+		ValueGetFunc: func(z *Zettel) []string {
 			return z.Metadata.Tags
 		},
-		ValueSetFunc: func(z *KastenZettel, v []string) {
+		ValueSetFunc: func(z *Zettel, v []string) {
 			z.Metadata.Tags = v
 		},
 	}

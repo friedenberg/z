@@ -65,7 +65,7 @@ func (a *Actions) ShouldOpenUrl() bool {
 	return *a&ActionOpenUrl != 0
 }
 
-func (a *Actions) MatchZettel(z *lib.KastenZettel) bool {
+func (a *Actions) MatchZettel(z *lib.Zettel) bool {
 	if *a&ActionEdit != 0 {
 		return true
 	}

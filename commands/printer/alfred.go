@@ -9,7 +9,7 @@ import (
 )
 
 type AlfredJsonZettelPrinter struct {
-	ItemFunc        func(z *lib.KastenZettel) []lib.AlfredItem
+	ItemFunc        func(z *lib.Zettel) []lib.AlfredItem
 	afterFirstPrint bool
 	sync.Mutex
 }
@@ -36,7 +36,7 @@ func (p *AlfredJsonZettelPrinter) setShouldPrintComma() {
 	p.afterFirstPrint = true
 }
 
-func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
+func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	defer p.setShouldPrintComma()
 
 	if errIn != nil {

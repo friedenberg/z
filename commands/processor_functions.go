@@ -17,7 +17,7 @@ func DefaultArgNormalizer(u lib.Umwelt) ArgNormalizeFunc {
 }
 
 func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
-	return func(_ int, z *lib.KastenZettel, path string) error {
+	return func(_ int, z *lib.Zettel, path string) error {
 		id := filepath.Base(path)
 
 		idId, err := zettel.IdFromString(id)
@@ -39,14 +39,14 @@ func HydrateFromIndexFunc(u lib.Umwelt) HydrateFunc {
 }
 
 func HydrateFromFileFunc(u lib.Umwelt, includeBody bool) HydrateFunc {
-	return func(_ int, z *lib.KastenZettel, path string) error {
+	return func(_ int, z *lib.Zettel, path string) error {
 		z.Path = path
 		return z.Hydrate(includeBody)
 	}
 }
 
 func MatchQuery(q string) pipeline.Filter {
-	return func(i int, z *lib.KastenZettel) bool {
+	return func(i int, z *lib.Zettel) bool {
 		return doesZettelMatchQuery(z, q)
 	}
 }

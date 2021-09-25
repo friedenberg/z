@@ -8,7 +8,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func (z *KastenZettel) Hydrate(readBody bool) (err error) {
+func (z *Zettel) Hydrate(readBody bool) (err error) {
 	id := strings.TrimSuffix(path.Base(z.Path), path.Ext(z.Path))
 	idInt, err := strconv.ParseInt(id, 10, 64)
 

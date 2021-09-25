@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-type FormatFunc func(*KastenZettel) string
+type FormatFunc func(*Zettel) string
 
 type Formatter interface {
-	Format(*KastenZettel) string
+	Format(*Zettel) string
 }
 
 type printfFormatter struct {
@@ -26,7 +26,7 @@ func MakePrintfFormatFunc(format string) FormatFunc {
 	return f.Format
 }
 
-func (f printfFormatter) Format(z *KastenZettel) string {
+func (f printfFormatter) Format(z *Zettel) string {
 	sb := &strings.Builder{}
 
 	lastLoopWasEmpty := false
@@ -81,6 +81,6 @@ func (f printfFormatter) Format(z *KastenZettel) string {
 	return sb.String()
 }
 
-func (z *KastenZettel) Format(f string) string {
+func (z *Zettel) Format(f string) string {
 	return MakePrintfFormatter(f).Format(z)
 }

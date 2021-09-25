@@ -27,7 +27,7 @@ func (p *GitPrinter) SetShouldCommit() {
 	p.shouldCommit = true
 }
 
-func (p *GitPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
+func (p *GitPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if !p.Umwelt.Kasten.Local.GitEnabled {
 		return
 	}

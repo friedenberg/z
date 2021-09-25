@@ -28,9 +28,8 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 	return func(u lib.Umwelt) (err error) {
 		currentTime := time.Now()
 
-		z := &lib.KastenZettel{
-			Zettel: lib.Zettel{},
-			Kasten: u.Kasten,
+		z := &lib.Zettel{
+			Umwelt: &u,
 		}
 		z.InitFromTime(currentTime)
 
@@ -97,7 +96,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 			z.Body = content
 		}
 
-		err = z.Write(func(z *lib.KastenZettel, errIn error) (errOut error) {
+		err = z.Write(func(z *lib.Zettel, errIn error) (errOut error) {
 			if errIn != nil {
 				if z.HasFile() {
 					errOut = os.Remove(z.FilePath())

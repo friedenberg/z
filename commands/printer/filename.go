@@ -10,7 +10,7 @@ type FilenameZettelPrinter struct{}
 func (p *FilenameZettelPrinter) Begin() {}
 func (p *FilenameZettelPrinter) End()   {}
 
-func (p *FilenameZettelPrinter) PrintZettel(i int, z *lib.KastenZettel, errIn error) {
+func (p *FilenameZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
 		util.StdPrinterErr(errIn)
 		return

@@ -42,12 +42,12 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			gitPrinter,
 		)
 
-		processor.hydrator = func(_ int, z *lib.KastenZettel, path string) (err error) {
+		processor.hydrator = func(_ int, z *lib.Zettel, path string) (err error) {
 			z.Path = path
 			return z.Hydrate(true)
 		}
 
-		processor.actioner = func(_ int, z *lib.KastenZettel) (shouldPrint bool, err error) {
+		processor.actioner = func(_ int, z *lib.Zettel) (shouldPrint bool, err error) {
 			shouldPrint = true
 			found := -1
 			values := fromMoveInstruction.fieldReadWriter.ValueGetFunc(z)
@@ -72,7 +72,7 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 			toMoveInstruction.fieldReadWriter.ValueSetFunc(z, values)
 
 			if !isDryRun {
-				err = z.Write(func(_ *lib.KastenZettel, _ error) error { return nil })
+				err = z.Write(func(_ *lib.Zettel, _ error) error { return nil })
 			}
 
 			if err != nil {

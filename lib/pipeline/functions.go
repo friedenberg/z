@@ -17,10 +17,9 @@ func NormalizePath(u lib.Umwelt, p string) (n string, err error) {
 	return
 }
 
-func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.KastenZettel, err error) {
-	z = &lib.KastenZettel{
-		Zettel: lib.Zettel{},
-		Kasten: u.Kasten,
+func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.Zettel, err error) {
+	z = &lib.Zettel{
+		Umwelt: &u,
 	}
 
 	id, err := zettel.IdFromString(s)
@@ -40,17 +39,16 @@ func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.KastenZettel, err error) {
 	return
 }
 
-func HydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.KastenZettel, err error) {
-	z = &lib.KastenZettel{
-		Zettel: lib.Zettel{},
-		Kasten: u.Kasten,
+func HydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.Zettel, err error) {
+	z = &lib.Zettel{
+		Umwelt: &u,
 	}
 	z.Path = p
 	err = z.Hydrate(includeBody)
 	return
 }
 
-func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err error) {
+func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
 	_, err = url.Parse(urlString)
 
 	if err != nil {
@@ -79,7 +77,7 @@ func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.KastenZettel, err 
 	return
 }
 
-func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.KastenZettel, err error) {
+func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zettel, err error) {
 	//TODO check if file exists on disk
 	//TODO check if file sha exists in cache
 	z, err = New(u)
@@ -116,19 +114,17 @@ func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Kaste
 	return
 }
 
-func New(u lib.Umwelt) (z *lib.KastenZettel, err error) {
+func New(u lib.Umwelt) (z *lib.Zettel, err error) {
 	id, err := u.FilesAndGit().NewId()
 
 	if err != nil {
 		return
 	}
 
-	z = &lib.KastenZettel{
-		Zettel: lib.Zettel{
-			Id:   id.Int(),
-			Path: lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
-		},
-		Kasten: u.Kasten,
+	z = &lib.Zettel{
+		Id:     id.Int(),
+		Path:   lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
+		Umwelt: &u,
 	}
 
 	return

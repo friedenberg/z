@@ -122,7 +122,7 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 
 	u.Kasten.Local = &FilesAndGit{
 		GitEnabled: c.Kasten.GitEnabled,
-		BasePath:   c.Kasten.Path,
+		BasePath:   os.ExpandEnv(c.Kasten.Path),
 	}
 
 	u.Kasten.Remotes = make(map[string]kasten.RemoteImplementation)

@@ -12,7 +12,7 @@ import (
 )
 
 //TODO deprecate
-func (z *KastenZettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err error) {
+func (z *Zettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err error) {
 	d, err := time.ParseDuration(strconv.Itoa(i) + "s")
 
 	if err != nil {
@@ -40,7 +40,7 @@ func (z *KastenZettel) InitAndAssignUniqueId(currentTime time.Time, i int) (err 
 	return
 }
 
-func (z *KastenZettel) InitFromTime(t time.Time) {
+func (z *Zettel) InitFromTime(t time.Time) {
 	z.Path = MakePathFromTime(z.Kasten.Local.BasePath, t)
 	z.Id = t.Unix()
 
@@ -61,7 +61,7 @@ func MakePathFromTime(basePath string, t time.Time) (filename string) {
 }
 
 func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
-	return func(z *KastenZettel, errIn error) (errOut error) {
+	return func(z *Zettel, errIn error) (errOut error) {
 		if errIn != nil {
 			return
 		}
@@ -80,7 +80,7 @@ func AddUrlOnWrite(u string, t time.Time) OnZettelWriteFunc {
 }
 
 func AddFileOnWrite(oldPath string) OnZettelWriteFunc {
-	return func(z *KastenZettel, errIn error) (errOut error) {
+	return func(z *Zettel, errIn error) (errOut error) {
 
 		if errIn != nil {
 			return

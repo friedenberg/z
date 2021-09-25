@@ -110,7 +110,7 @@ func (m Index) Set(k zettel.Id, z IndexZettel) {
 	m.Zettels[k] = z
 }
 
-func (i Index) Add(z *KastenZettel) error {
+func (i Index) Add(z *Zettel) error {
 	if _, ok := i.Get(zettel.Id(z.Id)); ok {
 		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
@@ -137,7 +137,7 @@ func (i Index) Add(z *KastenZettel) error {
 	return nil
 }
 
-func (i Index) HydrateZettel(z *KastenZettel, zb IndexZettel) {
+func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 	z.Metadata = zb.Metadata
 	z.Id = zb.Id
 	z.Path = zb.Path
