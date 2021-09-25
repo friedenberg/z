@@ -23,7 +23,6 @@ func (fd FileDescriptor) Tag() string {
 	sb.WriteString(fd.ZettelId.String())
 
 	if fd.Ext != "" {
-		sb.WriteString(".")
 		sb.WriteString(fd.Ext)
 	}
 
@@ -41,7 +40,7 @@ func (fd FileDescriptor) FileName() (fn string) {
 	if fd.Ext == "" {
 		fn = fi
 	} else {
-		fn = fi + "." + fd.Ext
+		fn = fi + fd.Ext
 	}
 
 	return
