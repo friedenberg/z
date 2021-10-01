@@ -1,8 +1,6 @@
 package printer
 
 import (
-	"fmt"
-
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/kasten"
@@ -51,7 +49,6 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	fmt.Println(fd)
 	p.rsyncPrinter.File(fd.FileName())
 }
 
