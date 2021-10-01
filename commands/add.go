@@ -51,12 +51,14 @@ func (a *attachmentKind) Set(s string) (err error) {
 
 func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	var tagString string
+	var description string
 	var kind attachmentKind
 	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	f.StringVar(&tagString, "tags", "", "parse the passed-in string as the metadata.")
+	f.StringVar(&description, "description", "", "use this string as the zettel description")
 	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
 	return func(e lib.Umwelt) (err error) {
@@ -81,8 +83,9 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 				z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
 			}
 
-			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
+			z.Metadata.Description = description
 
+			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
 
 			err = z.Write(nil)
 
