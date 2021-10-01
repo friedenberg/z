@@ -16,9 +16,6 @@ type ConfigTagForNewZettels struct {
 	TagForNewZettels string `toml:"tag-for-new-zettels"`
 }
 
-type KastenLocalConfig struct {
-}
-
 type KastenRemoteConfig struct {
 	ConfigTagForNewZettels
 
@@ -31,19 +28,14 @@ type TagConfig struct {
 	autoTags []string `toml:"auto-tags"`
 }
 
-type KastenTable struct {
-	ConfigTagForNewZettels
-	Path       string `toml:"path"`
-	GitEnabled bool   `toml:"git-enabled"`
-	Remote     map[string]KastenRemoteConfig
-}
-
 type Config struct {
 	ConfigTagForNewZettels
 
+	UseIndexCache bool   `toml:"use-index-cache"`
+	Path          string `toml:"path"`
+	GitEnabled    bool   `toml:"git-enabled"`
+	Remotes       map[string]KastenRemoteConfig
 	Tags          map[string]TagConfig
-	Kasten        KastenTable
-	UseIndexCache bool `toml:"use-index-cache"`
 }
 
 func DefaultConfigPath() (p string, err error) {
@@ -121,8 +113,8 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 	}
 
 	u.Kasten.Local = &FilesAndGit{
-		GitEnabled: c.Kasten.GitEnabled,
-		BasePath:   os.ExpandEnv(c.Kasten.Path),
+		GitEnabled: c.GitEnabled,
+		BasePath:   os.ExpandEnv(c.Path),
 	}
 
 	u.Kasten.Remotes = make(map[string]kasten.RemoteImplementation)
@@ -141,7 +133,7 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 	// 	}
 	// }
 
-	for n, kc := range c.Kasten.Remote {
+	for n, kc := range c.Remotes {
 		if i, ok := kasten.GetRemote(kc.Implementation); ok {
 			i.InitFromOptions(kc.Options)
 			u.Kasten.Remotes[n] = i
