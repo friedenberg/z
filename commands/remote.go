@@ -48,6 +48,9 @@ func GetSubcommandRemote(f *flag.FlagSet) CommandRunFunc {
 				Command: command,
 				Remote:  remote,
 			},
+			Filter: func(_ int, z *lib.Zettel) bool {
+				return z.HasFile()
+			},
 		}
 
 		var iter util.ParallelizerIterFunc
