@@ -2,10 +2,7 @@ package commands
 
 import (
 	"flag"
-	"path"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/commands/printer"
@@ -16,7 +13,6 @@ import (
 )
 
 type attachmentKind struct {
-	adder    func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc
 	hydrator func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
 }
 
@@ -26,33 +22,21 @@ func (a attachmentKind) String() string {
 }
 
 func (a *attachmentKind) Set(s string) (err error) {
-	fileAdder := func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-		z.Metadata.File = strconv.FormatInt(z.Id, 10) + path.Ext(p)
-		return lib.AddFileOnWrite(p)
-	}
-
 	switch s {
 	case "files-copy":
 		*a = attachmentKind{
-			adder: fileAdder,
 			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
 				return pipeline.NewOrFoundForFile(u, urlString, true)
 			},
 		}
 	case "files":
 		*a = attachmentKind{
-			adder: fileAdder,
 			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
 				return pipeline.NewOrFoundForFile(u, urlString, false)
 			},
 		}
 	case "urls":
 		*a = attachmentKind{
-			adder: func(z *lib.Zettel, t time.Time, p string) lib.OnZettelWriteFunc {
-				//TODO normalize
-				z.Metadata.Url = p
-				return lib.AddUrlOnWrite(p, t)
-			},
 			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
 				return pipeline.NewOrFoundForUrl(u, urlString)
 			},
@@ -76,8 +60,6 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
 	return func(e lib.Umwelt) (err error) {
-		currentTime := time.Now()
-
 		pr := &printer.MultiplexingZettelPrinter{
 			Printer: &printer.ActionZettelPrinter{
 				Umwelt:  e,
@@ -101,9 +83,8 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 
 			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
 
-			onWrite := kind.adder(z, currentTime, a)
 
-			err = z.Write(onWrite)
+			err = z.Write(nil)
 
 			if err != nil {
 				err = xerrors.Errorf("failed to write: %w", err)

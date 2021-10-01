@@ -2,7 +2,6 @@ package pipeline
 
 import (
 	"net/url"
-	"os"
 	"os/exec"
 	"path"
 	"strconv"
@@ -101,7 +100,12 @@ func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zette
 			err = xerrors.Errorf("%w: %s", err, msg)
 		}
 	} else {
-		err = os.Rename(file, fileName)
+		cmd := exec.Command("mv", file, fileName)
+		msg, err := cmd.CombinedOutput()
+
+		if err != nil {
+			err = xerrors.Errorf("%w: %s", err, msg)
+		}
 	}
 
 	if err != nil {

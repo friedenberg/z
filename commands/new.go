@@ -15,13 +15,10 @@ import (
 )
 
 func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
-	var metadata_json, content, urlToAdd, filePathToAdd string
+	var metadata_json, content string
 	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
-	//TODO convert to action
-	f.StringVar(&urlToAdd, "with-url", "", "include the passed-in URL in the zettel")
-	f.StringVar(&filePathToAdd, "with-file", "", "move the passed-in file into zettel control")
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
 	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
 
@@ -50,26 +47,6 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 
 		if err != nil {
 			return
-		}
-
-		if urlToAdd != "" {
-			err = lib.AddUrlOnWrite(urlToAdd, currentTime)(z, nil)
-
-			if err != nil {
-				return
-			}
-		}
-
-		if filePathToAdd != "" {
-			err = lib.AddFileOnWrite(filePathToAdd)(z, nil)
-
-			if err != nil {
-				return
-			}
-
-			if err != nil {
-				return
-			}
 		}
 
 		if metadata_json != "" {
