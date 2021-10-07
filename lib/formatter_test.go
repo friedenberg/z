@@ -3,8 +3,6 @@ package lib
 import (
 	"testing"
 	"time"
-
-	"github.com/friedenberg/z/lib/kasten"
 )
 
 type printFormatterTestCaseMakeZettelFunc func() *Zettel
@@ -17,12 +15,9 @@ type printfFormatterTestCase struct {
 }
 
 func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
-	k := &FilesAndGit{}
+	k := FilesAndGit{}
 	umwelt := Umwelt{
-		DefaultKasten: k,
-		Kasten: map[string]kasten.Implementation{
-			"default": k,
-		},
+		Kasten: Kasten{Local: &k},
 	}
 
 	makeZettelWithDate := func() (z *Zettel) {
@@ -33,7 +28,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 		}
 
 		z = &Zettel{
-			Umwelt: umwelt,
+			Umwelt: &umwelt,
 		}
 
 		z.InitFromTime(time)
@@ -75,6 +70,17 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 			},
 			format: "%w, %t",
 			output: "2021-07-26, some-tag",
+		},
+		printfFormatterTestCase{
+			name: "newlines",
+			makeZettel: func() (z *Zettel) {
+				z = makeZettelWithDate()
+				z.Metadata.File = "filename.extension"
+				return
+			},
+			format: "%f\n",
+			output: `filename.extension
+`,
 		},
 		printfFormatterTestCase{
 			name: "body",

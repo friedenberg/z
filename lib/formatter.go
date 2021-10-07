@@ -73,7 +73,6 @@ func (f printfFormatter) Format(z *Zettel) string {
 		}
 
 		if len(f) > 0 {
-			//TODO backslash escapes / printf style escapes
 			sb.WriteString(f)
 		}
 	}
