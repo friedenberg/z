@@ -8,10 +8,10 @@ import (
 	"github.com/friedenberg/z/lib/pipeline/printer"
 )
 
-func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {
-	return func(e lib.Umwelt) (err error) {
+func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		processor := MakeProcessor(
-			e,
+			u,
 			f.Args(),
 			&printer.NullZettelPrinter{},
 		)

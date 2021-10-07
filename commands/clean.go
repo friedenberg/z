@@ -9,14 +9,14 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandClean(f *flag.FlagSet) lib.Transactor {
 	isDryRun := false
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		processor := MakeProcessor(
-			e,
+			u,
 			f.Args(),
 			&printer.NullZettelPrinter{},
 		)
@@ -25,7 +25,7 @@ func GetSubcommandClean(f *flag.FlagSet) CommandRunFunc {
 			gitPrinter := &printer.GitPrinter{
 				Mutex:            &sync.Mutex{},
 				GitCommitMessage: n,
-				Umwelt:           e,
+				Umwelt:           u,
 			}
 
 			gitPrinter.SetShouldCommit()

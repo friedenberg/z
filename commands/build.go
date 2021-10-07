@@ -12,13 +12,13 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
-	return func(e lib.Umwelt) (err error) {
+func GetSubcommandBuild(f *flag.FlagSet) lib.Transactor {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 			shouldPrint = true
 
 			for _, t := range z.Metadata.Tags {
-				actionErr = symlinkZettel(e, t, z)
+				actionErr = symlinkZettel(u, t, z)
 
 				if actionErr != nil {
 					actionErr = xerrors.Errorf("symlinking zettel to tag: %w", actionErr)
@@ -27,7 +27,7 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 			}
 
 			if len(z.Metadata.Tags) == 0 {
-				actionErr = symlinkZettel(e, "untagged", z)
+				actionErr = symlinkZettel(u, "untagged", z)
 
 				if actionErr != nil {
 					actionErr = xerrors.Errorf("symlinking zettel: %w", actionErr)
@@ -39,14 +39,14 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 		}
 
 		processor := MakeProcessor(
-			e,
+			u,
 			f.Args(),
 			&printer.NullZettelPrinter{},
 		)
 
 		processor.actioner = actioner
 
-		buildPath := path.Join(e.FilesAndGit().BasePath, "build")
+		buildPath := path.Join(u.FilesAndGit().BasePath, "build")
 
 		os.RemoveAll(buildPath)
 		err = os.Mkdir(buildPath, 0700)
@@ -61,8 +61,8 @@ func GetSubcommandBuild(f *flag.FlagSet) CommandRunFunc {
 	}
 }
 
-func symlinkZettel(e lib.Umwelt, dir string, z *lib.Zettel) (err error) {
-	buildDir, err := makeDirectoryIfNecessary(e, dir)
+func symlinkZettel(u lib.Umwelt, dir string, z *lib.Zettel) (err error) {
+	buildDir, err := makeDirectoryIfNecessary(u, dir)
 
 	if err != nil {
 		err = xerrors.Errorf("making directory: %s: %w", dir, err)
@@ -101,8 +101,8 @@ func symlinkZettel(e lib.Umwelt, dir string, z *lib.Zettel) (err error) {
 	return
 }
 
-func makeDirectoryIfNecessary(e lib.Umwelt, p string) (a string, err error) {
-	a = path.Join(e.FilesAndGit().BasePath, "build", p)
+func makeDirectoryIfNecessary(u lib.Umwelt, p string) (a string, err error) {
+	a = path.Join(u.FilesAndGit().BasePath, "build", p)
 	err = os.Mkdir(a, 0700)
 
 	if os.IsExist(err) {

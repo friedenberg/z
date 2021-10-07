@@ -12,11 +12,11 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func GetSubcommandRemote(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 	var query string
 	f.StringVar(&query, "query", "", "zettel-spec")
 
-	return func(u lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		args := f.Args()
 
 		var command options.RemoteCommand

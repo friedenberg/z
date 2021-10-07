@@ -10,19 +10,19 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 	var query string
 	editActions := options.Actions(options.ActionEdit)
 
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
-	return func(e lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		fp := pipeline.FilterPrinter{
 			Filter: MatchQuery(query),
 			Printer: &printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					Umwelt:  e,
+					Umwelt:  u,
 					Actions: editActions,
 				},
 			},
@@ -31,22 +31,22 @@ func GetSubcommandEdit(f *flag.FlagSet) CommandRunFunc {
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 
-		if e.Config.UseIndexCache {
+		if u.Config.UseIndexCache {
 			if len(args) == 0 {
-				args = e.GetAll()
+				args = u.GetAll()
 			}
 
-			iter = cachedIteration(e, query, fp)
+			iter = cachedIteration(u, query, fp)
 		} else {
 			if len(args) == 0 {
-				args, err = e.FilesAndGit().GetAll()
+				args, err = u.FilesAndGit().GetAll()
 
 				if err != nil {
 					return
 				}
 			}
 
-			iter = filesystemIteration(e, query, fp)
+			iter = filesystemIteration(u, query, fp)
 		}
 
 		par := util.Parallelizer{Args: args}

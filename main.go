@@ -16,14 +16,14 @@ import (
 
 type subcommand struct {
 	flags   *flag.FlagSet
-	runFunc commands.CommandRunFunc
+	runFunc lib.Transactor
 }
 
 var (
 	subcommands = map[string]subcommand{}
 )
 
-func makeSubcommand(name string, makeFunc func(*flag.FlagSet) commands.CommandRunFunc) {
+func makeSubcommand(name string, makeFunc func(*flag.FlagSet) lib.Transactor) {
 	if _, ok := subcommands[name]; ok {
 		panic("command added more than once: " + name)
 	}
@@ -84,7 +84,7 @@ func run() int {
 
 	//TODO refactor to be command too
 	cmd.flags.Parse(os.Args[2:])
-	err = cmd.runFunc(umwelt)
+	err = umwelt.RunTransaction(cmd.runFunc)
 
 	if err != nil {
 		util.StdPrinterError(err)

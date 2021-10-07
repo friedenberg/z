@@ -9,12 +9,12 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandMv(f *flag.FlagSet) lib.Transactor {
 	isDryRun := false
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(e lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		args := f.Args()
 
 		fromMoveInstruction, err := moveInstructionFromString(args[0])
@@ -31,13 +31,13 @@ func GetSubcommandMv(f *flag.FlagSet) CommandRunFunc {
 		gitPrinter := &printer.GitPrinter{
 			Mutex:            &sync.Mutex{},
 			GitCommitMessage: "mv",
-			Umwelt:           e,
+			Umwelt:           u,
 		}
 
 		gitPrinter.SetShouldCommit()
 
 		processor := MakeProcessor(
-			e,
+			u,
 			args[2:],
 			gitPrinter,
 		)

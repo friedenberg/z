@@ -49,7 +49,7 @@ func (a *attachmentKind) Set(s string) (err error) {
 	return
 }
 
-func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	var tagString string
 	var description string
 	var kind attachmentKind
@@ -61,16 +61,16 @@ func GetSubcommandAdd(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&description, "description", "", "use this string as the zettel description")
 	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
-	return func(e lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		pr := &printer.MultiplexingZettelPrinter{
 			Printer: &printer.ActionZettelPrinter{
-				Umwelt:  e,
+				Umwelt:  u,
 				Actions: editActions,
 			},
 		}
 
 		iter := func(i int, a string) (err error) {
-			z, err := kind.hydrator(e, a)
+			z, err := kind.hydrator(u, a)
 
 			if err != nil {
 				return

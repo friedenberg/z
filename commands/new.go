@@ -14,7 +14,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 	var metadata_json, content string
 	editActions := options.Actions(options.ActionEdit)
 
@@ -22,7 +22,7 @@ func GetSubcommandNew(f *flag.FlagSet) CommandRunFunc {
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
 	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
 
-	return func(u lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		currentTime := time.Now()
 
 		z := &lib.Zettel{

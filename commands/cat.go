@@ -111,32 +111,32 @@ func (a *outputFormat) Set(s string) (err error) {
 	return
 }
 
-func GetSubcommandCat(f *flag.FlagSet) CommandRunFunc {
+func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	var of outputFormat
 	var query string
 	f.Var(&of, "output-format", fmt.Sprintf("One of %q", outputFormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
 
-	return func(e lib.Umwelt) (err error) {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 
-		if e.Config.UseIndexCache {
+		if u.Config.UseIndexCache {
 			if len(args) == 0 {
-				args = e.GetAll()
+				args = u.GetAll()
 			}
 
-			iter = cachedIteration(e, query, pipeline.FilterPrinter(of))
+			iter = cachedIteration(u, query, pipeline.FilterPrinter(of))
 		} else {
 			if len(args) == 0 {
-				args, err = e.FilesAndGit().GetAll()
+				args, err = u.FilesAndGit().GetAll()
 
 				if err != nil {
 					return
 				}
 			}
 
-			iter = filesystemIteration(e, query, pipeline.FilterPrinter(of))
+			iter = filesystemIteration(u, query, pipeline.FilterPrinter(of))
 		}
 
 		par := util.Parallelizer{Args: args}

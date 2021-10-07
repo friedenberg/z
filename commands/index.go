@@ -6,16 +6,16 @@ import (
 	"github.com/friedenberg/z/lib"
 )
 
-func GetSubcommandIndex(f *flag.FlagSet) CommandRunFunc {
-	return func(e lib.Umwelt) (err error) {
-		e.Index = lib.MakeIndex()
-		err = hydrateIndex(e)
+func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
+	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+		u.Index = lib.MakeIndex()
+		err = hydrateIndex(u)
 
 		if err != nil {
 			return
 		}
 
-		err = e.CacheIndex()
+		err = u.CacheIndex()
 
 		if err != nil {
 			return
