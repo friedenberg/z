@@ -7,8 +7,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline/printer"
 	"golang.org/x/xerrors"
 )
 

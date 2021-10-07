@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline/printer"
 )
 
 func GetSubcommandRm(f *flag.FlagSet) CommandRunFunc {

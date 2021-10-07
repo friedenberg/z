@@ -4,10 +4,10 @@ import (
 	"flag"
 
 	"github.com/friedenberg/z/commands/options"
-	"github.com/friedenberg/z/commands/printer"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/pipeline/printer"
 	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
