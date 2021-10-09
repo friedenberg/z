@@ -12,7 +12,6 @@ type RemotePrinter struct {
 	Umwelt       lib.Umwelt
 	Transaction  lib.Transaction
 	Command      options.RemoteCommand
-	RemoteName   string
 	Remote       kasten.RemoteImplementation
 	zettels      []*lib.Zettel
 	rsyncPrinter *Rsync
