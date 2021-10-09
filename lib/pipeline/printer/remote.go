@@ -43,7 +43,7 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	fd, ok := z.LocalFileDescriptor()
+	fd, ok := z.LocalFile()
 
 	if !ok {
 		//TODO decide whether to skip or to error

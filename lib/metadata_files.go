@@ -8,7 +8,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func (z *Zettel) LocalFileDescriptor() (fd metadata.File, ok bool) {
+func (z *Zettel) LocalFile() (fd metadata.File, ok bool) {
 	ok = z.HasFile()
 
 	if !ok {
@@ -23,7 +23,7 @@ func (z *Zettel) LocalFileDescriptor() (fd metadata.File, ok bool) {
 	return
 }
 
-func (z *Zettel) RemoteFileDescriptors() (fds []metadata.File) {
+func (z *Zettel) RemoteFiles() (fds []metadata.File) {
 	return
 }
 
