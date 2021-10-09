@@ -27,16 +27,14 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
 	k.Index = MakeIndex()
 
-	if c.UseIndexCache {
-		//find all caches
-		//remove any older-version caches
-		//try to load from correct version cache
-		//or exit if it doesn't exist
-		err = k.LoadIndexFromCache()
+	//find all caches
+	//remove any older-version caches
+	//try to load from correct version cache
+	//or exit if it doesn't exist
+	err = k.LoadIndexFromCache()
 
-		if err != nil && !os.IsNotExist(err) {
-			return
-		}
+	if err != nil && !os.IsNotExist(err) {
+		return
 	}
 
 	return

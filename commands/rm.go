@@ -28,6 +28,8 @@ func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
 				actionErr = os.Remove(z.FilePath())
 			}
 
+			t.Del.PrintZettel(0, z, actionErr)
+
 			return
 		}
 

@@ -48,22 +48,14 @@ func (p *Processor) init() (err error) {
 	}
 
 	if p.hydrator == nil {
-		if p.kasten.Config.UseIndexCache {
-			p.hydrator = HydrateFromIndexFunc(p.kasten)
-		} else {
-			p.hydrator = HydrateFromFileFunc(p.kasten, false)
-		}
+		p.hydrator = HydrateFromIndexFunc(p.kasten)
 	}
 
 	return
 }
 
 func (p *Processor) getDefaultFiles() (files []string, err error) {
-	if p.kasten.Config.UseIndexCache {
-		files = p.kasten.GetAll()
-	} else {
-		files, err = p.kasten.FilesAndGit().GetAll()
-	}
+	files = p.kasten.GetAll()
 
 	return
 }

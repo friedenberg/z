@@ -31,11 +31,10 @@ type TagConfig struct {
 type Config struct {
 	ConfigTagForNewZettels
 
-	UseIndexCache bool   `toml:"use-index-cache"`
-	Path          string `toml:"path"`
-	GitEnabled    bool   `toml:"git-enabled"`
-	Remotes       map[string]KastenRemoteConfig
-	Tags          map[string]TagConfig
+	Path       string `toml:"path"`
+	GitEnabled bool   `toml:"git-enabled"`
+	Remotes    map[string]KastenRemoteConfig
+	Tags       map[string]TagConfig
 }
 
 func DefaultConfigPath() (p string, err error) {

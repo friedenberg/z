@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"io"
 	"sync"
 
@@ -13,42 +13,8 @@ type IndexZettel struct {
 	Path     string
 	Id       int64
 	Metadata Metadata
-	Body     string
-}
-
-type ZettelIdMap struct {
-	IdMap map[string][]zettel.Id
-}
-
-func MakeZettelIdMap() ZettelIdMap {
-	return ZettelIdMap{
-		IdMap: make(map[string][]zettel.Id),
-	}
-}
-
-func (m ZettelIdMap) Get(k string, l sync.Locker) ([]zettel.Id, bool) {
-	l.Lock()
-	defer l.Unlock()
-	a, ok := m.IdMap[k]
-	return a, ok
-}
-
-func (m ZettelIdMap) Set(k string, ids []zettel.Id, l sync.Locker) {
-	l.Lock()
-	defer l.Unlock()
-	m.IdMap[k] = ids
-}
-
-func (m ZettelIdMap) Add(k string, id zettel.Id, l sync.Locker) {
-	var a []zettel.Id
-	ok := false
-
-	if a, ok = m.Get(k, l); !ok {
-		a = make([]zettel.Id, 0, 1)
-	}
-
-	a = append(a, id)
-	m.Set(k, a, l)
+	//TODO remove
+	Body string
 }
 
 type SerializableIndex struct {
@@ -76,7 +42,8 @@ func MakeIndex() Index {
 }
 
 func (i Index) Read(r io.Reader) (err error) {
-	dec := gob.NewDecoder(r)
+	dec := json.NewDecoder(r)
+	// dec := gob.NewDecoder(r)
 	err = dec.Decode(&i.SerializableIndex)
 
 	if err != nil {
@@ -87,7 +54,8 @@ func (i Index) Read(r io.Reader) (err error) {
 }
 
 func (i Index) Write(w io.Writer) (err error) {
-	enc := gob.NewEncoder(w)
+	enc := json.NewEncoder(w)
+	// enc := gob.NewEncoder(w)
 	err = enc.Encode(i.SerializableIndex)
 
 	if err != nil {
@@ -104,7 +72,7 @@ func (m Index) Get(k zettel.Id) (IndexZettel, bool) {
 	return a, ok
 }
 
-func (m Index) Set(k zettel.Id, z IndexZettel) {
+func (m Index) set(k zettel.Id, z IndexZettel) {
 	m.Lock()
 	defer m.Unlock()
 	m.Zettels[k] = z
@@ -115,7 +83,7 @@ func (i Index) Add(z *Zettel) error {
 		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
 
-	i.Set(zettel.Id(z.Id), IndexZettel{
+	i.set(zettel.Id(z.Id), IndexZettel{
 		Path:     z.Path,
 		Id:       int64(z.Id),
 		Metadata: z.Metadata,
@@ -137,6 +105,27 @@ func (i Index) Add(z *Zettel) error {
 	return nil
 }
 
+func (i Index) Update(z *Zettel) (err error) {
+	err = i.Delete(z)
+
+	if err != nil {
+		return err
+	}
+
+	err = i.Add(z)
+
+	return
+}
+
+func (i Index) Delete(z *Zettel) (err error) {
+	id := zettel.Id(z.Id)
+	delete(i.Zettels, id)
+	i.Files.Delete(id, i)
+	i.Urls.Delete(id, i)
+	i.Tags.Delete(id, i)
+	return
+}
+
 func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 	z.Metadata = zb.Metadata
 	z.Id = zb.Id
@@ -152,7 +141,7 @@ func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
 		return
 	}
 
-	for _, id := range ids {
+	for _, id := range ids.Slice() {
 		if zi, ok := i.Zettels[zettel.Id(id)]; ok {
 			o = append(o, zi)
 		}

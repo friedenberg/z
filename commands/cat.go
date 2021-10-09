@@ -121,23 +121,11 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 
-		if u.Config.UseIndexCache {
-			if len(args) == 0 {
-				args = u.GetAll()
-			}
-
-			iter = cachedIteration(u, query, pipeline.FilterPrinter(of))
-		} else {
-			if len(args) == 0 {
-				args, err = u.FilesAndGit().GetAll()
-
-				if err != nil {
-					return
-				}
-			}
-
-			iter = filesystemIteration(u, query, pipeline.FilterPrinter(of))
+		if len(args) == 0 {
+			args = u.GetAll()
 		}
+
+		iter = cachedIteration(u, query, pipeline.FilterPrinter(of))
 
 		par := util.Parallelizer{Args: args}
 		of.Printer.Begin()

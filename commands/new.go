@@ -30,6 +30,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 		}
 		z.InitFromTime(currentTime)
 
+		//TODO use common functions
 		for {
 			if util.FileExists(z.Path) {
 				d, err := time.ParseDuration("1s")
@@ -97,6 +98,8 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 		actionPrinter.Begin()
 		actionPrinter.PrintZettel(0, z, nil)
 		actionPrinter.End()
+
+		t.Add.PrintZettel(0, z, nil)
 
 		return
 	}

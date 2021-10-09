@@ -44,9 +44,10 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		fp := pipeline.FilterPrinter{
 			Printer: &printer.RemotePrinter{
-				Umwelt:  u,
-				Command: command,
-				Remote:  remote,
+				Umwelt:      u,
+				Transaction: t,
+				Command:     command,
+				Remote:      remote,
 			},
 			Filter: func(_ int, z *lib.Zettel) bool {
 				return z.HasFile()
@@ -55,23 +56,11 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		var iter util.ParallelizerIterFunc
 
-		if u.Config.UseIndexCache {
-			if len(args) == 0 {
-				args = u.GetAll()
-			}
-
-			iter = cachedIteration(u, query, fp)
-		} else {
-			if len(args) == 0 {
-				args, err = u.FilesAndGit().GetAll()
-
-				if err != nil {
-					return
-				}
-			}
-
-			iter = filesystemIteration(u, query, fp)
+		if len(args) == 0 {
+			args = u.GetAll()
 		}
+
+		iter = cachedIteration(u, query, fp)
 
 		par := util.Parallelizer{Args: args}
 		fp.Printer.Begin()

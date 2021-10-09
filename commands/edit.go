@@ -22,8 +22,9 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 			Filter: MatchQuery(query),
 			Printer: &printer.MultiplexingZettelPrinter{
 				Printer: &printer.ActionZettelPrinter{
-					Umwelt:  u,
-					Actions: editActions,
+					Umwelt:      u,
+					Transaction: t,
+					Actions:     editActions,
 				},
 			},
 		}
@@ -31,28 +32,19 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 
-		if u.Config.UseIndexCache {
-			if len(args) == 0 {
-				args = u.GetAll()
-			}
-
-			iter = cachedIteration(u, query, fp)
-		} else {
-			if len(args) == 0 {
-				args, err = u.FilesAndGit().GetAll()
-
-				if err != nil {
-					return
-				}
-			}
-
-			iter = filesystemIteration(u, query, fp)
+		if len(args) == 0 {
+			args = u.GetAll()
 		}
+
+		iter = cachedIteration(u, query, fp)
 
 		par := util.Parallelizer{Args: args}
 		fp.Printer.Begin()
 		defer fp.Printer.End()
-		par.Run(iter, errIterartion(fp.Printer))
+		par.Run(
+			iter,
+			errIterartion(fp.Printer),
+		)
 
 		return
 	}

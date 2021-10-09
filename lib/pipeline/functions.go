@@ -56,11 +56,11 @@ func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
 
 	ids, ok := u.Index.Urls.Get(urlString, u.Index)
 
-	if ok && len(ids) > 1 {
+	if ok && ids.Len() > 1 {
 		err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", ids, urlString)
 		return
-	} else if ok && len(ids) == 1 {
-		z, err = HydrateFromIndex(u, ids[0].String())
+	} else if ok && ids.Len() == 1 {
+		z, err = HydrateFromIndex(u, ids.Slice()[0].String())
 		return
 	}
 

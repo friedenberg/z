@@ -93,6 +93,8 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 				err = xerrors.Errorf("failed to write: %w", err)
 			}
 
+			t.Add.PrintZettel(i, z, err)
+
 			return
 		}
 

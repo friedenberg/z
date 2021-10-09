@@ -11,8 +11,8 @@ import (
 
 type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
+	Transaction lib.Transaction
 	Actions     options.Actions
-	gitPrinter  *GitPrinter
 	zettels     []*lib.Zettel
 	zettelFiles util.GitAnnex
 	files       util.GitAnnex
@@ -36,12 +36,6 @@ func (p *ActionZettelPrinter) Begin() {
 			Git:   git,
 			Files: make([]string, 0),
 		},
-	}
-
-	p.gitPrinter = &GitPrinter{
-		Umwelt:           p.Umwelt,
-		Mutex:            &sync.Mutex{},
-		GitCommitMessage: "edit",
 	}
 }
 
@@ -69,9 +63,6 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 }
 
 func (p *ActionZettelPrinter) End() {
-	p.gitPrinter.Begin()
-	defer p.gitPrinter.End()
-
 	wg := &sync.WaitGroup{}
 
 	var err error
@@ -88,8 +79,6 @@ func (p *ActionZettelPrinter) End() {
 				util.StdPrinterErr(err)
 				return
 			}
-
-			p.gitPrinter.SetShouldCommit()
 		}()
 	}
 
@@ -108,7 +97,7 @@ func (p *ActionZettelPrinter) End() {
 	wg.Wait()
 
 	for i, z := range p.zettels {
-		p.gitPrinter.PrintZettel(i, z, nil)
+		p.Transaction.Mod.PrintZettel(i, z, nil)
 	}
 
 	if err != nil {

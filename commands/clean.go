@@ -42,6 +42,8 @@ func GetSubcommandClean(f *flag.FlagSet) lib.Transactor {
 		}
 
 		return
+
+		//TODO add to transaction
 	}
 }
 

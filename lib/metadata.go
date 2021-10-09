@@ -79,6 +79,7 @@ func (zettel *Zettel) ReadMetadata() (err error) {
 }
 
 func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
+	z.Metadata = Metadata{}
 	sb := strings.Builder{}
 	within := false
 
