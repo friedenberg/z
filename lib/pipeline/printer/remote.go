@@ -44,15 +44,16 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	fd := z.FileDescriptor()
+	fd, ok := z.LocalFileDescriptor()
 
-	if fd == nil {
+	if !ok {
+		//TODO decide whether to skip or to error
 		util.StdPrinterError(xerrors.Errorf("zettel ('%s') has no file descriptors", z.Id))
 		return
 	}
 
 	p.rsyncPrinter.File(fd.FileName())
-	z.AddFileDescripter(*fd)
+	z.AddFileDescripter(fd)
 	p.Transaction.Mod.PrintZettel(i, z, errIn)
 }
 
