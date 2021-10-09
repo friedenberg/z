@@ -19,6 +19,21 @@ type ZettelIdSet struct {
 	Set         map[zettel.Id]bool
 }
 
+//TODO
+// func (s *ZettelIdSet) MarshalBinary() ([]byte, error) {
+// 	var b bytes.Buffer
+// 	fmt.Fprintln(&b, v.x, v.y, v.z)
+// 	return b.Bytes(), nil
+// }
+
+// // UnmarshalBinary modifies the receiver so it must take a pointer receiver.
+// func (v *Vector) UnmarshalBinary(data []byte) error {
+// 	// A simple encoding: plain text.
+// 	b := bytes.NewBuffer(data)
+// 	_, err := fmt.Fscanln(b, &v.x, &v.y, &v.z)
+// 	return err
+// }
+
 func (s *ZettelIdSet) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &s.Set); err != nil {
 		return err

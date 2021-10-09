@@ -15,6 +15,16 @@ func BaseNameNoSuffix(p string) string {
 	return b[0 : len(b)-len(path.Ext(b))]
 }
 
+func ExtNoDot(p string) (e string) {
+	e = path.Ext(p)
+
+	if len(e) != 0 {
+		e = e[1:]
+	}
+
+	return
+}
+
 func EverythingExceptExtension(p string) string {
 	return p[0 : len(p)-len(path.Ext(p))]
 }

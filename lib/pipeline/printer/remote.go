@@ -12,6 +12,7 @@ type RemotePrinter struct {
 	Umwelt       lib.Umwelt
 	Transaction  lib.Transaction
 	Command      options.RemoteCommand
+	RemoteName   string
 	Remote       kasten.RemoteImplementation
 	zettels      []*lib.Zettel
 	rsyncPrinter *Rsync
@@ -51,6 +52,7 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	p.rsyncPrinter.File(fd.FileName())
+	z.AddFileDescripter(*fd)
 	p.Transaction.Mod.PrintZettel(i, z, errIn)
 }
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 )
 
 func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
@@ -133,7 +133,7 @@ func alfredItemFromTag(t string, counts tagCounts) (i lib.AlfredItem) {
 
 	sb = &strings.Builder{}
 
-	for _, m := range util.ExpandTags(t) {
+	for _, m := range metadata.ExpandTags(t) {
 		sb.WriteString(m)
 		sb.WriteString(" ")
 	}

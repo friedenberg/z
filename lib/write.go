@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
@@ -44,7 +45,7 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 
 	w := bufio.NewWriter(f)
 
-	_, err = w.WriteString(MetadataStartSequence)
+	_, err = w.WriteString(metadata.MetadataStartSequence)
 
 	if err != nil {
 		err = xerrors.Errorf("writing metadata start sequence: %w", err)
@@ -58,7 +59,7 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 		return
 	}
 
-	_, err = w.WriteString(MetadataEndSequence)
+	_, err = w.WriteString(metadata.MetadataEndSequence)
 
 	if err != nil {
 		err = xerrors.Errorf("writing metadata end sequence: %w", err)

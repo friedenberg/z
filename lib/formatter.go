@@ -60,8 +60,8 @@ func (f printfFormatter) Format(z *Zettel) string {
 			sb.WriteString(strings.Join(z.Metadata.Tags, ", "))
 		case 'u':
 			sb.WriteString(z.Metadata.Url)
-		case 'w':
-			sb.WriteString(z.Metadata.Date)
+		// case 'w':
+		// 	sb.WriteString(z.Metadata.Date)
 		case 'z':
 			sb.WriteString(strconv.FormatInt(z.Id, 10))
 		default:

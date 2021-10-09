@@ -12,7 +12,7 @@ func (z *Zettel) InitFromTime(t time.Time) {
 	z.Id = t.Unix()
 
 	z.Metadata = Metadata{
-		Date: t.Format("2006-01-02"),
+		// Date: t.Format("2006-01-02"),
 	}
 
 	return

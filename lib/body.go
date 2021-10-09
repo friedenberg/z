@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"bytes"
 
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util/files_guard"
 )
 
-func (zettel *Zettel) ReadMetadataAndBody() (err error) {
-	f, err := files_guard.Open(zettel.Path)
+func (z *Zettel) ReadMetadataAndBody() (err error) {
+	f, err := files_guard.Open(z.Path)
 	defer files_guard.Close(f)
 
 	if err != nil {
@@ -17,13 +18,14 @@ func (zettel *Zettel) ReadMetadataAndBody() (err error) {
 
 	r := bufio.NewReader(f)
 
-	err = zettel.readMetadataFromReader(r)
+	yamlString, err := metadata.ReadYAMLHeader(r)
 
 	if err != nil {
 		return
 	}
 
-	err = zettel.readBodyFromReader(r)
+	z.Data.MetadataYaml = yamlString
+
 	return
 }
 

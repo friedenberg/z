@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"golang.org/x/xerrors"
 )
 
@@ -54,7 +54,7 @@ func MakeAlfredMatches(z *lib.Zettel) string {
 	}
 
 	for _, t := range m.Tags {
-		for _, m := range util.ExpandTags(t) {
+		for _, m := range metadata.ExpandTags(t) {
 			addMatch(m)
 		}
 	}

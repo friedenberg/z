@@ -2,24 +2,16 @@ package lib
 
 import (
 	"bufio"
-	"io"
 	"net/url"
 	"path"
 	"regexp"
 	"sort"
-	"strings"
-	"time"
 
-	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util"
 	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
-)
-
-const (
-	MetadataStartSequence = "---\n"
-	MetadataEndSequence   = "...\n"
 )
 
 var (
@@ -27,13 +19,13 @@ var (
 )
 
 func init() {
+	//TODO decide on regex
 	RegexTag = regexp.MustCompile(`^\w{1,2}-[^\s]+$`)
 }
 
 type MetadataList []string
 
 type Metadata struct {
-	Date         string   `yaml:"-" json:"date,omitempty"`
 	Description  string   `yaml:"description,omitempty" json:"description,omitempty"`
 	Tags         []string `yaml:"tags,omitempty" json:"tags,omitempty"`
 	ExpandedTags []string `yaml:"-" json:"expanded_tags,omitempty"`
@@ -65,8 +57,8 @@ func (id Metadata) ToMetadata() (md MetadataList) {
 	return
 }
 
-func (zettel *Zettel) ReadMetadata() (err error) {
-	f, err := files_guard.Open(zettel.Path)
+func (z *Zettel) ReadMetadata() (err error) {
+	f, err := files_guard.Open(z.Path)
 	defer files_guard.Close(f)
 
 	if err != nil {
@@ -75,35 +67,13 @@ func (zettel *Zettel) ReadMetadata() (err error) {
 
 	r := bufio.NewReader(f)
 
-	return zettel.readMetadataFromReader(r)
-}
+	yamlString, err := metadata.ReadYAMLHeader(r)
 
-func (z *Zettel) readMetadataFromReader(r *bufio.Reader) (err error) {
-	z.Metadata = Metadata{}
-	sb := strings.Builder{}
-	within := false
-
-	for {
-		some_string, err := r.ReadString('\n')
-
-		if err == io.EOF {
-			return nil
-		}
-
-		if err != nil {
-			return err
-		}
-
-		if !within && some_string == MetadataStartSequence {
-			within = true
-		} else if within && some_string == MetadataEndSequence {
-			break
-		} else if within {
-			sb.WriteString(some_string)
-		}
+	if err != nil {
+		return
 	}
 
-	z.Data.MetadataYaml = sb.String()
+	z.Data.MetadataYaml = yamlString
 
 	return
 }
@@ -163,21 +133,19 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 		z.Metadata.Tags = append(z.Metadata.Tags, v)
 	}
 
-	var t time.Time
-
-	t, err = TimeFromPath(z.Path)
+	_, err = TimeFromPath(z.Path)
 
 	if err != nil {
 		err = xerrors.Errorf("parse metadata: %w", err)
 		return
 	}
 
-	z.Metadata.Date = t.Format("2006-01-02")
+	// z.Metadata.Date = t.Format("2006-01-02")
 
 	for _, t := range z.Metadata.Tags {
 		z.Metadata.ExpandedTags = append(
 			z.Metadata.ExpandedTags,
-			util.ExpandTags(t)...,
+			metadata.ExpandTags(t)...,
 		)
 	}
 
@@ -187,18 +155,6 @@ func (z *Zettel) FromMetadata(md MetadataList) (err error) {
 
 	if z.HasUrl() {
 		z.Metadata.ExpandedTags = append(z.Metadata.ExpandedTags, "h-u")
-	}
-
-	return
-}
-
-func (z *Zettel) FileDescriptor() (fd *zettel.FileDescriptor) {
-	if !z.HasFile() {
-		return
-	}
-	fd = &zettel.FileDescriptor{
-		ZettelId: zettel.Id(z.Id),
-		Ext:      path.Ext(z.FilePath()),
 	}
 
 	return

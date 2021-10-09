@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util"
 )
 
@@ -19,9 +20,9 @@ func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
 	}
 
 	sb := &strings.Builder{}
-	sb.WriteString(lib.MetadataStartSequence)
+	sb.WriteString(metadata.MetadataStartSequence)
 	sb.WriteString(z.Data.MetadataYaml)
-	sb.WriteString(lib.MetadataEndSequence)
+	sb.WriteString(metadata.MetadataEndSequence)
 	sb.WriteString(z.Body)
 	util.StdPrinterOutf(sb.String())
 }
