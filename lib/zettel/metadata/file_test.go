@@ -4,7 +4,7 @@ import "testing"
 
 type descriptorTestCase struct {
 	description string
-	fd          *FileDescriptor
+	fd          *File
 	expectedTag string
 }
 
@@ -12,7 +12,7 @@ func getDescriptorTestCases(t *testing.T) []descriptorTestCase {
 	return []descriptorTestCase{
 		descriptorTestCase{
 			description: "local with extension no kasten",
-			fd: &FileDescriptor{
+			fd: &File{
 				ZettelId: Id(1),
 				Ext:      "test",
 			},
@@ -20,14 +20,14 @@ func getDescriptorTestCases(t *testing.T) []descriptorTestCase {
 		},
 		descriptorTestCase{
 			description: "local without extension no kasten",
-			fd: &FileDescriptor{
+			fd: &File{
 				ZettelId: Id(1),
 			},
 			expectedTag: "1",
 		},
 		descriptorTestCase{
 			description: "local with extension with kasten",
-			fd: &FileDescriptor{
+			fd: &File{
 				KastenName: "some_kasten",
 				ZettelId:   Id(1),
 				Ext:        "test",
@@ -36,7 +36,7 @@ func getDescriptorTestCases(t *testing.T) []descriptorTestCase {
 		},
 		descriptorTestCase{
 			description: "local without extension with kasten",
-			fd: &FileDescriptor{
+			fd: &File{
 				KastenName: "some_kasten",
 				ZettelId:   Id(1),
 			},
@@ -56,7 +56,7 @@ func TestDescriptors(t *testing.T) {
 					t.Errorf("Actual tag was '%s', wanted '%s'", actualTag, tc.expectedTag)
 				}
 
-				actualFd := &FileDescriptor{}
+				actualFd := &File{}
 				err := actualFd.Set(tc.expectedTag)
 
 				if err != nil {

@@ -7,17 +7,17 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type FileDescriptor struct {
+type File struct {
 	KastenName string
 	Id         string
 	Ext        string
 }
 
 type RemoteFileDescriptor struct {
-	FileDescriptor
+	File
 }
 
-func (fd *FileDescriptor) Set(s string) (err error) {
+func (fd *File) Set(s string) (err error) {
 	parts := strings.Split(s, "-")
 	partCount := len(parts)
 
@@ -40,7 +40,7 @@ func (fd *FileDescriptor) Set(s string) (err error) {
 	return
 }
 
-func (fd FileDescriptor) Tag() string {
+func (fd File) Tag() string {
 	sb := &strings.Builder{}
 
 	sb.WriteString(fd.Id)
@@ -58,7 +58,7 @@ func (fd FileDescriptor) Tag() string {
 	return sb.String()
 }
 
-func (fd FileDescriptor) FileName() (fn string) {
+func (fd File) FileName() (fn string) {
 	fi := fd.Id
 
 	if fd.Ext == "" {

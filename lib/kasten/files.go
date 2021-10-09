@@ -23,7 +23,7 @@ func (k *Files) InitFromOptions(o map[string]interface{}) (err error) {
 	return
 }
 
-func (k *Files) CopyFileTo(localPath string, fd metadata.FileDescriptor) (err error) {
+func (k *Files) CopyFileTo(localPath string, fd metadata.File) (err error) {
 	remotePath := path.Join(k.BasePath, fd.FileName())
 
 	cmd := exec.Command("cp", "-R", localPath, remotePath)
@@ -37,7 +37,7 @@ func (k *Files) CopyFileTo(localPath string, fd metadata.FileDescriptor) (err er
 	return
 }
 
-func (k *Files) CopyFileFrom(localPath string, fd metadata.FileDescriptor) (err error) {
+func (k *Files) CopyFileFrom(localPath string, fd metadata.File) (err error) {
 	remotePath := path.Join(k.BasePath, fd.FileName())
 
 	cmd := exec.Command("cp", "-R", remotePath, localPath)
