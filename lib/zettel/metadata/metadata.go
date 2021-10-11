@@ -141,7 +141,7 @@ func (m Metadata) Description() string {
 }
 
 func (m *Metadata) SetDescription(d string) {
-	m.description = d
+	m.description = strings.TrimSpace(d)
 }
 
 func (m Metadata) StringTags() []ITag {
