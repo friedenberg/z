@@ -9,9 +9,10 @@ import (
 
 type Umwelt struct {
 	Kasten
-	Index    Index
-	BasePath string
-	Config   Config
+	Index             Index
+	BasePath          string
+	Config            Config
+	TagsForNewZettels []string
 }
 
 func MakeUmwelt(c Config) (k Umwelt, err error) {

@@ -44,6 +44,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 			z.Body = content
 		}
 
+		//TODO-P3 add to transaction
 		err = z.Write(func(z *lib.Zettel, errIn error) (errOut error) {
 			if errIn != nil {
 				if f, ok := z.Note.Metadata.LocalFile(); ok {

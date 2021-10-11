@@ -194,5 +194,7 @@ func New(u lib.Umwelt) (z *lib.Zettel, err error) {
 		},
 	}
 
+	z.Metadata.AddStringTags(u.TagsForNewZettels...)
+
 	return
 }

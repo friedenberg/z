@@ -24,8 +24,9 @@ type KastenRemoteConfig struct {
 }
 
 type TagConfig struct {
-	kasten   string
-	autoTags []string `toml:"auto-tags"`
+	kasten          string
+	AutoTags        []string `toml:"auto-tags"`
+	AddToNewZettels bool     `toml:"add-to-new-zettels"`
 }
 
 type Config struct {
@@ -132,6 +133,12 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 		} else {
 			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
 			return
+		}
+	}
+
+	for t, tc := range c.Tags {
+		if tc.AddToNewZettels {
+			u.TagsForNewZettels = append(u.TagsForNewZettels, t)
 		}
 	}
 
