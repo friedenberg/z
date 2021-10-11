@@ -104,9 +104,12 @@ func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zette
 		return
 	}
 
+	//TODO-P0 check for checksum file name collisions
+	n := sum[0:7]
+
 	fd := metadata.File{
-		Id:  sum,
-		Ext: util.ExtNoDot(file),
+		Id:  n,
+		Ext: strings.ReplaceAll(util.ExtNoDot(file), "-", ""),
 	}
 
 	if shouldCopy {
