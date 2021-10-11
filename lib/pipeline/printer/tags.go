@@ -31,7 +31,11 @@ func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	for _, t := range z.Note.Metadata.Tags() {
-		c, _ := p.tags[t.Tag()]
+		c, ok := p.tags[t.Tag()]
+
+		if !ok {
+			c.ITag = t
+		}
 
 		c.zettels += 1
 
