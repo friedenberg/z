@@ -16,7 +16,7 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 	var query string
 	f.StringVar(&query, "query", "", "zettel-spec")
 
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
 		args := f.Args()
 
 		var command options.RemoteCommand
@@ -39,7 +39,7 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		args = args[1:]
 
-		////TODO validation
+		////TODO-P3 validation
 		//query := args[2]
 
 		fp := pipeline.FilterPrinter{
@@ -50,7 +50,7 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 				Remote:      remote,
 			},
 			Filter: func(_ int, z *lib.Zettel) bool {
-				return z.HasFile()
+				return z.Note.Metadata.HasFile()
 			},
 		}
 

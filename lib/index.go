@@ -6,14 +6,15 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"golang.org/x/xerrors"
 )
 
 type IndexZettel struct {
 	Path     string
 	Id       int64
-	Metadata Metadata
-	//TODO remove
+	Metadata metadata.Metadata
+	//TODO-P2 remove
 	Body string
 }
 
@@ -90,15 +91,15 @@ func (i Index) Add(z *Zettel) error {
 		Body:     z.Body,
 	})
 
-	if z.HasFile() {
-		i.Files.Add(z.FilePath(), zettel.Id(z.Id), i)
+	if f, ok := z.Note.Metadata.LocalFile(); ok {
+		i.Files.Add(f.FileName(), zettel.Id(z.Id), i)
 	}
 
-	if z.HasUrl() {
-		i.Urls.Add(z.Metadata.Url, zettel.Id(z.Id), i)
+	if u, ok := z.Metadata.Url(); ok {
+		i.Urls.Add(u.String(), zettel.Id(z.Id), i)
 	}
 
-	for _, t := range z.Metadata.Tags {
+	for _, t := range z.Metadata.TagStrings() {
 		i.Tags.Add(t, zettel.Id(z.Id), i)
 	}
 
@@ -134,7 +135,7 @@ func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 }
 
 func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
-	//TODO normalize url
+	//TODO-P3 normalize url
 	ids, ok := i.Urls.Get(u, i)
 
 	if !ok {

@@ -51,7 +51,7 @@ func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error)
 	}
 
 	items := p.ItemFunc(z)
-	//TODO handle erro
+	//TODO-P2 handle erro
 	j, _ := lib.GenerateAlfredItemsJson(items)
 
 	sb.WriteString(j)

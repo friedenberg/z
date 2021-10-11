@@ -6,48 +6,9 @@ import (
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/pipeline/printer"
 	"github.com/friedenberg/z/util"
-	"golang.org/x/xerrors"
 )
-
-type attachmentKind struct {
-	hydrator func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
-}
-
-func (a attachmentKind) String() string {
-	//TODO
-	return ""
-}
-
-func (a *attachmentKind) Set(s string) (err error) {
-	switch s {
-	case "files-copy":
-		*a = attachmentKind{
-			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
-				return pipeline.NewOrFoundForFile(u, urlString, true)
-			},
-		}
-	case "files":
-		*a = attachmentKind{
-			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
-				return pipeline.NewOrFoundForFile(u, urlString, false)
-			},
-		}
-	case "urls":
-		*a = attachmentKind{
-			hydrator: func(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
-				return pipeline.NewOrFoundForUrl(u, urlString)
-			},
-		}
-	default:
-		err = xerrors.Errorf("unsupported type: '%s'", s)
-		return
-	}
-
-	return
-}
 
 func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	var tagString string
@@ -61,11 +22,12 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&description, "description", "", "use this string as the zettel description")
 	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
 		pr := &printer.MultiplexingZettelPrinter{
 			Printer: &printer.ActionZettelPrinter{
-				Umwelt:  u,
-				Actions: editActions,
+				Umwelt:      u,
+				Actions:     editActions,
+				Transaction: t,
 			},
 		}
 
@@ -76,21 +38,11 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 				return
 			}
 
-			if tagString != "" {
-				tags := strings.Split(tagString, " ")
-				z.Metadata.Tags = append(z.Metadata.Tags, tags...)
-			} else {
-				z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
-			}
+			tags := strings.Split(tagString, " ")
+			z.Metadata.AddStringTags(tags...)
 
-			z.Metadata.Description = description
-
-			z.Metadata.Tags = uniqueAndSortTags(z.Metadata.Tags)
-
-			err = z.Write(nil)
-
-			if err != nil {
-				err = xerrors.Errorf("failed to write: %w", err)
+			if description != "" {
+				z.Metadata.SetDescription(description)
 			}
 
 			t.Add.PrintZettel(i, z, err)

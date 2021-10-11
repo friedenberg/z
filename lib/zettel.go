@@ -1,6 +1,9 @@
 package lib
 
-import "github.com/friedenberg/z/lib/kasten"
+import (
+	"github.com/friedenberg/z/lib/kasten"
+	"github.com/friedenberg/z/lib/zettel/metadata"
+)
 
 type Kasten struct {
 	Local   *FilesAndGit
@@ -10,18 +13,15 @@ type Kasten struct {
 type Zettel struct {
 	*Umwelt
 
+	//TODO-P2 change to zettel.Id
 	Id int64
 	Note
 
 	Path string
-	Data ZettelData
 }
 
 type Note struct {
-	Metadata
-	Body string
-}
-
-type ZettelData struct {
-	MetadataYaml string
+	// Metadata
+	Metadata metadata.Metadata
+	Body     string
 }

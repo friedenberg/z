@@ -9,7 +9,7 @@ import (
 )
 
 func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
 		processor := MakeProcessor(
 			u,
 			f.Args(),
@@ -24,8 +24,8 @@ func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
 				return
 			}
 
-			if z.HasFile() {
-				actionErr = os.Remove(z.FilePath())
+			if f, ok := z.Note.Metadata.LocalFile(); ok {
+				actionErr = os.Remove(f.FilePath(u.BasePath))
 			}
 
 			t.Del.PrintZettel(0, z, actionErr)

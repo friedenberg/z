@@ -11,7 +11,7 @@ import (
 
 type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
-	Transaction lib.Transaction
+	Transaction *lib.Transaction
 	Actions     options.Actions
 	zettels     []*lib.Zettel
 	zettelFiles util.GitAnnex
@@ -48,16 +48,16 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	p.zettels = append(p.zettels, z)
 	p.zettelFiles.Files = append(p.zettelFiles.Files, z.Path)
 
-	if z.HasFile() {
-		p.files.Files = append(p.files.Files, z.FilePath())
+	if f, ok := z.Note.Metadata.LocalFile(); ok {
+		p.files.Files = append(p.files.Files, f.FilePath(p.Umwelt.BasePath))
 	}
 
-	if z.HasUrl() {
-		p.urls = append(p.urls, z.Metadata.Url)
+	if u, ok := z.Note.Metadata.Url(); ok {
+		p.urls = append(p.urls, u.String())
 	}
 
 	if p.Actions&options.ActionPrintZettelPath != 0 {
-		//TODO full path
+		//TODO-P2 full path
 		util.StdPrinterOut(z.Path)
 	}
 }

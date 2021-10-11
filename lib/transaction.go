@@ -1,9 +1,11 @@
 package lib
 
+//TODO-P1 handle cases where files or zettles are just opened but not edited
 type Transaction struct {
-	Add *transactionPrinter
-	Mod *transactionPrinter
-	Del *transactionPrinter
+	ShouldSkipCommit bool
+	Add              *transactionPrinter
+	Mod              *transactionPrinter
+	Del              *transactionPrinter
 }
 
 type ZettelSlice []*Zettel
@@ -63,13 +65,13 @@ func (p *transactionPrinter) PrintZettel(i int, z *Zettel, err error) {
 
 	p.zettels = append(p.zettels, z)
 
-	if z.HasFile() {
-		//TODO which filepath?
-		p.files = append(p.files, z.FilePath())
+	if f, ok := z.Note.Metadata.LocalFile(); ok {
+		//TODO-P2 support deleting local files
+		p.files = append(p.files, f.Id)
 	}
 
-	if z.HasUrl() {
-		p.urls = append(p.urls, z.Metadata.Url)
+	if u, ok := z.Note.Metadata.Url(); ok {
+		p.urls = append(p.urls, u.String())
 	}
 
 	return

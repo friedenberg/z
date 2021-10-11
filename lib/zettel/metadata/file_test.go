@@ -13,34 +13,34 @@ func getDescriptorTestCases(t *testing.T) []descriptorTestCase {
 		descriptorTestCase{
 			description: "local with extension no kasten",
 			fd: &File{
-				ZettelId: Id(1),
-				Ext:      "test",
+				Id:  "1",
+				Ext: "test",
 			},
-			expectedTag: "1.test",
+			expectedTag: "f-1.test",
 		},
 		descriptorTestCase{
 			description: "local without extension no kasten",
 			fd: &File{
-				ZettelId: Id(1),
+				Id: "1",
 			},
-			expectedTag: "1",
+			expectedTag: "f-1",
 		},
 		descriptorTestCase{
 			description: "local with extension with kasten",
 			fd: &File{
 				KastenName: "some_kasten",
-				ZettelId:   Id(1),
+				Id:         "1",
 				Ext:        "test",
 			},
-			expectedTag: "1.test-some_kasten",
+			expectedTag: "f-1.test-some_kasten",
 		},
 		descriptorTestCase{
 			description: "local without extension with kasten",
 			fd: &File{
 				KastenName: "some_kasten",
-				ZettelId:   Id(1),
+				Id:         "1",
 			},
-			expectedTag: "1-some_kasten",
+			expectedTag: "f-1-some_kasten",
 		},
 	}
 }
@@ -66,7 +66,7 @@ func TestDescriptors(t *testing.T) {
 				expectedFd := tc.fd
 
 				if *actualFd != *expectedFd {
-					t.Errorf("Actual fd was '%s', wanted '%s'", actualFd, expectedFd)
+					t.Errorf("Actual fd was '%q', wanted '%q'", actualFd, expectedFd)
 				}
 			},
 		)

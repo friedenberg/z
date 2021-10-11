@@ -10,7 +10,7 @@ import (
 
 type RemotePrinter struct {
 	Umwelt       lib.Umwelt
-	Transaction  lib.Transaction
+	Transaction  *lib.Transaction
 	Command      options.RemoteCommand
 	Remote       kasten.RemoteImplementation
 	zettels      []*lib.Zettel
@@ -43,21 +43,21 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	fd, ok := z.LocalFile()
+	fd, ok := z.Note.Metadata.LocalFile()
 
 	if !ok {
-		//TODO decide whether to skip or to error
+		//TODO-P4 decide whether to skip or to error
 		util.StdPrinterError(xerrors.Errorf("zettel ('%s') has no file descriptors", z.Id))
 		return
 	}
 
 	p.rsyncPrinter.File(fd.FileName())
-	z.AddFileDescripter(fd)
+	z.Note.Metadata.AddFile(fd)
 	p.Transaction.Mod.PrintZettel(i, z, errIn)
 }
 
 func (p *RemotePrinter) End() {
 	p.rsyncPrinter.End()
-	//TODO record location of files in remote in zettels
+	//TODO-P0 record location of files in remote in zettels
 	// p.Umwelt.LocalKasten
 }

@@ -81,7 +81,7 @@ func LoadConfig(p string) (c Config, err error) {
 }
 
 func DefaultConfig() (c Config, err error) {
-	//TODO
+	//TODO-P2
 	return
 }
 
@@ -111,26 +111,19 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 		return
 	}
 
+	wd, err := os.Getwd()
+
+	if err != nil {
+		return
+	}
+
 	u.Kasten.Local = &FilesAndGit{
 		GitEnabled: c.GitEnabled,
-		BasePath:   os.ExpandEnv(c.Path),
+		//TODO-P2 use cwd or config if available
+		BasePath: wd,
 	}
 
 	u.Kasten.Remotes = make(map[string]kasten.RemoteImplementation)
-
-	//TODO primary kasten validation
-	// if c.LocalKasten != "" {
-	// 	if i, ok := u.Kasten[c.DefaultKasten]; ok {
-	// 		u.DefaultKasten = i
-	// 	} else {
-	// 		err = xerrors.Errorf(
-	// 			"no kasten matching name '%s' for default",
-	// 			c.DefaultKasten,
-	// 		)
-
-	// 		return
-	// 	}
-	// }
 
 	for n, kc := range c.Remotes {
 		if i, ok := kasten.GetRemote(kc.Implementation); ok {

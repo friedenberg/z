@@ -4,16 +4,68 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-type Transactor func(Umwelt, Transaction) error
+type Transactor func(Umwelt, *Transaction) error
 
 func (u Umwelt) RunTransaction(f Transactor) (err error) {
-	t := Transaction{
+	t := &Transaction{
 		Add: &transactionPrinter{},
 		Mod: &transactionPrinter{},
 		Del: &transactionPrinter{},
 	}
 
 	f(u, t)
+
+	for _, z := range t.Added() {
+		err = z.Write(nil)
+
+		if err != nil {
+			return
+		}
+
+		u.Index.Add(z)
+	}
+
+	for _, z := range t.Modified() {
+		err = z.Write(nil)
+
+		if err != nil {
+			return
+		}
+
+		u.Index.Update(z)
+	}
+
+	err = u.gitCommitTransactionIfNecessary(t)
+
+	if err != nil {
+		return
+	}
+
+	for _, z := range t.Added() {
+		u.Index.Add(z)
+	}
+
+	for _, z := range t.Modified() {
+		u.Index.Update(z)
+	}
+
+	for _, z := range t.Deleted() {
+		u.Index.Delete(z)
+	}
+
+	err = u.CacheIndex()
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (u Umwelt) gitCommitTransactionIfNecessary(t *Transaction) (err error) {
+	if t.ShouldSkipCommit {
+		return
+	}
 
 	git := util.GitFilesToCommit{
 		Git: util.Git{
@@ -34,27 +86,6 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 		if err != nil {
 			return
 		}
-	}
-
-	for _, z := range t.Added() {
-		z.Hydrate(true)
-		u.Index.Add(z)
-	}
-
-	for _, z := range t.Modified() {
-		z.Hydrate(true)
-		u.Index.Update(z)
-	}
-
-	for _, z := range t.Deleted() {
-		z.ReadMetadataAndBody()
-		u.Index.Delete(z)
-	}
-
-	err = u.CacheIndex()
-
-	if err != nil {
-		return
 	}
 
 	return

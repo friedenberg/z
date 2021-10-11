@@ -2,6 +2,7 @@ package printer
 
 import (
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util"
 )
 
@@ -9,13 +10,18 @@ type tagCounts struct {
 	zettels, files, urls int
 }
 
+type Tag struct {
+	metadata.ITag
+	tagCounts
+}
+
 type Tags struct {
 	ShouldExpand bool
-	tags         map[string]tagCounts
+	tags         map[string]Tag
 }
 
 func (p *Tags) Begin() {
-	p.tags = make(map[string]tagCounts)
+	p.tags = make(map[string]Tag)
 }
 
 func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
@@ -24,28 +30,20 @@ func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
 		return
 	}
 
-	tags := z.Metadata.Tags
-
-	if p.ShouldExpand {
-		tags = z.Metadata.ExpandedTags
-	}
-
-	for _, t := range tags {
-		var c tagCounts
-
-		c, _ = p.tags[t]
+	for _, t := range z.Note.Metadata.Tags() {
+		c, _ := p.tags[t.Tag()]
 
 		c.zettels += 1
 
-		if z.HasFile() {
+		if z.Note.Metadata.HasFile() {
 			c.files += 1
 		}
 
-		if z.HasUrl() {
+		if _, ok := z.Note.Metadata.Url(); ok {
 			c.urls += 1
 		}
 
-		p.tags[t] = c
+		p.tags[t.Tag()] = c
 	}
 }
 
@@ -60,8 +58,12 @@ func (p *Tags) End() {
 		}
 
 		item := alfredItemFromTag(t, c)
-		//TODO handle error
-		j, _ := lib.GenerateAlfredItemsJson([]lib.AlfredItem{item})
+		j, err := lib.GenerateAlfredItemsJson([]lib.AlfredItem{item})
+
+		if err != nil {
+			//TODO-P2 handle error
+			continue
+		}
 
 		util.StdPrinterOut(j)
 		needsComma = true

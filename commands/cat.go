@@ -26,7 +26,7 @@ func init() {
 		},
 		"alfred-json-files": outputFormat{
 			Filter: func(i int, z *lib.Zettel) bool {
-				return z.HasFile()
+				return z.Note.Metadata.HasFile()
 			},
 			Printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelFiles,
@@ -34,7 +34,8 @@ func init() {
 		},
 		"alfred-json-urls": outputFormat{
 			Filter: func(i int, z *lib.Zettel) bool {
-				return z.HasUrl()
+				_, ok := z.Note.Metadata.Url()
+				return ok
 			},
 			Printer: &printer.AlfredJsonZettelPrinter{
 				ItemFunc: printer.AlfredItemsFromZettelUrls,
@@ -47,7 +48,7 @@ func init() {
 		},
 		"alfred-json-snippets": outputFormat{
 			Filter: func(i int, z *lib.Zettel) bool {
-				for _, t := range z.Metadata.Tags {
+				for _, t := range z.Metadata.TagStrings() {
 					if strings.Contains(t, "t-snippet") {
 						return true
 					}
@@ -117,7 +118,8 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	f.Var(&of, "output-format", fmt.Sprintf("One of %q", outputFormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
 
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+		t.ShouldSkipCommit = true
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 

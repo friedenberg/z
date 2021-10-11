@@ -2,7 +2,6 @@ package lib
 
 import (
 	"testing"
-	"time"
 )
 
 type printFormatterTestCaseMakeZettelFunc func() *Zettel
@@ -21,17 +20,10 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 	}
 
 	makeZettelWithDate := func() (z *Zettel) {
-		time, err := time.Parse("2006-01-02", "2021-07-26")
-
-		if err != nil {
-			t.Fatal(err)
-		}
-
 		z = &Zettel{
 			Umwelt: &umwelt,
+			Path:   "1633902356.md",
 		}
-
-		z.InitFromTime(time)
 
 		return
 	}
@@ -41,7 +33,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 			name:       "just date",
 			makeZettel: makeZettelWithDate,
 			format:     "%w",
-			output:     "2021-07-26",
+			output:     "2021-10-10",
 		},
 		printfFormatterTestCase{
 			name:       "just constant string",
@@ -65,17 +57,17 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 			name: "date then tags",
 			makeZettel: func() (z *Zettel) {
 				z = makeZettelWithDate()
-				z.Metadata.Tags = []string{"some-tag"}
+				z.Metadata.SetStringTags([]string{"some-tag"})
 				return
 			},
 			format: "%w, %t",
-			output: "2021-07-26, some-tag",
+			output: "2021-10-10, some-tag",
 		},
 		printfFormatterTestCase{
 			name: "newlines",
 			makeZettel: func() (z *Zettel) {
 				z = makeZettelWithDate()
-				z.Metadata.File = "filename.extension"
+				z.Metadata.SetStringTags([]string{"f-filename.extension"})
 				return
 			},
 			format: "%f\n",

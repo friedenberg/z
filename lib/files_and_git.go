@@ -9,7 +9,7 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-//TODO move to lib/kasten
+//TODO-P2 move to lib/kasten
 type FilesAndGit struct {
 	BasePath        string
 	GitEnabled      bool

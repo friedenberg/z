@@ -67,7 +67,7 @@ func (m ZettelIdMap) Delete(id zettel.Id, l sync.Locker) {
 	delete(m.IdToValue, id)
 
 	if vs == nil {
-		//TODO determine why this is necessary
+		//TODO-P4 determine why this is necessary
 		return
 	}
 

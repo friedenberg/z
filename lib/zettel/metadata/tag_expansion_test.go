@@ -1,7 +1,6 @@
 package metadata
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -27,21 +26,21 @@ func GetTestExpandTagsTestCases(t *testing.T) []ExpandTagsTestCase {
 			"one hyphen",
 			"tag-part",
 			[]string{
-				"tag-part",
-				"tag",
 				"part",
+				"tag",
+				"tag-part",
 			},
 		},
 		ExpandTagsTestCase{
 			"two hyphens",
 			"p-2021-zettel",
 			[]string{
-				"p-2021-zettel",
-				"p",
-				"2021-zettel",
-				"p-2021",
-				"zettel",
 				"2021",
+				"2021-zettel",
+				"p",
+				"p-2021",
+				"p-2021-zettel",
+				"zettel",
 			},
 		},
 	}
@@ -52,7 +51,8 @@ func TestExpandTags(t *testing.T) {
 		t.Run(
 			testCase.description,
 			func(t *testing.T) {
-				actual := ExpandTags(testCase.tag)
+				tag := Tag(testCase.tag)
+				actual := tag.SearchMatchTags().Strings()
 
 				if len(testCase.expandedTags) != len(actual) {
 					t.Errorf(
@@ -67,7 +67,6 @@ func TestExpandTags(t *testing.T) {
 				for i, a := range actual {
 					e := testCase.expandedTags[i]
 					if a != e {
-						fmt.Println(actual)
 						t.Errorf(
 							"Expanded tags was '%q' at %d, wanted '%q'",
 							a,

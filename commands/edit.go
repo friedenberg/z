@@ -17,7 +17,7 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
 		fp := pipeline.FilterPrinter{
 			Filter: MatchQuery(query),
 			Printer: &printer.MultiplexingZettelPrinter{

@@ -9,7 +9,8 @@ import (
 )
 
 func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+		t.ShouldSkipCommit = true
 		u.Index = lib.MakeIndex()
 
 		args, err := u.FilesAndGit().GetAll()

@@ -51,17 +51,28 @@ func (f printfFormatter) Format(z *Zettel) string {
 			sb.WriteString(strings.TrimSpace(z.Body))
 			// sb.WriteString(strings.ReplaceAll(z.Data.Body, "%", "%%"))
 		case 'd':
-			sb.WriteString(z.Metadata.Description)
+			sb.WriteString(z.Metadata.Description())
 		case 'f':
-			sb.WriteString(z.FilePath())
+			if f, ok := z.Note.Metadata.LocalFile(); ok {
+				sb.WriteString(f.FilePath(z.Umwelt.BasePath))
+			}
 		case 'p':
 			sb.WriteString(z.Path)
 		case 't':
-			sb.WriteString(strings.Join(z.Metadata.Tags, ", "))
+			sb.WriteString(strings.Join(z.Metadata.TagStrings(), ", "))
 		case 'u':
-			sb.WriteString(z.Metadata.Url)
-		// case 'w':
-		// 	sb.WriteString(z.Metadata.Date)
+			if u, ok := z.Metadata.Url(); ok {
+				sb.WriteString(u.String())
+			}
+		case 'w':
+			t, err := TimeFromPath(z.Path)
+
+			if err != nil {
+				panic(err)
+			}
+
+			day := t.Format("2006-01-02")
+			sb.WriteString(day)
 		case 'z':
 			sb.WriteString(strconv.FormatInt(z.Id, 10))
 		default:

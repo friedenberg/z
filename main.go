@@ -82,7 +82,7 @@ func run() int {
 		return 1
 	}
 
-	//TODO refactor to be command too
+	//TODO-P4 refactor to be command too
 	cmd.flags.Parse(os.Args[2:])
 	err = umwelt.RunTransaction(cmd.runFunc)
 
@@ -117,7 +117,7 @@ func printUsage(err error) int {
 	status := 0
 
 	if err != nil {
-		//TODO get correct status
+		//TODO-P4 get correct status
 		status = 1
 	}
 

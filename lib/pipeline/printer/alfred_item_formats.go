@@ -7,13 +7,12 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/lib/zettel/metadata"
 )
 
 func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
-	if len(z.Metadata.Description) > 0 {
-		i.Title = z.Metadata.Description
+	if len(z.Note.Metadata.Description()) > 0 {
+		i.Title = z.Note.Metadata.Description()
 	} else {
 		i.Title = z.Format("%w")
 	}
@@ -22,7 +21,7 @@ func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 	i.Uid = "z." + id
 	i.ItemType = "file:skipcheck"
 
-	if len(z.Metadata.Tags) > 0 {
+	if len(z.Note.Metadata.StringTags()) > 0 {
 		i.Subtitle = z.Format("%t")
 	} else {
 		i.Subtitle = z.Format("%w")
@@ -51,9 +50,15 @@ func alfredItemsFromZettelDefault(z *lib.Zettel) (a []lib.AlfredItem) {
 }
 
 func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
+	f, ok := z.Note.Metadata.LocalFile()
+
+	if !ok {
+		return
+	}
+
 	i := alfredItemFromZettelBase(z)
-	i.Icon.Path = z.FilePath()
-	i.Arg = z.FilePath()
+	i.Icon.Path = f.FilePath(z.Umwelt.BasePath)
+	i.Arg = f.FileName()
 	i.Uid = i.Uid + ".file"
 	i.Match = i.Match + "i-f"
 	a = append(a, i)
@@ -62,19 +67,21 @@ func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
 }
 
 func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
-	i := alfredItemFromZettelBase(z)
-	//TODO set to url icon
-	// i.Icon.Path = z.FilePath()
-	i.Arg = z.Metadata.Url
+	u, ok := z.Note.Metadata.Url()
 
-	url, err := url.Parse(z.Metadata.Url)
-
-	if err != nil {
-		//TODO
+	if !ok {
+		return
 	}
 
-	//TODO move to tags
-	i.Title = fmt.Sprintf("%s: %s", url.Host, z.Metadata.Description)
+	i := alfredItemFromZettelBase(z)
+	//TODO-P2 set to url icon
+	// i.Icon.Path = z.FilePath()
+	i.Arg = u.String()
+
+	ur := url.URL(u)
+
+	//TODO-P4 move to tags
+	i.Title = fmt.Sprintf("%s: %s", ur.Host, z.Note.Metadata.Description())
 	i.Uid = i.Uid + ".url"
 	i.Match = i.Match + "i-u"
 	a = append(a, i)
@@ -85,11 +92,11 @@ func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
 func AlfredItemsFromZettelAll(z *lib.Zettel) (a []lib.AlfredItem) {
 	a = append(a, alfredItemFromZettelBase(z))
 
-	if z.HasFile() {
+	if z.Note.Metadata.HasFile() {
 		a = append(a, AlfredItemsFromZettelFiles(z)...)
 	}
 
-	if z.HasUrl() {
+	if _, ok := z.Note.Metadata.Url(); ok {
 		a = append(a, AlfredItemsFromZettelUrls(z)...)
 	}
 
@@ -98,24 +105,24 @@ func AlfredItemsFromZettelAll(z *lib.Zettel) (a []lib.AlfredItem) {
 
 func AlfredItemsFromZettelSnippets(z *lib.Zettel) (a []lib.AlfredItem) {
 	i := alfredItemFromZettelBase(z)
-	//TODO move body normalization to dedicated function
+	//TODO-P3 move body normalization to dedicated function
 	i.Title = strings.ReplaceAll(z.Body, "\n", " ")
 	i.Subtitle = z.Format("%d, %t")
 	a = append(a, i)
 	return
 }
 
-func alfredItemFromTag(t string, counts tagCounts) (i lib.AlfredItem) {
+func alfredItemFromTag(t string, t1 Tag) (i lib.AlfredItem) {
 	i.Title = t
 	i.Arg = t
 	i.Uid = "z." + t
 
 	sb := &strings.Builder{}
 
-	if counts.zettels == 1 {
+	if t1.zettels == 1 {
 		sb.WriteString("1 zettel")
 	} else {
-		sb.WriteString(fmt.Sprintf("%d zettels", counts.zettels))
+		sb.WriteString(fmt.Sprintf("%d zettels", t1.zettels))
 	}
 
 	addCount := func(name string, c int) {
@@ -126,25 +133,15 @@ func alfredItemFromTag(t string, counts tagCounts) (i lib.AlfredItem) {
 		}
 	}
 
-	addCount("file", counts.files)
-	addCount("url", counts.urls)
+	addCount("file", t1.files)
+	addCount("url", t1.urls)
 
 	i.Subtitle = sb.String()
 
 	sb = &strings.Builder{}
 
-	for _, m := range metadata.ExpandTags(t) {
+	for _, m := range t1.SearchMatchTags().Strings() {
 		sb.WriteString(m)
-		sb.WriteString(" ")
-	}
-
-	if counts.files > 0 {
-		sb.WriteString("h-f")
-		sb.WriteString(" ")
-	}
-
-	if counts.urls > 0 {
-		sb.WriteString("h-u")
 		sb.WriteString(" ")
 	}
 

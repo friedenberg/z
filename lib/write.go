@@ -4,34 +4,18 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v2"
 )
-
-func (z *Zettel) generateMetadataYaml() (err error) {
-	var y []byte
-	y, err = yaml.Marshal(z.Metadata.ToMetadata())
-
-	if err != nil {
-		return
-	}
-
-	z.Data.MetadataYaml = string(y)
-
-	return
-}
 
 func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 	if onWriteFunc != nil {
 		defer onWriteFunc(z, err)
 	}
 
-	err = z.generateMetadataYaml()
+	y, err := z.Note.Metadata.ToYAMLWithBoundary()
 
 	if err != nil {
-		err = xerrors.Errorf("writing zettel: %w", err)
 		return
 	}
 
@@ -45,24 +29,9 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 
 	w := bufio.NewWriter(f)
 
-	_, err = w.WriteString(metadata.MetadataStartSequence)
+	_, err = w.WriteString(y)
 
 	if err != nil {
-		err = xerrors.Errorf("writing metadata start sequence: %w", err)
-		return
-	}
-
-	_, err = w.WriteString(z.Data.MetadataYaml)
-
-	if err != nil {
-		err = xerrors.Errorf("writing metadata yaml: %w", err)
-		return
-	}
-
-	_, err = w.WriteString(metadata.MetadataEndSequence)
-
-	if err != nil {
-		err = xerrors.Errorf("writing metadata end sequence: %w", err)
 		return
 	}
 

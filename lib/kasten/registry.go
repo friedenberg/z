@@ -32,7 +32,7 @@ func GetLocal(n string) (i LocalImplementation, ok bool) {
 }
 
 func GetRemote(n string) (i RemoteImplementation, ok bool) {
-	//TODO normalize n
+	//TODO-P4 normalize n
 	f, ok := registryInstance[n]
 	i = f()
 	return

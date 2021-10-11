@@ -39,8 +39,8 @@ func (p *GitPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 
 	p.files = append(p.files, z.Path)
 
-	if z.HasFile() {
-		p.files = append(p.files, z.FilePath())
+	if f, ok := z.Note.Metadata.LocalFile(); ok {
+		p.files = append(p.files, f.FilePath(p.Umwelt.BasePath))
 	}
 }
 

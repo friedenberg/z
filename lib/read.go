@@ -1,10 +1,14 @@
 package lib
 
 import (
+	"bufio"
+	"bytes"
 	"path"
 	"strconv"
 	"strings"
 
+	"github.com/friedenberg/z/lib/zettel/metadata"
+	"github.com/friedenberg/z/util/files_guard"
 	"golang.org/x/xerrors"
 )
 
@@ -19,22 +23,36 @@ func (z *Zettel) Hydrate(readBody bool) (err error) {
 
 	z.Id = idInt
 
+	f, err := files_guard.Open(z.Path)
+	defer files_guard.Close(f)
+
+	if err != nil {
+		return
+	}
+
+	r := bufio.NewReader(f)
+
+	y, err := metadata.ReadYAMLHeader(r)
+
+	if err != nil {
+		return
+	}
+
+	err = z.Metadata.Set(y)
+
+	if err != nil {
+		return
+	}
+
 	if readBody {
-		err = z.ReadMetadataAndBody()
-	} else {
-		err = z.ReadMetadata()
-	}
+		body := &bytes.Buffer{}
+		_, err = r.WriteTo(body)
 
-	if err != nil {
-		err = xerrors.Errorf("reading metadata: %w", err)
-		return
-	}
+		if err != nil {
+			return
+		}
 
-	err = z.ParseMetadata()
-
-	if err != nil {
-		err = xerrors.Errorf("reading parsing: %w", err)
-		return
+		z.Body = string(body.Bytes())
 	}
 
 	return

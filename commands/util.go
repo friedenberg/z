@@ -56,21 +56,22 @@ func uniqueAndSortTags(tags []string) (o []string) {
 	return
 }
 
-//TODO refactor
+//TODO-P4 refactor
 func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
 	if q == "" {
 		return true
 	}
 
-	if z.Metadata.File == q {
-		return true
-	}
+	//TODO-P2
+	// if z.Note.Metadata.LocalFile() == q {
+	// 	return true
+	// }
 
-	if z.Metadata.Url == q {
-		return true
-	}
+	// if z.Metadata.Url == q {
+	// 	return true
+	// }
 
-	for _, t := range z.Metadata.ExpandedTags {
+	for _, t := range z.Note.Metadata.TagStrings() {
 		if t == q {
 			return true
 		}
@@ -114,7 +115,7 @@ func filesystemIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util
 		if err != nil {
 			return
 		}
-		//TODO determine if body read is necessary
+
 		z, err := pipeline.HydrateFromFile(u, p, true)
 
 		if err != nil {

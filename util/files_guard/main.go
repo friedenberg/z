@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+//TODO-P3 add exponential backoff for too many files open error
 type openFilesGuard struct {
 	channel chan struct{}
 }
@@ -31,8 +32,7 @@ func init() {
 	}
 
 	openFilesGuardInstance = &openFilesGuard{
-		//TODO subtract from unknowable
-		channel: make(chan struct{}, limit),
+		channel: make(chan struct{}, limit-10),
 	}
 }
 

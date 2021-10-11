@@ -1,6 +1,8 @@
 package metadata
 
 import (
+	"fmt"
+	"path"
 	"strings"
 
 	"github.com/friedenberg/z/util"
@@ -18,23 +20,24 @@ type RemoteFileDescriptor struct {
 }
 
 func (fd *File) Set(s string) (err error) {
+	if len(s) < 3 {
+		err = xerrors.Errorf("string %s is too small to be a file tag", s)
+		return
+	}
+
 	parts := strings.Split(s, "-")
 	partCount := len(parts)
 
-	switch partCount {
-
-	}
-
-	if partCount > 2 || partCount < 1 {
+	if partCount > 3 || partCount < 2 {
 		err = xerrors.Errorf("wrong number of tag parts: %s", partCount)
 		return
 	}
 
-	fd.Id = util.BaseNameNoSuffix(parts[0])
-	fd.Ext = util.ExtNoDot(parts[0])
+	fd.Id = util.BaseNameNoSuffix(parts[1])
+	fd.Ext = util.ExtNoDot(parts[1])
 
-	if partCount == 2 {
-		fd.KastenName = parts[1]
+	if partCount == 3 {
+		fd.KastenName = parts[2]
 	}
 
 	return
@@ -42,6 +45,8 @@ func (fd *File) Set(s string) (err error) {
 
 func (fd File) Tag() string {
 	sb := &strings.Builder{}
+
+	sb.WriteString("f-")
 
 	sb.WriteString(fd.Id)
 
@@ -58,14 +63,32 @@ func (fd File) Tag() string {
 	return sb.String()
 }
 
+func (f File) SearchMatchTags() (expanded TagSet) {
+	expanded = MakeTagSet()
+
+	if f.KastenName != "" {
+		expanded.Merge(Tag("r-" + f.KastenName).SearchMatchTags())
+	}
+
+	if f.Ext != "" {
+		expanded.Merge(Tag("e-" + f.Ext).SearchMatchTags())
+	}
+
+	return
+}
+
 func (fd File) FileName() (fn string) {
 	fi := fd.Id
 
 	if fd.Ext == "" {
 		fn = fi
 	} else {
-		fn = fi + fd.Ext
+		fn = fmt.Sprintf("%s.%s", fi, fd.Ext)
 	}
 
 	return
+}
+
+func (fd File) FilePath(basepath string) (fn string) {
+	return path.Join(basepath, fd.FileName())
 }

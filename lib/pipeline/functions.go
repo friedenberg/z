@@ -5,9 +5,12 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
+	"strings"
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/metadata"
+	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
 
@@ -41,14 +44,16 @@ func HydrateFromIndex(u lib.Umwelt, s string) (z *lib.Zettel, err error) {
 func HydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.Zettel, err error) {
 	z = &lib.Zettel{
 		Umwelt: &u,
+		Path:   p,
 	}
-	z.Path = p
+
 	err = z.Hydrate(includeBody)
+
 	return
 }
 
 func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error) {
-	_, err = url.Parse(urlString)
+	ur, err := url.Parse(urlString)
 
 	if err != nil {
 		return
@@ -70,37 +75,49 @@ func NewOrFoundForUrl(u lib.Umwelt, urlString string) (z *lib.Zettel, err error)
 		return
 	}
 
-	//TODO check if Metadata exists
-	z.Metadata.Url = urlString
+	urlTag := metadata.Url(*ur)
+	z.Metadata.SetUrl(urlTag)
 
 	return
 }
 
 func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zettel, err error) {
-	//TODO check if file exists on disk
-	//TODO check if file sha exists in cache
+	sum, err := util.Sha256HashForFile(file)
+
+	if err != nil {
+		return
+	}
+
+	ids, ok := u.Index.Files.Get(sum, u.Index)
+
+	if ok && ids.Len() > 1 {
+		err = xerrors.Errorf("multiple zettels ('%q') with file: '%s'", ids, sum)
+		return
+	} else if ok && ids.Len() == 1 {
+		z, err = HydrateFromIndex(u, ids.Slice()[0].String())
+		return
+	}
+
 	z, err = New(u)
 
 	if err != nil {
 		return
 	}
 
-	fileName := strconv.FormatInt(z.Id, 10) + path.Ext(file)
-	fileName, err = NormalizePath(u, fileName)
-
-	if err != nil {
-		return
+	fd := metadata.File{
+		Id:  sum,
+		Ext: util.ExtNoDot(file),
 	}
 
 	if shouldCopy {
-		cmd := exec.Command("cp", "-R", file, fileName)
+		cmd := exec.Command("cp", "-R", file, fd.FilePath(u.BasePath))
 		msg, err := cmd.CombinedOutput()
 
 		if err != nil {
 			err = xerrors.Errorf("%w: %s", err, msg)
 		}
 	} else {
-		cmd := exec.Command("mv", file, fileName)
+		cmd := exec.Command("mv", file, fd.FilePath(u.BasePath))
 		msg, err := cmd.CombinedOutput()
 
 		if err != nil {
@@ -112,8 +129,51 @@ func NewOrFoundForFile(u lib.Umwelt, file string, shouldCopy bool) (z *lib.Zette
 		return
 	}
 
-	//TODO check if Metadata exists
-	z.Metadata.File = fileName
+	z.Note.Metadata.AddFile(fd)
+
+	return
+}
+
+func Import(u lib.Umwelt, oldPath string, shouldCopy bool) (z *lib.Zettel, err error) {
+	oldId := strings.TrimSuffix(path.Base(oldPath), path.Ext(oldPath))
+
+	oldIdInt, err := strconv.ParseInt(oldId, 10, 64)
+
+	if err != nil {
+		return
+	}
+
+	z1 := &lib.Zettel{
+		Id:     oldIdInt,
+		Path:   oldPath,
+		Umwelt: &u,
+	}
+
+	err = z1.Hydrate(true)
+
+	if err != nil {
+		return
+	}
+
+	ur, hasUrl := z1.Metadata.Url()
+	f, hasFile := z1.Metadata.LocalFile()
+
+	if hasUrl && hasFile {
+		err = xerrors.Errorf("imported zettel has both url and file")
+	} else if hasFile {
+		base := path.Dir(oldPath)
+		z, err = NewOrFoundForFile(u, f.FilePath(base), shouldCopy)
+	} else if hasUrl {
+		z, err = NewOrFoundForUrl(u, ur.String())
+	} else {
+		z, err = New(u)
+	}
+
+	if err != nil {
+		return
+	}
+
+	z.Merge(z1)
 
 	return
 }
@@ -129,6 +189,9 @@ func New(u lib.Umwelt) (z *lib.Zettel, err error) {
 		Id:     id.Int(),
 		Path:   lib.MakePathFromId(u.FilesAndGit().BasePath, id.String()),
 		Umwelt: &u,
+		Note: lib.Note{
+			Metadata: metadata.MakeMetadata(),
+		},
 	}
 
 	return

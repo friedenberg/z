@@ -70,11 +70,13 @@ func (a *Actions) MatchZettel(z *lib.Zettel) bool {
 		return true
 	}
 
-	if *a&ActionOpenFile != 0 && z.HasFile() {
+	if *a&ActionOpenFile != 0 && z.Note.Metadata.HasFile() {
 		return true
 	}
 
-	if *a&ActionOpenUrl != 0 && z.HasUrl() {
+	_, hu := z.Note.Metadata.Url()
+
+	if *a&ActionOpenUrl != 0 && hu {
 		return true
 	}
 

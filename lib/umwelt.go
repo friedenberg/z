@@ -2,7 +2,6 @@ package lib
 
 import (
 	"os"
-	"os/user"
 	"path"
 
 	"github.com/friedenberg/z/util/files_guard"
@@ -18,13 +17,13 @@ type Umwelt struct {
 func MakeUmwelt(c Config) (k Umwelt, err error) {
 	k.Config = c
 
-	usr, err := user.Current()
+	wd, err := os.Getwd()
 
 	if err != nil {
 		return
 	}
 
-	k.BasePath = path.Join(usr.HomeDir, "Zettelkasten")
+	k.BasePath = wd
 	k.Index = MakeIndex()
 
 	//find all caches
@@ -80,6 +79,7 @@ func (u Umwelt) LoadIndexFromCache() (err error) {
 	return
 }
 
+//TODO-P2 add lock like git: git add: exit status 128: fatal: Unable to create '/Users/sasha/Zettelkasten/.git/index.lock': File exists.
 func (e Umwelt) CacheIndex() (err error) {
 	f, err := files_guard.Create((e.GetIndexPath()))
 	defer files_guard.Close(f)

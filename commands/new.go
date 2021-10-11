@@ -1,65 +1,35 @@
 package commands
 
 import (
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
-	"time"
+	"strings"
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/pipeline/printer"
-	"github.com/friedenberg/z/util"
-	"golang.org/x/xerrors"
 )
 
 func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
-	var metadata_json, content string
+	var tags, content string
 	editActions := options.Actions(options.ActionEdit)
 
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
-	f.StringVar(&metadata_json, "metadata-json", "", "parse the passed-in string as the metadata.")
+	f.StringVar(&tags, "tags", "", "use the passed-in space-separated string as tags")
 
-	return func(u lib.Umwelt, t lib.Transaction) (err error) {
-		currentTime := time.Now()
-
-		z := &lib.Zettel{
-			Umwelt: &u,
-		}
-		z.InitFromTime(currentTime)
-
-		//TODO use common functions
-		for {
-			if util.FileExists(z.Path) {
-				d, err := time.ParseDuration("1s")
-
-				if err != nil {
-					panic(err)
-				}
-
-				currentTime = currentTime.Add(d)
-				z.InitFromTime(currentTime)
-			} else {
-				break
-			}
-		}
+	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+		z, err := pipeline.New(u)
 
 		if err != nil {
 			return
 		}
 
-		if metadata_json != "" {
-			err = json.Unmarshal([]byte(metadata_json), &z.Metadata)
-
-			if err != nil {
-				err = xerrors.Errorf("parsing metadata json: %w", err)
-				return
-			}
+		if tags != "" {
+			z.Note.Metadata.SetStringTags(strings.Split(tags, " "))
 		}
-
-		z.Metadata.Tags = append(z.Metadata.Tags, "zz-inbox")
 
 		if content == "-" {
 			var b []byte
@@ -76,8 +46,8 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 
 		err = z.Write(func(z *lib.Zettel, errIn error) (errOut error) {
 			if errIn != nil {
-				if z.HasFile() {
-					errOut = os.Remove(z.FilePath())
+				if f, ok := z.Note.Metadata.LocalFile(); ok {
+					errOut = os.Remove(f.FilePath(u.BasePath))
 				}
 
 				return
@@ -91,8 +61,9 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 		}
 
 		actionPrinter := printer.ActionZettelPrinter{
-			Actions: editActions,
-			Umwelt:  u,
+			Actions:     editActions,
+			Umwelt:      u,
+			Transaction: t,
 		}
 
 		actionPrinter.Begin()
