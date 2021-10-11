@@ -58,7 +58,6 @@ func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
 
 	i := alfredItemFromZettelBase(z)
 	i.Icon.Path = f.FilePath(z.Umwelt.BasePath)
-	i.Arg = f.FileName()
 	i.Uid = i.Uid + ".file"
 	i.Match = i.Match + "i-f"
 	a = append(a, i)
