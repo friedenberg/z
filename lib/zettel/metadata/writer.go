@@ -56,7 +56,9 @@ func (m Metadata) ToYAMLWithBoundary() (h string, err error) {
 		return
 	}
 
-	w.WriteString(y)
+	if y != "[]\n" {
+		w.WriteString(y)
+	}
 
 	if err != nil {
 		return
