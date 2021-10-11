@@ -26,6 +26,12 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 	}
 
 	for _, z := range t.Modified() {
+		err = z.Hydrate(true)
+
+		if err != nil {
+			return
+		}
+
 		err = z.Write(nil)
 
 		if err != nil {
