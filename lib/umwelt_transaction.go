@@ -15,8 +15,24 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 
 	f(u, t)
 
-	for _, z := range t.Added() {
+	readAndWrite := func(z *Zettel) (err error) {
+		err = z.Hydrate(true)
+
+		if err != nil {
+			return
+		}
+
 		err = z.Write(nil)
+
+		if err != nil {
+			return
+		}
+
+		return
+	}
+
+	for _, z := range t.Added() {
+		err = readAndWrite(z)
 
 		if err != nil {
 			return
@@ -26,13 +42,7 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 	}
 
 	for _, z := range t.Modified() {
-		err = z.Hydrate(true)
-
-		if err != nil {
-			return
-		}
-
-		err = z.Write(nil)
+		err = readAndWrite(z)
 
 		if err != nil {
 			return
