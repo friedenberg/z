@@ -11,15 +11,9 @@ import (
 )
 
 func init() {
-	n := "add"
-	f := flag.NewFlagSet(n, flag.ExitOnError)
-
-	registerCommand(
-		n,
-		Command{
-			Flags: f,
-			Run:   GetSubcommandAdd(f),
-		},
+	makeAndRegisterCommand(
+		"add",
+		GetSubcommandAdd,
 	)
 }
 
@@ -35,12 +29,11 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&description, "description", "", "use this string as the zettel description")
 	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+	return func(u lib.Umwelt) (err error) {
 		pr := &printer.MultiplexingZettelPrinter{
 			Printer: &printer.ActionZettelPrinter{
-				Umwelt:      u,
-				Actions:     editActions,
-				Transaction: t,
+				Umwelt:  u,
+				Actions: editActions,
 			},
 		}
 
@@ -58,7 +51,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 				z.Metadata.SetDescription(description)
 			}
 
-			t.Add.PrintZettel(i, z, err)
+			u.Add.PrintZettel(i, z, err)
 
 			return
 		}

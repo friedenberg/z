@@ -10,7 +10,6 @@ import (
 
 type RemotePrinter struct {
 	Umwelt       lib.Umwelt
-	Transaction  *lib.Transaction
 	Command      options.RemoteCommand
 	Remote       kasten.RemoteImplementation
 	zettels      []*lib.Zettel
@@ -53,7 +52,7 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 
 	p.rsyncPrinter.File(fd.FileName())
 	z.Note.Metadata.AddFile(fd)
-	p.Transaction.Mod.PrintZettel(i, z, errIn)
+	p.Umwelt.Mod.PrintZettel(i, z, errIn)
 }
 
 func (p *RemotePrinter) End() {

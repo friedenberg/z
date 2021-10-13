@@ -11,7 +11,6 @@ import (
 
 type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
-	Transaction *lib.Transaction
 	Actions     options.Actions
 	zettels     []*lib.Zettel
 	zettelFiles util.GitAnnex
@@ -97,7 +96,7 @@ func (p *ActionZettelPrinter) End() {
 	wg.Wait()
 
 	for i, z := range p.zettels {
-		p.Transaction.Mod.PrintZettel(i, z, nil)
+		p.Umwelt.Mod.PrintZettel(i, z, nil)
 	}
 
 	if err != nil {

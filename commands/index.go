@@ -8,9 +8,16 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
+func init() {
+	makeAndRegisterCommand(
+		"index",
+		GetSubcommandIndex,
+	)
+}
+
 func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
-		t.ShouldSkipCommit = true
+	return func(u lib.Umwelt) (err error) {
+		u.ShouldSkipCommit = true
 		u.Index = lib.MakeIndex()
 
 		args, err := u.FilesAndGit().GetAll()
@@ -20,8 +27,8 @@ func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
 		}
 
 		par := util.Parallelizer{Args: args}
-		t.Add.Begin()
-		defer t.Add.End()
+		u.Add.Begin()
+		defer u.Add.End()
 		par.Run(
 			func(i int, a string) (pErr error) {
 				z, pErr := pipeline.HydrateFromFile(u, a, true)
@@ -30,12 +37,12 @@ func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
 					return
 				}
 
-				t.Add.PrintZettel(i, z, pErr)
+				u.Add.PrintZettel(i, z, pErr)
 
 				return
 			},
 			func(i int, s string, eErr error) {
-				t.Add.PrintZettel(i, nil, eErr)
+				u.Add.PrintZettel(i, nil, eErr)
 			},
 		)
 

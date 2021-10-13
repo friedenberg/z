@@ -7,7 +7,7 @@ import (
 )
 
 func GetSubcommandBuild(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+	return func(u lib.Umwelt) (err error) {
 		// actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 		// 	shouldPrint = true
 

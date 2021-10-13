@@ -11,7 +11,7 @@ func GetSubcommandClean(f *flag.FlagSet) lib.Transactor {
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+	return func(u lib.Umwelt) (err error) {
 		//processor := MakeProcessor(
 		//	u,
 		//	f.Args(),

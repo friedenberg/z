@@ -6,16 +6,10 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
-type Transactor func(Umwelt, *Transaction) error
+type Transactor func(Umwelt) error
 
 func (u Umwelt) RunTransaction(f Transactor) (err error) {
-	t := &Transaction{
-		Add: &transactionPrinter{},
-		Mod: &transactionPrinter{},
-		Del: &transactionPrinter{},
-	}
-
-	f(u, t)
+	f(u)
 
 	readAndWrite := func(z *Zettel) (err error) {
 		err = z.Hydrate(true)
@@ -35,7 +29,7 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 		return
 	}
 
-	for _, z := range t.Added() {
+	for _, z := range u.Transaction.Added() {
 		err = readAndWrite(z)
 
 		if err != nil {
@@ -45,7 +39,7 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 		u.Index.Add(z)
 	}
 
-	for _, z := range t.Modified() {
+	for _, z := range u.Transaction.Modified() {
 		err = readAndWrite(z)
 
 		if err != nil {
@@ -55,21 +49,21 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 		u.Index.Update(z)
 	}
 
-	err = u.gitCommitTransactionIfNecessary(t)
+	err = u.gitCommitTransactionIfNecessary()
 
 	if err != nil {
 		return
 	}
 
-	for _, z := range t.Added() {
+	for _, z := range u.Added() {
 		u.Index.Add(z)
 	}
 
-	for _, z := range t.Modified() {
+	for _, z := range u.Modified() {
 		u.Index.Update(z)
 	}
 
-	for _, z := range t.Deleted() {
+	for _, z := range u.Deleted() {
 		u.Index.Delete(z)
 	}
 
@@ -82,8 +76,8 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 	return
 }
 
-func (u Umwelt) gitCommitTransactionIfNecessary(t *Transaction) (err error) {
-	if t.ShouldSkipCommit {
+func (u Umwelt) gitCommitTransactionIfNecessary() (err error) {
+	if u.Transaction.ShouldSkipCommit {
 		return
 	}
 
@@ -94,9 +88,9 @@ func (u Umwelt) gitCommitTransactionIfNecessary(t *Transaction) (err error) {
 	}
 
 	fileListMap := map[string][]string{
-		"delete": t.Deleted().Paths(),
-		"modify": t.Modified().Paths(),
-		"add":    t.Added().Paths(),
+		"delete": u.Transaction.Deleted().Paths(),
+		"modify": u.Transaction.Modified().Paths(),
+		"add":    u.Transaction.Added().Paths(),
 	}
 
 	for k, v := range fileListMap {

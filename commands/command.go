@@ -23,29 +23,24 @@ func registerCommand(n string, c Command) {
 	commands[n] = c
 }
 
-func Commands() map[string]Command {
-	return commands
-}
+func makeCommand(n string, makeFunc func(*flag.FlagSet) lib.Transactor) (c Command) {
+	f := flag.NewFlagSet(n, flag.ExitOnError)
 
-func registerSubcommand(name string, makeFunc func(*flag.FlagSet) lib.Transactor) {
-	flags := flag.NewFlagSet(name, flag.ExitOnError)
-	s := Command{
-		Flags: flags,
-		Run:   makeFunc(flags),
+	c = Command{
+		Flags: f,
+		Run:   makeFunc(f),
 	}
 
-	registerCommand(name, s)
+	return
 }
 
-func init() {
-	registerSubcommand("autocomplete", GetSubcommandAutocomplete)
-	registerSubcommand("build", GetSubcommandBuild)
-	registerSubcommand("cat", GetSubcommandCat)
-	registerSubcommand("clean", GetSubcommandClean)
-	registerSubcommand("edit", GetSubcommandEdit)
-	registerSubcommand("index", GetSubcommandIndex)
-	registerSubcommand("mv", GetSubcommandMv)
-	registerSubcommand("new", GetSubcommandNew)
-	registerSubcommand("remote", GetSubcommandRemote)
-	registerSubcommand("rm", GetSubcommandRm)
+func makeAndRegisterCommand(n string, makeFunc func(*flag.FlagSet) lib.Transactor) {
+	c := makeCommand(n, makeFunc)
+	registerCommand(n, c)
+
+	return
+}
+
+func Commands() map[string]Command {
+	return commands
 }

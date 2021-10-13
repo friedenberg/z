@@ -12,6 +12,13 @@ import (
 	"github.com/friedenberg/z/lib/pipeline/printer"
 )
 
+func init() {
+	makeAndRegisterCommand(
+		"new",
+		GetSubcommandNew,
+	)
+}
+
 func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 	var tags, content string
 	editActions := options.Actions(options.ActionEdit)
@@ -20,7 +27,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
 	f.StringVar(&tags, "tags", "", "use the passed-in space-separated string as tags")
 
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+	return func(u lib.Umwelt) (err error) {
 		z, err := pipeline.New(u)
 
 		if err != nil {
@@ -62,16 +69,15 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 		}
 
 		actionPrinter := printer.ActionZettelPrinter{
-			Actions:     editActions,
-			Umwelt:      u,
-			Transaction: t,
+			Actions: editActions,
+			Umwelt:  u,
 		}
 
 		actionPrinter.Begin()
 		actionPrinter.PrintZettel(0, z, nil)
 		actionPrinter.End()
 
-		t.Add.PrintZettel(0, z, nil)
+		u.Add.PrintZettel(0, z, nil)
 
 		return
 	}

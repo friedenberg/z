@@ -12,11 +12,18 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func init() {
+	makeAndRegisterCommand(
+		"remote",
+		GetSubcommandRemote,
+	)
+}
+
 func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 	var query string
 	f.StringVar(&query, "query", "", "zettel-spec")
 
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
+	return func(u lib.Umwelt) (err error) {
 		args := f.Args()
 
 		var command options.RemoteCommand
@@ -44,10 +51,9 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		fp := pipeline.FilterPrinter{
 			Printer: &printer.RemotePrinter{
-				Umwelt:      u,
-				Transaction: t,
-				Command:     command,
-				Remote:      remote,
+				Umwelt:  u,
+				Command: command,
+				Remote:  remote,
 			},
 			Filter: func(_ int, z *lib.Zettel) bool {
 				return z.Note.Metadata.HasFile()

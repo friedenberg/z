@@ -12,6 +12,19 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
+func init() {
+	n := "cat"
+	f := flag.NewFlagSet(n, flag.ExitOnError)
+
+	registerCommand(
+		n,
+		Command{
+			Flags: f,
+			Run:   GetSubcommandCat(f),
+		},
+	)
+}
+
 type outputFormat pipeline.FilterPrinter
 
 var (
@@ -118,8 +131,8 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	f.Var(&of, "output-format", fmt.Sprintf("One of %q", outputFormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
 
-	return func(u lib.Umwelt, t *lib.Transaction) (err error) {
-		t.ShouldSkipCommit = true
+	return func(u lib.Umwelt) (err error) {
+		u.ShouldSkipCommit = true
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 

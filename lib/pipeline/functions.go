@@ -178,6 +178,10 @@ func Import(u lib.Umwelt, oldPath string, shouldCopy bool) (z *lib.Zettel, err e
 
 	z.Merge(z1)
 
+	if !shouldCopy {
+		//TODO-P3 should delete imported zettel?
+	}
+
 	return
 }
 

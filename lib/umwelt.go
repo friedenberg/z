@@ -13,6 +13,7 @@ type Umwelt struct {
 	BasePath          string
 	Config            Config
 	TagsForNewZettels []string
+	Transaction
 }
 
 func MakeUmwelt(c Config) (k Umwelt, err error) {
@@ -35,6 +36,12 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 
 	if err != nil && !os.IsNotExist(err) {
 		return
+	}
+
+	k.Transaction = Transaction{
+		Add: &transactionPrinter{},
+		Mod: &transactionPrinter{},
+		Del: &transactionPrinter{},
 	}
 
 	return
