@@ -11,7 +11,8 @@ const (
 	MetadataEndSequence   = "...\n"
 )
 
-func ReadYAMLHeader(r *bufio.Reader) (h string, err error) {
+func ReadYAMLHeader(r1 io.Reader) (h string, err error) {
+	r := bufio.NewReader(r1)
 	sb := strings.Builder{}
 	within := false
 

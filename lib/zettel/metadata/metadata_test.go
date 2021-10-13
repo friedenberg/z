@@ -5,72 +5,27 @@ import (
 )
 
 func TestMetadataToJSON(t *testing.T) {
-	expected := `["t-test-tag"]`
-
-	var m Metadata
-	err := m.SetStringTags([]string{"t-test-tag"})
-
-	if err != nil {
-		t.Errorf("failed to set from tag: %w", err)
-	}
-
-	b, err := m.MarshalJSON()
-
-	if err != nil {
-		t.Errorf("failed to marshal json: %w", err)
-	}
-
-	json := string(b)
-
-	if expected != json {
-		t.Errorf("Actual json was '%s', wanted '%s'", json, expected)
-	}
+	assertMetadataSetStringTags(
+		t,
+		[]string{"t-test-tag"},
+		`["t-test-tag"]`,
+	)
 }
 
 func TestMetadataToJSON2(t *testing.T) {
-	expected := `[]`
-
-	var m Metadata
-	err := m.SetStringTags([]string{})
-
-	if err != nil {
-		t.Errorf("failed to set from tag: %w", err)
-	}
-
-	b, err := m.MarshalJSON()
-
-	if err != nil {
-		t.Errorf("failed to marshal json: %w", err)
-	}
-
-	json := string(b)
-
-	if expected != json {
-		t.Errorf("Actual json was '%s', wanted '%s'", json, expected)
-	}
+	assertMetadataSetStringTags(
+		t,
+		[]string{},
+		`[]`,
+	)
 }
 
 func TestMetadataToJSON3(t *testing.T) {
-	expected := `["ok","t-wow"]`
-
-	var m Metadata
-	err := m.SetStringTags([]string{"t-wow", "ok"})
-
-	if err != nil {
-		t.Errorf("failed to set from tag: %w", err)
-	}
-
-	b, err := m.MarshalJSON()
-
-	if err != nil {
-		t.Errorf("failed to marshal json: %w", err)
-	}
-
-	json := string(b)
-
-	if expected != json {
-		t.Errorf("Actual json was '%s', wanted '%s'", json, expected)
-	}
+	assertMetadataSetStringTags(
+		t,
+		[]string{"t-wow", "ok"},
+		`["ok","t-wow"]`,
+	)
 }
 
 func TestMetadataToJSON4(t *testing.T) {
@@ -102,6 +57,14 @@ func TestMetadataToJSON7(t *testing.T) {
 		t,
 		`["ok","u-https://google.com/thispath","wow"]`,
 		`["ok","u-https://google.com/thispath","wow"]`,
+	)
+}
+
+func TestMetadataToJSON8(t *testing.T) {
+	assertMetadataSetStringTags(
+		t,
+		[]string{""},
+		`[]`,
 	)
 }
 
@@ -150,7 +113,7 @@ func assertMetadataSetStringTags(t *testing.T, in []string, expected string) {
 	}
 }
 
-func TestMetadataToJSON8(t *testing.T) {
+func TestMetadataToJSON9(t *testing.T) {
 	assertYamlMatches(t,
 		`---
 - ok

@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/friedenberg/z/lib/zettel/metadata"
 )
@@ -26,6 +27,6 @@ func (n Note) Merge(n1 Note) (n2 Note) {
 	)
 
 	n2.Metadata = m
-	n2.Body = fmt.Sprintf("%s\n%s", n.Body, n1.Body)
+	n2.Body = strings.TrimSpace(fmt.Sprintf("%s\n\n%s", n.Body, n1.Body))
 	return
 }
