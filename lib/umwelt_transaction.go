@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"os"
+
 	"github.com/friedenberg/z/util"
 )
 
@@ -18,7 +20,9 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 	readAndWrite := func(z *Zettel) (err error) {
 		err = z.Hydrate(true)
 
-		if err != nil {
+		if os.IsNotExist(err) {
+			err = nil
+		} else if err != nil {
 			return
 		}
 
