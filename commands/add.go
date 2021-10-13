@@ -10,6 +10,19 @@ import (
 	"github.com/friedenberg/z/util"
 )
 
+func init() {
+	n := "add"
+	f := flag.NewFlagSet(n, flag.ExitOnError)
+
+	registerCommand(
+		n,
+		Command{
+			Flags: f,
+			Run:   GetSubcommandAdd(f),
+		},
+	)
+}
+
 func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	var tagString string
 	var description string

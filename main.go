@@ -14,41 +14,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type subcommand struct {
-	flags   *flag.FlagSet
-	runFunc lib.Transactor
-}
-
-var (
-	subcommands = map[string]subcommand{}
-)
-
-func makeSubcommand(name string, makeFunc func(*flag.FlagSet) lib.Transactor) {
-	if _, ok := subcommands[name]; ok {
-		panic("command added more than once: " + name)
-	}
-
-	flags := flag.NewFlagSet(name, flag.ExitOnError)
-	subcommands[name] = subcommand{
-		flags:   flags,
-		runFunc: makeFunc(flags),
-	}
-}
-
-func init() {
-	makeSubcommand("add", commands.GetSubcommandAdd)
-	makeSubcommand("autocomplete", commands.GetSubcommandAutocomplete)
-	makeSubcommand("build", commands.GetSubcommandBuild)
-	makeSubcommand("cat", commands.GetSubcommandCat)
-	makeSubcommand("clean", commands.GetSubcommandClean)
-	makeSubcommand("edit", commands.GetSubcommandEdit)
-	makeSubcommand("index", commands.GetSubcommandIndex)
-	makeSubcommand("mv", commands.GetSubcommandMv)
-	makeSubcommand("new", commands.GetSubcommandNew)
-	makeSubcommand("remote", commands.GetSubcommandRemote)
-	makeSubcommand("rm", commands.GetSubcommandRm)
-}
-
 func main() {
 	os.Exit(run())
 }
@@ -60,8 +25,9 @@ func run() int {
 		return printUsage(nil)
 	}
 
+	cmds := commands.Commands()
 	specifiedSubcommand := os.Args[1]
-	cmd, ok := subcommands[specifiedSubcommand]
+	cmd, ok := cmds[specifiedSubcommand]
 
 	if !ok {
 		return printUsage(xerrors.Errorf("No subcommand '%s'", specifiedSubcommand))
@@ -83,8 +49,8 @@ func run() int {
 	}
 
 	//TODO-P4 refactor to be command too
-	cmd.flags.Parse(os.Args[2:])
-	err = umwelt.RunTransaction(cmd.runFunc)
+	cmd.Flags.Parse(os.Args[2:])
+	err = umwelt.RunTransaction(cmd.Run)
 
 	if err != nil {
 		util.StdPrinterError(err)
@@ -100,18 +66,18 @@ func printUsage(err error) int {
 
 	fmt.Println("Usage for z: ")
 
-	sc := make([]subcommand, 0, len(subcommands))
+	fs := make([]flag.FlagSet, 0, len(commands.Commands()))
 
-	for _, c := range subcommands {
-		sc = append(sc, c)
+	for _, c := range commands.Commands() {
+		fs = append(fs, *c.Flags)
 	}
 
-	sort.Slice(sc, func(i, j int) bool {
-		return sc[i].flags.Name() < sc[j].flags.Name()
+	sort.Slice(fs, func(i, j int) bool {
+		return fs[i].Name() < fs[j].Name()
 	})
 
-	for _, c := range sc {
-		printSubcommandUsage(c)
+	for _, f := range fs {
+		printSubcommandUsage(f)
 	}
 
 	status := 0
@@ -124,12 +90,10 @@ func printUsage(err error) int {
 	return status
 }
 
-func printSubcommandUsage(sc subcommand) {
+func printSubcommandUsage(flags flag.FlagSet) {
 	printTabbed := func(s string) {
 		util.StdPrinterErrf("  %s\n", s)
 	}
-
-	flags := sc.flags
 
 	var b bytes.Buffer
 	flags.SetOutput(&b)
