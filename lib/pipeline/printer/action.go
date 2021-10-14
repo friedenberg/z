@@ -13,29 +13,14 @@ type ActionZettelPrinter struct {
 	Umwelt      lib.Umwelt
 	Actions     options.Actions
 	zettels     []*lib.Zettel
-	zettelFiles util.GitAnnex
-	files       util.GitAnnex
+	zettelFiles []string
+	files       []string
 	urls        []string
 }
 
 func (p *ActionZettelPrinter) Begin() {
-	git := util.Git{
-		Path: p.Umwelt.Kasten.Local.BasePath,
-	}
-
-	p.zettelFiles = util.GitAnnex{
-		GitFilesToCommit: util.GitFilesToCommit{
-			Git:   git,
-			Files: make([]string, 0),
-		},
-	}
-
-	p.files = util.GitAnnex{
-		GitFilesToCommit: util.GitFilesToCommit{
-			Git:   git,
-			Files: make([]string, 0),
-		},
-	}
+	p.zettelFiles = make([]string, 0)
+	p.files = make([]string, 0)
 }
 
 func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
@@ -45,10 +30,10 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	p.zettels = append(p.zettels, z)
-	p.zettelFiles.Files = append(p.zettelFiles.Files, z.Path)
+	p.zettelFiles = append(p.zettelFiles, z.Path)
 
 	if f, ok := z.Note.Metadata.LocalFile(); ok {
-		p.files.Files = append(p.files.Files, f.FilePath(p.Umwelt.BasePath))
+		p.files = append(p.files, f.FilePath(p.Umwelt.BasePath))
 	}
 
 	if u, ok := z.Note.Metadata.Url(); ok {
@@ -109,22 +94,12 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 		return
 	}
 
-	if p.Umwelt.Kasten.Local.GitAnnexEnabled {
-		err = p.zettelFiles.Unlock()
-
-		if err != nil {
-			return
-		}
-
-		defer p.zettelFiles.Lock()
-	}
-
 	args := []string{"-f", "-p"}
 
 	cmd := util.ExecCommand(
 		"mvim",
 		args,
-		p.zettelFiles.Files,
+		p.zettelFiles,
 	)
 
 	output, err := cmd.CombinedOutput()
@@ -138,24 +113,14 @@ func (p *ActionZettelPrinter) openZettels() (err error) {
 }
 
 func (p *ActionZettelPrinter) openFiles() (err error) {
-	if len(p.files.Files) == 0 {
+	if len(p.files) == 0 {
 		return
-	}
-
-	if p.Umwelt.Kasten.Local.GitAnnexEnabled {
-		err = p.files.Unlock()
-
-		if err != nil {
-			return
-		}
-
-		defer p.files.Lock()
 	}
 
 	cmd := util.ExecCommand(
 		"open",
 		[]string{"-W"},
-		p.files.Files,
+		p.files,
 	)
 
 	output, err := cmd.CombinedOutput()

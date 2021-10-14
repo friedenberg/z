@@ -14,7 +14,7 @@ type printfFormatterTestCase struct {
 }
 
 func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
-	k := FilesAndGit{}
+	k := FileStore{}
 	umwelt := Umwelt{
 		Kasten: Kasten{Local: &k},
 	}

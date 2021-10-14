@@ -32,10 +32,11 @@ type TagConfig struct {
 type Config struct {
 	ConfigTagForNewZettels
 
-	Path       string `toml:"path"`
-	GitEnabled bool   `toml:"git-enabled"`
-	Remotes    map[string]KastenRemoteConfig
-	Tags       map[string]TagConfig
+	Path           string `toml:"path"`
+	GitEnabled     bool   `toml:"git-enabled"`
+	GitSignCommits bool   `toml:"git-sign-commits"`
+	Remotes        map[string]KastenRemoteConfig
+	Tags           map[string]TagConfig
 }
 
 func DefaultConfigPath() (p string, err error) {
@@ -118,10 +119,18 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 		return
 	}
 
-	u.Kasten.Local = &FilesAndGit{
-		GitEnabled: c.GitEnabled,
+	fs := &FileStore{
 		//TODO-P2 use cwd or config if available
-		BasePath: wd,
+		basePath: wd,
+	}
+
+	if c.GitEnabled {
+		u.Kasten.Local = &GitStore{
+			FileStore:   *fs,
+			SignCommits: c.GitSignCommits,
+		}
+	} else {
+		u.Kasten.Local = fs
 	}
 
 	u.Kasten.Remotes = make(map[string]kasten.RemoteImplementation)

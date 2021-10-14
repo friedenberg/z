@@ -11,7 +11,7 @@ import (
 
 func DefaultArgNormalizer(u lib.Umwelt) ArgNormalizeFunc {
 	return func(_ int, path string) (normalizedArg string, err error) {
-		normalizedArg, err = u.FilesAndGit().GetNormalizedPath(path)
+		normalizedArg, err = u.FileStore().GetNormalizedPath(path)
 		return
 	}
 }
