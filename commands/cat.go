@@ -10,15 +10,9 @@ import (
 )
 
 func init() {
-	n := "cat"
-	f := flag.NewFlagSet(n, flag.ExitOnError)
-
-	registerCommand(
-		n,
-		Command{
-			Flags: f,
-			Run:   GetSubcommandCat(f),
-		},
+	makeAndRegisterCommand(
+		"cat",
+		GetSubcommandCat,
 	)
 }
 
@@ -30,6 +24,7 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 
 	return func(u lib.Umwelt) (err error) {
 		u.ShouldSkipCommit = true
+
 		args := f.Args()
 		var iter util.ParallelizerIterFunc
 

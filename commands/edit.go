@@ -11,15 +11,9 @@ import (
 )
 
 func init() {
-	n := "edit"
-	f := flag.NewFlagSet(n, flag.ExitOnError)
-
-	registerCommand(
-		n,
-		Command{
-			Flags: f,
-			Run:   GetSubcommandEdit(f),
-		},
+	makeAndRegisterCommand(
+		"edit",
+		GetSubcommandEdit,
 	)
 }
 
