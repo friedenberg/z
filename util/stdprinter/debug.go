@@ -5,10 +5,10 @@ import (
 	"os"
 )
 
-func Debug(err error) {
+func Debug(a ...interface{}) {
 	printerChannel <- printerLine{
 		file:    os.Stderr,
-		line:    fmt.Sprintf("%+v", err),
+		line:    fmt.Sprintln(a...),
 		isDebug: true,
 	}
 }

@@ -32,8 +32,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	return func(u lib.Umwelt) (err error) {
 		pr := &printer.MultiplexingZettelPrinter{
 			Printer: &printer.ActionZettelPrinter{
-				Umwelt:  u,
-				Actions: editActions,
+				Umwelt: u,
 			},
 		}
 
@@ -51,15 +50,30 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 				z.Metadata.SetDescription(description)
 			}
 
+			pr.PrintZettel(i, z, err)
 			u.Add.PrintZettel(i, z, err)
 
 			return
 		}
 
-		par := util.Parallelizer{Args: f.Args()}
-		pr.Printer.Begin()
-		defer pr.Printer.End()
+		par := util.Parallelizer{
+			Args:    f.Args(),
+			Printer: pr,
+		}
+
 		par.Run(iter, errIterartion(pr.Printer))
+
+		added := u.Added().Paths()
+
+		err = u.RunTransaction(nil)
+
+		if err != nil {
+			return
+		}
+
+		u.Transaction = lib.MakeTransaction()
+
+		action(u, added, nil, editActions)
 
 		return
 	}

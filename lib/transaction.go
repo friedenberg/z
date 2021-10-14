@@ -1,5 +1,15 @@
 package lib
 
+func MakeTransaction() (t Transaction) {
+	t = Transaction{
+		Add: &transactionPrinter{},
+		Mod: &transactionPrinter{},
+		Del: &transactionPrinter{},
+	}
+
+	return
+}
+
 //TODO-P1 handle cases where files or zettles are just opened but not edited
 type Transaction struct {
 	ShouldSkipCommit bool

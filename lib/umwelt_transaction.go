@@ -3,7 +3,9 @@ package lib
 type Transactor func(Umwelt) error
 
 func (u Umwelt) RunTransaction(f Transactor) (err error) {
-	f(u)
+	if f != nil {
+		f(u)
+	}
 
 	err = u.Kasten.Local.CommitTransaction(u)
 
@@ -11,6 +13,16 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 		return
 	}
 
+	err = u.IndexTransaction()
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (u Umwelt) IndexTransaction() (err error) {
 	for _, z := range u.Added() {
 		u.Index.Add(z)
 	}

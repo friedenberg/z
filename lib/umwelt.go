@@ -38,11 +38,7 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 		return
 	}
 
-	k.Transaction = Transaction{
-		Add: &transactionPrinter{},
-		Mod: &transactionPrinter{},
-		Del: &transactionPrinter{},
-	}
+	k.Transaction = MakeTransaction()
 
 	return
 }
