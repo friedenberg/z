@@ -93,6 +93,10 @@ func (m *Metadata) AddStringTags(t ...string) (err error) {
 }
 
 func (m *Metadata) addStringTag(t string) (err error) {
+	if t == "" {
+		return
+	}
+
 	var t1 ITag
 
 	firstGroup := strings.Split(t, "-")[0]
