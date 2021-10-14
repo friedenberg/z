@@ -20,6 +20,7 @@ type ActionZettelPrinter struct {
 }
 
 func (p *ActionZettelPrinter) Begin() {
+	p.zettels = make([]*lib.Zettel, 0)
 	p.zettelFiles = make([]string, 0)
 	p.files = make([]string, 0)
 }
@@ -86,12 +87,13 @@ func (p *ActionZettelPrinter) End() {
 	}
 
 	if err != nil {
-		util.StdPrinterErr(err)
+		stdprinter.Err(err)
 	}
 }
 
 func (p *ActionZettelPrinter) openZettels() (err error) {
 	if len(p.zettels) == 0 {
+		stdprinter.Debug("no zettels to open")
 		return
 	}
 

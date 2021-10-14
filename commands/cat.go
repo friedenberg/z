@@ -32,11 +32,19 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 			args = u.GetAll()
 		}
 
-		iter = cachedIteration(u, query, pipeline.FilterPrinter(of))
+		fp := pipeline.FilterPrinter(of)
 
-		par := util.Parallelizer{Args: args}
-		of.Printer.Begin()
-		defer of.Printer.End()
+		if query != "" {
+			fp.Filter = pipeline.MatchQuery(query)
+		}
+
+		iter = cachedIteration(u, pipeline.FilterPrinter(of))
+
+		par := util.Parallelizer{
+			Args:    args,
+			Printer: of.Printer,
+		}
+
 		par.Run(iter, errIterartion(of.Printer))
 
 		return

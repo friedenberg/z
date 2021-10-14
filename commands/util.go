@@ -56,43 +56,19 @@ func uniqueAndSortTags(tags []string) (o []string) {
 	return
 }
 
-//TODO-P4 refactor
-func doesZettelMatchQuery(z *lib.Zettel, q string) bool {
-	if q == "" {
-		return true
-	}
-
-	//TODO-P2
-	// if z.Note.Metadata.LocalFile() == q {
-	// 	return true
-	// }
-
-	// if z.Metadata.Url == q {
-	// 	return true
-	// }
-
-	for _, t := range z.Note.Metadata.TagStrings() {
-		if t == q {
-			return true
-		}
-	}
-
-	return false
-}
-
 func errIterartion(p pipeline.Printer) util.ParallelizerErrorFunc {
 	return func(i int, s string, err error) {
 		p.PrintZettel(i, nil, err)
 	}
 }
 
-func printIfNecessary(i int, z *lib.Zettel, q string, fp pipeline.FilterPrinter) {
-	if (fp.Filter == nil || fp.Filter(i, z)) && doesZettelMatchQuery(z, q) {
+func printIfNecessary(i int, z *lib.Zettel, fp pipeline.FilterPrinter) {
+	if fp.Filter == nil || fp.Filter(i, z) {
 		fp.Printer.PrintZettel(i, z, nil)
 	}
 }
 
-func cachedIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util.ParallelizerIterFunc {
+func cachedIteration(u lib.Umwelt, fp pipeline.FilterPrinter) util.ParallelizerIterFunc {
 	return func(i int, s string) (err error) {
 		s = util.BaseNameNoSuffix(s)
 		z, err := pipeline.HydrateFromIndex(u, s)
@@ -101,13 +77,13 @@ func cachedIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util.Par
 			return
 		}
 
-		printIfNecessary(i, z, q, fp)
+		printIfNecessary(i, z, fp)
 
 		return
 	}
 }
 
-func filesystemIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util.ParallelizerIterFunc {
+func filesystemIteration(u lib.Umwelt, fp pipeline.FilterPrinter) util.ParallelizerIterFunc {
 	return func(i int, s string) (err error) {
 		p, err := pipeline.NormalizePath(u, s)
 		p = util.EverythingExceptExtension(p) + ".md"
@@ -122,7 +98,7 @@ func filesystemIteration(u lib.Umwelt, q string, fp pipeline.FilterPrinter) util
 			return
 		}
 
-		printIfNecessary(i, z, q, fp)
+		printIfNecessary(i, z, fp)
 
 		return
 	}

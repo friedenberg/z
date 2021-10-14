@@ -47,9 +47,12 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 				Command:    command,
 				RemotePath: remotePath,
 			},
-			Filter: func(_ int, z *lib.Zettel) bool {
-				return z.Note.Metadata.HasFile()
-			},
+			Filter: pipeline.And(
+				pipeline.MatchQuery(query),
+				func(_ int, z *lib.Zettel) bool {
+					return z.Note.Metadata.HasFile()
+				},
+			),
 		}
 
 		var iter util.ParallelizerIterFunc
@@ -58,11 +61,13 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 			args = u.GetAll()
 		}
 
-		iter = cachedIteration(u, query, fp)
+		iter = cachedIteration(u, fp)
 
-		par := util.Parallelizer{Args: args}
-		fp.Printer.Begin()
-		defer fp.Printer.End()
+		par := util.Parallelizer{
+			Args:    args,
+			Printer: fp.Printer,
+		}
+
 		par.Run(iter, errIterartion(fp.Printer))
 
 		return

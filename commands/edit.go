@@ -25,33 +25,46 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	return func(u lib.Umwelt) (err error) {
-		fp := pipeline.FilterPrinter{
-			Filter: MatchQuery(query),
-			Printer: &printer.MultiplexingZettelPrinter{
-				Printer: &printer.ActionZettelPrinter{
-					Umwelt:  u,
-					Actions: editActions,
-				},
-			},
-		}
-
 		args := f.Args()
-		var iter util.ParallelizerIterFunc
 
 		if len(args) == 0 {
-			args = u.GetAll()
+			//TODO-P3 does it make sense to edit all zettels on no args?
+			// args = u.GetAll()
 		}
 
-		iter = cachedIteration(u, query, fp)
-
-		par := util.Parallelizer{Args: args}
-		fp.Printer.Begin()
-		defer fp.Printer.End()
-		par.Run(
-			iter,
-			errIterartion(fp.Printer),
+		err = action(
+			u,
+			args,
+			pipeline.MatchQuery(query),
+			editActions,
 		)
 
 		return
 	}
+}
+
+func action(u lib.Umwelt, args []string, f pipeline.Filter, a options.Actions) (err error) {
+	fp := pipeline.FilterPrinter{
+		Filter: f,
+		Printer: &printer.MultiplexingZettelPrinter{
+			Printer: &printer.ActionZettelPrinter{
+				Umwelt:  u,
+				Actions: a,
+			},
+		},
+	}
+
+	iter := cachedIteration(u, fp)
+
+	par := util.Parallelizer{
+		Args:    args,
+		Printer: fp.Printer,
+	}
+
+	par.Run(
+		iter,
+		errIterartion(fp.Printer),
+	)
+
+	return
 }
