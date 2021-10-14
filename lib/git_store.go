@@ -28,13 +28,7 @@ func (k GitStore) CommitTransaction(u Umwelt) (err error) {
 		},
 	}
 
-	fileListMap := map[string][]string{
-		"delete": u.Transaction.Deleted().Paths(),
-		"modify": u.Transaction.Modified().Paths(),
-		"add":    u.Transaction.Added().Paths(),
-	}
-
-	for k, v := range fileListMap {
+	run := func(k string, v []string) (err error) {
 		g.AddedOrModifiedFiles = nil
 		g.DeletedFiles = nil
 
@@ -57,7 +51,7 @@ func (k GitStore) CommitTransaction(u Umwelt) (err error) {
 		ok := false
 
 		if ok, err = g.HasChangesInDiff(); !ok {
-			continue
+			return
 		}
 
 		if err != nil {
@@ -69,6 +63,26 @@ func (k GitStore) CommitTransaction(u Umwelt) (err error) {
 		if err != nil {
 			return
 		}
+
+		return
+	}
+
+	err = run("add", u.Transaction.Added().Paths())
+
+	if err != nil {
+		return
+	}
+
+	err = run("modify", u.Transaction.Modified().Paths())
+
+	if err != nil {
+		return
+	}
+
+	err = run("delete", u.Transaction.Deleted().Paths())
+
+	if err != nil {
+		return
 	}
 
 	return
