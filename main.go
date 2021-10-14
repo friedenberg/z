@@ -10,7 +10,7 @@ import (
 
 	"github.com/friedenberg/z/commands"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
 )
 
@@ -19,7 +19,7 @@ func main() {
 }
 
 func run() int {
-	defer util.WaitForPrinter()
+	defer stdprinter.WaitForPrinter()
 
 	if len(os.Args) < 2 {
 		return printUsage(nil)
@@ -37,14 +37,14 @@ func run() int {
 	c, err := lib.LoadDefaultConfig()
 
 	if err != nil {
-		util.StdPrinterErr(err)
+		stdprinter.Err(err)
 		return 1
 	}
 
 	umwelt, err := c.Umwelt()
 
 	if err != nil {
-		util.StdPrinterError(err)
+		stdprinter.Error(err)
 		return 1
 	}
 
@@ -53,7 +53,7 @@ func run() int {
 	err = umwelt.RunTransaction(cmd.Run)
 
 	if err != nil {
-		util.StdPrinterError(err)
+		stdprinter.Error(err)
 	}
 
 	return 0
@@ -61,7 +61,7 @@ func run() int {
 
 func printUsage(err error) int {
 	if err != nil {
-		util.StdPrinterErr(err)
+		stdprinter.Err(err)
 	}
 
 	fmt.Println("Usage for z: ")
@@ -92,7 +92,7 @@ func printUsage(err error) int {
 
 func printSubcommandUsage(flags flag.FlagSet) {
 	printTabbed := func(s string) {
-		util.StdPrinterErrf("  %s\n", s)
+		stdprinter.Errf("  %s\n", s)
 	}
 
 	var b bytes.Buffer

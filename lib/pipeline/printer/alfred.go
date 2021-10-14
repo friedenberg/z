@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type AlfredJsonZettelPrinter struct {
@@ -19,7 +19,7 @@ func (p *AlfredJsonZettelPrinter) Begin() {
 		p.ItemFunc = alfredItemsFromZettelDefault
 	}
 
-	util.StdPrinterOut(`{"items":[`)
+	stdprinter.Out(`{"items":[`)
 }
 
 func (p *AlfredJsonZettelPrinter) shouldPrintComma() bool {
@@ -40,7 +40,7 @@ func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error)
 	defer p.setShouldPrintComma()
 
 	if errIn != nil {
-		util.StdPrinterErr(errIn)
+		stdprinter.Err(errIn)
 		return
 	}
 
@@ -55,9 +55,9 @@ func (p *AlfredJsonZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error)
 	j, _ := lib.GenerateAlfredItemsJson(items)
 
 	sb.WriteString(j)
-	util.StdPrinterOut(sb.String())
+	stdprinter.Out(sb.String())
 }
 
 func (p *AlfredJsonZettelPrinter) End() {
-	util.StdPrinterOut(`]}`)
+	stdprinter.Out(`]}`)
 }

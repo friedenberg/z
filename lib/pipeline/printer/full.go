@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type FullZettelPrinter struct{}
@@ -14,7 +14,7 @@ func (p *FullZettelPrinter) End()   {}
 
 func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
-		util.StdPrinterErr(errIn)
+		stdprinter.Err(errIn)
 		return
 	}
 
@@ -23,11 +23,11 @@ func (p *FullZettelPrinter) PrintZettel(_ int, z *lib.Zettel, errIn error) {
 	y, err := z.Note.Metadata.ToYAMLWithBoundary()
 
 	if err != nil {
-		util.StdPrinterError(err)
+		stdprinter.Error(err)
 		return
 	}
 
 	sb.WriteString(y)
 	sb.WriteString(z.Body)
-	util.StdPrinterOutf(sb.String())
+	stdprinter.Outf(sb.String())
 }

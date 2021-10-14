@@ -2,7 +2,7 @@ package printer
 
 import (
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type FormatZettelPrinter struct {
@@ -14,10 +14,10 @@ func (p *FormatZettelPrinter) End()   {}
 
 func (p *FormatZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
-		util.StdPrinterErr(errIn)
+		stdprinter.Err(errIn)
 		return
 	}
 
 	//TODO-P4 should empty strings be printed?
-	util.StdPrinterOutf("%s", p.Formatter.Format(z))
+	stdprinter.Outf("%s", p.Formatter.Format(z))
 }

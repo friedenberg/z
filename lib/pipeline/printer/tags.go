@@ -3,7 +3,7 @@ package printer
 import (
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel/metadata"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type tagCounts struct {
@@ -26,7 +26,7 @@ func (p *Tags) Begin() {
 
 func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
-		util.StdPrinterErr(errIn)
+		stdprinter.Err(errIn)
 		return
 	}
 
@@ -52,13 +52,13 @@ func (p *Tags) PrintZettel(i int, z *lib.Zettel, errIn error) {
 }
 
 func (p *Tags) End() {
-	util.StdPrinterOut(`{"items":[`)
+	stdprinter.Out(`{"items":[`)
 
 	needsComma := false
 
 	for t, c := range p.tags {
 		if needsComma {
-			util.StdPrinterOut(",")
+			stdprinter.Out(",")
 		}
 
 		item := alfredItemFromTag(t, c)
@@ -69,9 +69,9 @@ func (p *Tags) End() {
 			continue
 		}
 
-		util.StdPrinterOut(j)
+		stdprinter.Out(j)
 		needsComma = true
 	}
 
-	util.StdPrinterOut(`]}`)
+	stdprinter.Out(`]}`)
 }

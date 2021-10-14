@@ -3,7 +3,7 @@ package printer
 import (
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
 )
 
@@ -37,7 +37,7 @@ func (p *RemotePrinter) Begin() {
 
 func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
-		util.StdPrinterError(errIn)
+		stdprinter.Error(errIn)
 		return
 	}
 
@@ -45,7 +45,7 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 
 	if !ok {
 		//TODO-P4 decide whether to skip or to error
-		util.StdPrinterError(xerrors.Errorf("zettel ('%s') has no file descriptors", z.Id))
+		stdprinter.Error(xerrors.Errorf("zettel ('%s') has no file descriptors", z.Id))
 		return
 	}
 

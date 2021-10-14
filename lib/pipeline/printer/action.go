@@ -6,6 +6,7 @@ import (
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
 )
 
@@ -25,7 +26,7 @@ func (p *ActionZettelPrinter) Begin() {
 
 func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	if errIn != nil {
-		util.StdPrinterErr(errIn)
+		stdprinter.Err(errIn)
 		return
 	}
 
@@ -42,7 +43,7 @@ func (p *ActionZettelPrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 
 	if p.Actions&options.ActionPrintZettelPath != 0 {
 		//TODO-P2 full path
-		util.StdPrinterOut(z.Path)
+		stdprinter.Out(z.Path)
 	}
 }
 
@@ -60,7 +61,7 @@ func (p *ActionZettelPrinter) End() {
 			err := actionFunc()
 
 			if err != nil {
-				util.StdPrinterErr(err)
+				stdprinter.Err(err)
 				return
 			}
 		}()

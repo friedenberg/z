@@ -2,7 +2,7 @@ package printer
 
 import (
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/util"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type NullZettelPrinter struct{}
@@ -12,7 +12,7 @@ func (p *NullZettelPrinter) End()   {}
 
 func (p *NullZettelPrinter) PrintZettel(_ int, _ *lib.Zettel, errIn error) {
 	if errIn != nil {
-		util.StdPrinterErr(errIn)
+		stdprinter.Err(errIn)
 		return
 	}
 }
