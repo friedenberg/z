@@ -51,6 +51,10 @@ func (g Git) HasChangesInDiff() (ok bool, err error) {
 }
 
 func (g FilesToCommit) Add() (err error) {
+	if len(g.AddedOrModifiedFiles) == 0 {
+		return
+	}
+
 	cmd := util.ExecCommand(
 		"git",
 		[]string{"add"},
@@ -70,6 +74,10 @@ func (g FilesToCommit) Add() (err error) {
 }
 
 func (g FilesToCommit) Delete() (err error) {
+	if len(g.DeletedFiles) == 0 {
+		return
+	}
+
 	cmd := util.ExecCommand(
 		"git",
 		[]string{"rm"},

@@ -2,17 +2,25 @@ package lib
 
 import (
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"time"
 
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util"
+	"golang.org/x/xerrors"
 )
 
 //TODO-P2 move to lib/kasten
 type FileStore struct {
 	basePath string
+}
+
+func (s *FileStore) InitFromOptions(map[string]interface{}) (err error) {
+	//TODO-P1
+	return
 }
 
 func (s FileStore) BasePath() string {
@@ -91,6 +99,34 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 		if err != nil {
 			return
 		}
+	}
+
+	return
+}
+
+func (k FileStore) CopyFileTo(localPath string, fd metadata.File) (err error) {
+	remotePath := path.Join(k.BasePath(), fd.FileName())
+
+	cmd := exec.Command("cp", "-R", localPath, remotePath)
+	out, err := cmd.CombinedOutput()
+
+	if err != nil {
+		err = xerrors.Errorf("%w: %s", err, out)
+		return
+	}
+
+	return
+}
+
+func (k FileStore) CopyFileFrom(localPath string, fd metadata.File) (err error) {
+	remotePath := path.Join(k.BasePath(), fd.FileName())
+
+	cmd := exec.Command("cp", "-R", remotePath, localPath)
+	out, err := cmd.CombinedOutput()
+
+	if err != nil {
+		err = xerrors.Errorf("%w: %s", err, out)
+		return
 	}
 
 	return

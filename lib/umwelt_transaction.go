@@ -5,7 +5,7 @@ type Transactor func(Umwelt) error
 func (u Umwelt) RunTransaction(f Transactor) (err error) {
 	f(u)
 
-	u.Kasten.Local.CommitTransaction(u)
+	err = u.Kasten.Local.CommitTransaction(u)
 
 	if err != nil {
 		return

@@ -9,6 +9,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
+type OnZettelWriteFunc func(*Zettel, error) error
+
 func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 	if onWriteFunc != nil {
 		defer onWriteFunc(z, err)

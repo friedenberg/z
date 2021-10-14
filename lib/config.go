@@ -6,7 +6,6 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/util/files_guard"
 	"github.com/pelletier/go-toml/v2"
 	"golang.org/x/xerrors"
@@ -133,12 +132,13 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 		u.Kasten.Local = fs
 	}
 
-	u.Kasten.Remotes = make(map[string]kasten.RemoteImplementation)
+	u.Kasten.Remotes = make(map[string]RemoteStore)
 
 	for n, kc := range c.Remotes {
-		if i, ok := kasten.GetRemote(kc.Implementation); ok {
-			i.InitFromOptions(kc.Options)
-			u.Kasten.Remotes[n] = i
+		if i, ok := registryRemoteStores[kc.Implementation]; ok {
+			s := i()
+			s.InitFromOptions(kc.Options)
+			u.Kasten.Remotes[n] = s
 		} else {
 			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
 			return

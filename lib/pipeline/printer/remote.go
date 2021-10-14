@@ -3,7 +3,6 @@ package printer
 import (
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/util"
 	"golang.org/x/xerrors"
 )
@@ -11,7 +10,7 @@ import (
 type RemotePrinter struct {
 	Umwelt       lib.Umwelt
 	Command      options.RemoteCommand
-	Remote       kasten.RemoteImplementation
+	RemotePath   string
 	zettels      []*lib.Zettel
 	rsyncPrinter *Rsync
 }
@@ -21,12 +20,12 @@ func (p *RemotePrinter) Begin() {
 
 	switch p.Command {
 	case options.RemoteCommandPull:
-		p.rsyncPrinter.Src = p.Remote.(*kasten.Files).BasePath
+		p.rsyncPrinter.Src = p.RemotePath
 		p.rsyncPrinter.Dst = p.Umwelt.BasePath
 
 	case options.RemoteCommandPush:
 		p.rsyncPrinter.Src = p.Umwelt.BasePath
-		p.rsyncPrinter.Dst = p.Remote.(*kasten.Files).BasePath
+		p.rsyncPrinter.Dst = p.RemotePath
 
 	default:
 		panic(xerrors.Errorf("unsupported remote command: '%s'", p.Command))
@@ -51,8 +50,8 @@ func (p *RemotePrinter) PrintZettel(i int, z *lib.Zettel, errIn error) {
 	}
 
 	p.rsyncPrinter.File(fd.FileName())
-	z.Note.Metadata.AddFile(fd)
-	p.Umwelt.Mod.PrintZettel(i, z, errIn)
+	// z.Note.Metadata.AddFile(fd)
+	// p.Umwelt.Mod.PrintZettel(i, z, errIn)
 }
 
 func (p *RemotePrinter) End() {

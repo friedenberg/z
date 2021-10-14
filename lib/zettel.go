@@ -1,12 +1,17 @@
 package lib
 
 import (
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
 )
 
+type StoreBase interface {
+	InitFromOptions(map[string]interface{}) (err error)
+}
+
+//TODO-P3 rename to LocalStore
 type Store interface {
+	StoreBase
 	BasePath() string
 	GetAll() (zettels []string, err error)
 	GetNormalizedPath(a string) (b string, err error)
@@ -14,9 +19,15 @@ type Store interface {
 	CommitTransaction(Umwelt) error
 }
 
+type RemoteStore interface {
+	StoreBase
+	CopyFileTo(localPath string, fd metadata.File) (err error)
+	CopyFileFrom(localPath string, fd metadata.File) (err error)
+}
+
 type Kasten struct {
 	Local   Store
-	Remotes map[string]kasten.RemoteImplementation
+	Remotes map[string]RemoteStore
 }
 
 type Zettel struct {

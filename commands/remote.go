@@ -5,11 +5,9 @@ import (
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/lib/kasten"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/pipeline/printer"
 	"github.com/friedenberg/z/util"
-	"golang.org/x/xerrors"
 )
 
 func init() {
@@ -36,13 +34,7 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		args = args[1:]
 
-		var remote kasten.RemoteImplementation
-		var ok bool
-
-		if remote, ok = u.Kasten.Remotes[args[0]]; !ok {
-			err = xerrors.Errorf("invalid remote kasten: '%s'", args[1])
-			return
-		}
+		remotePath := args[0]
 
 		args = args[1:]
 
@@ -51,9 +43,9 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		fp := pipeline.FilterPrinter{
 			Printer: &printer.RemotePrinter{
-				Umwelt:  u,
-				Command: command,
-				Remote:  remote,
+				Umwelt:     u,
+				Command:    command,
+				RemotePath: remotePath,
 			},
 			Filter: func(_ int, z *lib.Zettel) bool {
 				return z.Note.Metadata.HasFile()
