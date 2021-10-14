@@ -15,7 +15,7 @@ import (
 )
 
 func NormalizePath(u lib.Umwelt, p string) (n string, err error) {
-	n, err = u.FileStore().GetNormalizedPath(p)
+	n, err = u.Store().GetNormalizedPath(p)
 	return
 }
 
@@ -186,7 +186,7 @@ func Import(u lib.Umwelt, oldPath string, shouldCopy bool) (z *lib.Zettel, err e
 }
 
 func New(u lib.Umwelt) (z *lib.Zettel, err error) {
-	id, err := u.FileStore().NewId()
+	id, err := u.Store().NewId()
 
 	if err != nil {
 		return
@@ -194,7 +194,7 @@ func New(u lib.Umwelt) (z *lib.Zettel, err error) {
 
 	z = &lib.Zettel{
 		Id:     id.Int(),
-		Path:   lib.MakePathFromId(u.FileStore().BasePath(), id.String()),
+		Path:   lib.MakePathFromId(u.Store().BasePath(), id.String()),
 		Umwelt: &u,
 		Note: lib.Note{
 			Metadata: metadata.MakeMetadata(),

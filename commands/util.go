@@ -10,7 +10,7 @@ import (
 )
 
 func hydrateIndex(k lib.Umwelt) (err error) {
-	allFiles, err := k.FileStore().GetAll()
+	allFiles, err := k.Store().GetAll()
 
 	if err != nil {
 		return

@@ -47,7 +47,7 @@ func MakeUmwelt(c Config) (k Umwelt, err error) {
 	return
 }
 
-func (u Umwelt) FileStore() Store {
+func (u Umwelt) Store() Store {
 	return u.Kasten.Local
 }
 

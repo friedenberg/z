@@ -20,7 +20,7 @@ func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
 		u.ShouldSkipCommit = true
 		u.Index = lib.MakeIndex()
 
-		args, err := u.FileStore().GetAll()
+		args, err := u.Store().GetAll()
 
 		if err != nil {
 			return
