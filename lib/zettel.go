@@ -6,7 +6,7 @@ import (
 )
 
 type StoreBase interface {
-	InitFromOptions(map[string]interface{}) (err error)
+	Init(Umwelt, map[string]interface{}) (err error)
 }
 
 //TODO-P3 rename to LocalStore
@@ -16,6 +16,7 @@ type Store interface {
 	GetAll() (zettels []string, err error)
 	GetNormalizedPath(a string) (b string, err error)
 	NewId() (id zettel.Id, err error)
+	Hydrate(z *Zettel, includeBody bool) (err error)
 	CommitTransaction(Umwelt) error
 }
 
@@ -31,7 +32,7 @@ type Kasten struct {
 }
 
 type Zettel struct {
-	*Umwelt
+	Umwelt
 
 	//TODO-P2 change to zettel.Id
 	Id int64

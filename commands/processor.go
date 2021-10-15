@@ -105,7 +105,7 @@ func (p *Processor) Run() (err error) {
 
 func (p *Processor) HydrateFile(i int, path string) (z *lib.Zettel, err error) {
 	z = &lib.Zettel{
-		Umwelt: &p.kasten,
+		Umwelt: p.kasten,
 	}
 
 	a, err := p.argNormalizer(i, path)

@@ -21,7 +21,7 @@ func getPrintfTestCases(t *testing.T) []printfFormatterTestCase {
 
 	makeZettelWithDate := func() (z *Zettel) {
 		z = &Zettel{
-			Umwelt: &umwelt,
+			Umwelt: umwelt,
 			Path:   "1633902356.md",
 		}
 

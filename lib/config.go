@@ -137,7 +137,7 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 	for n, kc := range c.Remotes {
 		if i, ok := registryRemoteStores[kc.Implementation]; ok {
 			s := i()
-			s.InitFromOptions(kc.Options)
+			s.Init(u, kc.Options)
 			u.Kasten.Remotes[n] = s
 		} else {
 			err = xerrors.Errorf("missing implementation for kasten from config: '%s'", n)
