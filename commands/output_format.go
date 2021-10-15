@@ -73,6 +73,9 @@ func init() {
 		"filename": outputFormat{
 			Printer: &printer.FilenameZettelPrinter{},
 		},
+		"toml-to-json": outputFormat{
+			Printer: &printer.TomlToJson{},
+		},
 	}
 
 	for k, _ := range outputFormats {
