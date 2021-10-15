@@ -18,10 +18,9 @@ func MatchQuery(q string) Filter {
 		// 	return true
 		// }
 
-		for _, t := range z.Note.Metadata.TagStrings() {
-			if t == q {
-				return true
-			}
+		//TODO-P1 normalize
+		if _, ok := z.Metadata.TagSet().Get(q); ok {
+			return true
 		}
 
 		return false

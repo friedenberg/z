@@ -47,6 +47,7 @@ func (s TagSet) Add(t ...ITag) (ok bool) {
 }
 
 func (s TagSet) Get(t string) (t1 ITag, ok bool) {
+	//TODO-P1 normalize
 	t1, ok = s.set[t]
 	return
 }

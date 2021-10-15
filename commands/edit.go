@@ -29,7 +29,7 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 
 		if len(args) == 0 {
 			//TODO-P3 does it make sense to edit all zettels on no args?
-			// args = u.GetAll()
+			args = u.GetAll()
 		}
 
 		err = action(

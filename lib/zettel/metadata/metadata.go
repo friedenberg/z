@@ -232,6 +232,11 @@ func (m Metadata) Files() (fs []File) {
 	return
 }
 
+func (m Metadata) TagSet() (s TagSet) {
+	s = m.allTags
+	return
+}
+
 func (m Metadata) Tags() (r []ITag) {
 	r = m.allTags.Tags()
 	return

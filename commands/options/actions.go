@@ -9,8 +9,8 @@ import (
 type Actions uint8
 
 const (
-	ActionUnknown = 0
-	ActionEdit    = 1 << iota
+	ActionNone = 0
+	ActionEdit = 1 << iota
 	ActionOpenFile
 	ActionOpenUrl
 	ActionPrintZettelPath
@@ -25,7 +25,7 @@ func (a *Actions) String() string {
 
 func (a *Actions) Set(s string) (err error) {
 	if *a == ActionEdit {
-		*a = ActionUnknown
+		*a = ActionNone
 	}
 
 	if s == "" {
@@ -37,6 +37,8 @@ func (a *Actions) Set(s string) (err error) {
 
 	for _, action := range actions {
 		switch action {
+		case "none":
+			*a = *a | ActionNone
 		case "edit":
 			*a = *a | ActionEdit
 		case "open-files":
