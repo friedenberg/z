@@ -8,11 +8,12 @@ import (
 )
 
 type Umwelt struct {
-	Kasten            Kasten
-	Index             *Index
-	BasePath          string
-	Config            Config
-	TagsForNewZettels []string
+	Kasten                 Kasten
+	Index                  *Index
+	BasePath               string
+	Config                 Config
+	TagsForNewZettels      []string
+	TagsForExcludedZettels []string
 	Transaction
 }
 

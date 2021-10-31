@@ -23,6 +23,7 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	//TODO-P3 rename to "format"
 	f.Var(&format, "output-format", fmt.Sprintf("One of %q", writer.FormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
+	disableExclude := f.Bool("disable-tag-exclusions", false, "")
 
 	return func(u lib.Umwelt) (err error) {
 		u.ShouldSkipCommit = true
@@ -48,6 +49,15 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 			// 		return
 			// 	},
 			// ),
+		}
+
+		if !*disableExclude {
+			p.Filter = filter.And(
+				p.Filter,
+				filter.Not(
+					filter.MatchQueries(u.TagsForExcludedZettels...),
+				),
+			)
 		}
 
 		p.Run(u)

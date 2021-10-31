@@ -16,9 +16,10 @@ type ConfigTagForNewZettels struct {
 }
 
 type ConfigTag struct {
-	kasten          string
-	AutoTags        []string `toml:"auto-tags"`
-	AddToNewZettels bool     `toml:"add-to-new-zettels"`
+	kasten                      string
+	AutoTags                    []string `toml:"auto-tags"`
+	AddToNewZettels             bool     `toml:"add-to-new-zettels"`
+	DoNotIncludeMatchingZettels bool     `toml:"do-not-include-matching-zettels"`
 }
 
 type ConfigRemoteScript struct {
@@ -139,6 +140,10 @@ func (c Config) Umwelt() (u Umwelt, err error) {
 	for t, tc := range c.Tags {
 		if tc.AddToNewZettels {
 			u.TagsForNewZettels = append(u.TagsForNewZettels, t)
+		}
+
+		if tc.DoNotIncludeMatchingZettels {
+			u.TagsForExcludedZettels = append(u.TagsForExcludedZettels, t)
 		}
 	}
 
