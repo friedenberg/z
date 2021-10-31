@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bufio"
-	"os"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -124,29 +123,11 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 	}
 
 	for _, z := range u.Transaction.Deleted() {
-		err = k.readAndWrite(z, false)
+		err = k.transactionProcessDelete(u, z)
 
 		if err != nil {
 			return
 		}
-
-		err = os.Remove(z.Path)
-
-		if err != nil {
-			return
-		}
-
-		if f, ok := z.Metadata.LocalFile(); ok {
-			err = os.Remove(f.FilePath(u.BasePath))
-		}
-
-		if err != nil {
-			return
-		}
-
-		u.Del.ModifyZettel(0, z)
-
-		return
 	}
 
 	return

@@ -2,7 +2,7 @@ package lib
 
 import "os"
 
-func (k *FileStore) readAndWrite(z *Zettel, shouldWrite bool) (err error) {
+func (k *FileStore) hydrateFromFileIfExists(z *Zettel) (err error) {
 	err = k.Hydrate(z, true)
 
 	if os.IsNotExist(err) {
@@ -11,6 +11,20 @@ func (k *FileStore) readAndWrite(z *Zettel, shouldWrite bool) (err error) {
 		return
 	}
 
+	return
+}
+
+func (k *FileStore) writeToFile(z *Zettel) (err error) {
+	err = z.Write(nil)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (k *FileStore) donotuse(z *Zettel, shouldWrite bool) (err error) {
 	// if f, ok := z.Note.Metadata.NewFile(); ok {
 	// 	var sum string
 	// 	sum, err = util.Sha256HashForFile(f.Path)
@@ -49,16 +63,5 @@ func (k *FileStore) readAndWrite(z *Zettel, shouldWrite bool) (err error) {
 	// 		return
 	// 	}
 	// }
-
-	if !shouldWrite {
-		return
-	}
-
-	err = z.Write(nil)
-
-	if err != nil {
-		return
-	}
-
 	return
 }

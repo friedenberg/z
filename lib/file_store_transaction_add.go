@@ -15,7 +15,13 @@ func (k *FileStore) transactionProcessAdd(u Umwelt, z *Zettel) (err error) {
 		z.Path = MakePathFromId(u.Kasten.BasePath(), id.String())
 	}
 
-	err = k.readAndWrite(z, true)
+	err = k.hydrateFromFileIfExists(z)
+
+	if err != nil {
+		return
+	}
+
+	err = k.writeToFile(z)
 
 	if err != nil {
 		return
