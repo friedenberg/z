@@ -116,7 +116,7 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 	}
 
 	for _, z := range u.Transaction.Modified() {
-		err = k.readAndWrite(z, true)
+		err = k.transactionProcessModify(u, z)
 
 		if err != nil {
 			return
