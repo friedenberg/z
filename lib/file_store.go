@@ -108,19 +108,7 @@ func (k FileStore) Hydrate(z *Zettel, includeBody bool) (err error) {
 
 func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 	for _, z := range u.Transaction.Added() {
-		if z.Id == 0 {
-			var id zettel.Id
-			id, err = u.Kasten.NewId()
-
-			if err != nil {
-				return
-			}
-
-			z.Id = id.Int()
-			z.Path = MakePathFromId(u.Kasten.BasePath(), id.String())
-		}
-
-		err = k.readAndWrite(z, true)
+		err = k.transactionProcessAdd(u, z)
 
 		if err != nil {
 			return
