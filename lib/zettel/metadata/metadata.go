@@ -2,20 +2,11 @@ package metadata
 
 import (
 	"encoding/json"
-	"regexp"
 	"strings"
 
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
-
-var (
-	RegexTag *regexp.Regexp
-)
-
-func init() {
-	RegexTag = regexp.MustCompile(`^\w+-\w[^\s]+$`)
-}
 
 func MakeMetadata() (m Metadata) {
 	m = Metadata{}
@@ -28,6 +19,7 @@ type Metadata struct {
 	allTags         TagSet
 	stringTags      TagSet
 	searchMatchTags TagSet
+	newFile         *NewFile
 	localFile       *File
 	remoteFiles     []File
 	url             *Url
@@ -56,6 +48,7 @@ func (m *Metadata) init() {
 	m.allTags = MakeTagSet()
 	m.stringTags = MakeTagSet()
 	m.searchMatchTags = MakeTagSet()
+	m.newFile = nil
 	m.localFile = nil
 	m.remoteFiles = nil
 	m.url = nil
@@ -65,7 +58,7 @@ func (m *Metadata) SetStringTags(tags []string) (err error) {
 	m.init()
 
 	for i, t := range tags {
-		if i == 0 && !RegexTag.MatchString(t) {
+		if i == 0 {
 			m.description = t
 			continue
 		}
@@ -93,45 +86,35 @@ func (m *Metadata) AddStringTags(t ...string) (err error) {
 }
 
 func (m *Metadata) addStringTag(t string) (err error) {
-	if t == "" {
+	t1, err := makeTag(t)
+
+	if err != nil || t1 == nil {
 		return
 	}
 
-	var t1 ITag
-
-	firstGroup := strings.Split(t, "-")[0]
-
-	switch firstGroup {
-	case "f":
-		f := File{}
-		err = f.Set(t)
-
-		if err != nil {
+	switch t2 := t1.(type) {
+	case *NewFile:
+		if m.newFile != nil {
+			err = xerrors.Errorf("already have new file, cannot add again")
 			return
 		}
 
-		if f.KastenName == "" {
-			m.localFile = &f
+		m.newFile = t2
+	case *File:
+		if t2.KastenName == "" {
+			m.localFile = t2
 		} else {
-			m.remoteFiles = append(m.remoteFiles, f)
+			m.remoteFiles = append(m.remoteFiles, *t2)
 		}
 
-		t1 = &f
-	case "u":
-		u := Url{}
-		err = u.Set(t)
+	case *Url:
+		m.url = t2
 
-		if err != nil {
-			return
-		}
-
-		m.url = &u
-		t1 = &u
+	case *Tag:
+		m.stringTags.Add(t2)
 
 	default:
-		t2 := Tag(t)
-		t1 = &t2
-		m.stringTags.Add(t1)
+		panic(xerrors.Errorf("uncaught format for tag: '%s'", t))
 	}
 
 	m.allTags.Add(t1)
@@ -184,16 +167,6 @@ func (m *Metadata) SetUrl(u Url) {
 	m.url = &u
 }
 
-func (m *Metadata) AddFile(fd File) {
-	if fd.KastenName == "" {
-		m.localFile = &fd
-	} else {
-		m.remoteFiles = append(m.remoteFiles, fd)
-	}
-
-	m.allTags.Add(&fd)
-}
-
 func (m Metadata) HasFile() (ok bool) {
 	ok = false
 
@@ -204,6 +177,16 @@ func (m Metadata) HasFile() (ok bool) {
 	}
 
 	ok = len(m.RemoteFiles()) > 0
+
+	return
+}
+
+func (m Metadata) NewFile() (fd NewFile, ok bool) {
+	ok = m.newFile != nil
+
+	if ok {
+		fd = *m.newFile
+	}
 
 	return
 }

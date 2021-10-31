@@ -10,6 +10,13 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func init() {
+	registerTagPrefix(
+		"u",
+		func() (t ITag) { return &Url{} },
+	)
+}
+
 type Url struct {
 	url.URL
 }

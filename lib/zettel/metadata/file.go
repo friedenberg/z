@@ -9,6 +9,15 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func init() {
+	registerTagPrefix(
+		"f",
+		func() (t ITag) { return &File{} },
+	)
+}
+
+const IdTruncationLength = 7
+
 type File struct {
 	KastenName string
 	Id         string
@@ -43,12 +52,22 @@ func (fd *File) Set(s string) (err error) {
 	return
 }
 
+func (fd File) TruncatedId() (i string) {
+	i = fd.Id
+
+	if len(i) > IdTruncationLength {
+		i = i[0:IdTruncationLength]
+	}
+
+	return
+}
+
 func (fd File) Tag() string {
 	sb := &strings.Builder{}
 
 	sb.WriteString("f-")
 
-	sb.WriteString(fd.Id)
+	sb.WriteString(fd.TruncatedId())
 
 	if fd.Ext != "" {
 		sb.WriteString(".")
@@ -78,7 +97,7 @@ func (f File) SearchMatchTags() (expanded TagSet) {
 }
 
 func (fd File) FileName() (fn string) {
-	fi := fd.Id
+	fi := fd.TruncatedId()
 
 	if fd.Ext == "" {
 		fn = fi

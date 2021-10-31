@@ -20,14 +20,6 @@ func TestMetadataToJSON2(t *testing.T) {
 	)
 }
 
-func TestMetadataToJSON3(t *testing.T) {
-	assertMetadataSetStringTags(
-		t,
-		[]string{"t-wow", "ok"},
-		`["ok","t-wow"]`,
-	)
-}
-
 func TestMetadataToJSON4(t *testing.T) {
 	assertMetadataSetStringTags(
 		t,
@@ -65,6 +57,14 @@ func TestMetadataToJSON8(t *testing.T) {
 		t,
 		[]string{""},
 		`[]`,
+	)
+}
+
+func TestMetadataToJSONNewFile(t *testing.T) {
+	assertMetadataSetStringTags(
+		t,
+		[]string{"nf-the_path"},
+		`["nf-the_path"]`,
 	)
 }
 
@@ -109,7 +109,7 @@ func assertMetadataSetStringTags(t *testing.T, in []string, expected string) {
 	json := string(b)
 
 	if expected != json {
-		t.Errorf("Actual json was '%s', wanted '%s'", json, expected)
+		t.Errorf("\n  actual: '%s'\nexpected: '%s'", json, expected)
 	}
 }
 
