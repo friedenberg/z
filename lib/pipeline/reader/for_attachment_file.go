@@ -31,7 +31,8 @@ func newOrFoundForFile(u lib.Umwelt, i int, file string, shouldCopy bool) (z *li
 		err = xerrors.Errorf("multiple zettels ('%q') with file: '%s'", ids, sum)
 		return
 	} else if ok && ids.Len() == 1 {
-		z, err = FromIndex(u, 0, ids.Slice()[0].String())
+		id := ids.Slice()[0]
+		z, err = FromIndex(u, 0, id.String())
 		return
 	}
 

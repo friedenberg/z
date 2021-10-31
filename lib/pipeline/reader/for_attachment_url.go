@@ -29,7 +29,7 @@ func newOrFoundForUrl(u lib.Umwelt, i int, urlString string) (z *lib.Zettel, err
 		err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", ids, urlString)
 		return
 	} else if ok && ids.Len() == 1 {
-		z, err = hydrateFromFile(u, ids.Slice()[0].String(), true)
+		z, err = hydrateFromFile(u, ids.Slice()[0].String()+".md", true)
 		return
 	}
 
