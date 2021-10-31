@@ -14,6 +14,7 @@ import (
 //TODO-P3 add structured error printing
 type Pipeline struct {
 	//TODO-P2 change to channel or io.StringWriter to able to process stdin separately
+	//TODO-P2 modify to support non-strings
 	Arguments []string
 	Reader
 	Filter

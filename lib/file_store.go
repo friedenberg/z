@@ -3,7 +3,6 @@ package lib
 import (
 	"bufio"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -12,7 +11,6 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/lib/zettel"
-	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util/files_guard"
 	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
@@ -109,28 +107,6 @@ func (k FileStore) Hydrate(z *Zettel, includeBody bool) (err error) {
 }
 
 func (k FileStore) CommitTransaction(u Umwelt) (err error) {
-	readAndWrite := func(z *Zettel, shouldWrite bool) (err error) {
-		err = k.Hydrate(z, true)
-
-		if os.IsNotExist(err) {
-			err = nil
-		} else if err != nil {
-			return
-		}
-
-		if !shouldWrite {
-			return
-		}
-
-		err = z.Write(nil)
-
-		if err != nil {
-			return
-		}
-
-		return
-	}
-
 	for _, z := range u.Transaction.Added() {
 		if z.Id == 0 {
 			var id zettel.Id
@@ -144,7 +120,7 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 			z.Path = MakePathFromId(u.Kasten.BasePath(), id.String())
 		}
 
-		err = readAndWrite(z, true)
+		err = k.readAndWrite(z, true)
 
 		if err != nil {
 			return
@@ -152,7 +128,7 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 	}
 
 	for _, z := range u.Transaction.Modified() {
-		err = readAndWrite(z, true)
+		err = k.readAndWrite(z, true)
 
 		if err != nil {
 			return
@@ -160,7 +136,7 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 	}
 
 	for _, z := range u.Transaction.Deleted() {
-		err = readAndWrite(z, false)
+		err = k.readAndWrite(z, false)
 
 		if err != nil {
 			return
