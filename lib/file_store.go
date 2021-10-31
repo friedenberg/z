@@ -187,31 +187,3 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 
 	return
 }
-
-func (k FileStore) CopyFileTo(localPath string, fd metadata.File) (err error) {
-	remotePath := path.Join(k.BasePath(), fd.FileName())
-
-	cmd := exec.Command("cp", "-R", localPath, remotePath)
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		err = xerrors.Errorf("%w: %s", err, out)
-		return
-	}
-
-	return
-}
-
-func (k FileStore) CopyFileFrom(localPath string, fd metadata.File) (err error) {
-	remotePath := path.Join(k.BasePath(), fd.FileName())
-
-	cmd := exec.Command("cp", "-R", remotePath, localPath)
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		err = xerrors.Errorf("%w: %s", err, out)
-		return
-	}
-
-	return
-}
