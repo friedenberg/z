@@ -43,6 +43,8 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 							z.Metadata.SetDescription(description)
 						}
 
+						err = z.Write(nil)
+
 						return
 					},
 				),
