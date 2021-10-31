@@ -84,6 +84,7 @@ func (m Index) set(k zettel.Id, z IndexZettel) {
 	m.Zettels[k] = z
 }
 
+//TODO-P0 check for checksum file name collisions
 func (i Index) Add(z *Zettel) error {
 	if _, ok := i.Get(zettel.Id(z.Id)); ok {
 		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)

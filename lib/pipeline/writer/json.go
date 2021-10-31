@@ -37,7 +37,7 @@ func (p *Json) WriteZettel(w io.Writer, i int, z *lib.Zettel) {
 }
 
 func (p *Json) ReadZettel(u lib.Umwelt, i int, b []byte) (z *lib.Zettel, err error) {
-	//TODO try to read ID or assign ID
+	//TODO-P3 try to read ID or assign ID
 	err = json.Unmarshal(b, &z)
 
 	if err != nil {

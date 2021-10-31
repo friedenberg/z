@@ -14,6 +14,7 @@ func MakeZettelIdMap() ZettelIdMap {
 	}
 }
 
+//TODO add option for limiting set to one value
 type ZettelIdMap struct {
 	ValueToId map[string]*set.ZettelIdSet
 	IdToValue map[zettel.Id]*set.StringSet
