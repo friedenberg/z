@@ -1,6 +1,8 @@
 package lib
 
-import "os"
+import (
+	"os"
+)
 
 func (k *FileStore) hydrateFromFileIfExists(z *Zettel) (err error) {
 	err = k.Hydrate(z, true)

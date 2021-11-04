@@ -2,11 +2,18 @@ package metadata
 
 import (
 	"encoding/json"
+	"regexp"
 	"strings"
 
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
+
+var TagPrefixRegexp *regexp.Regexp
+
+func init() {
+	TagPrefixRegexp = regexp.MustCompile(`^\w{1,2}-\S`)
+}
 
 func MakeMetadata() (m Metadata) {
 	m = Metadata{}
@@ -20,7 +27,7 @@ type Metadata struct {
 	stringTags      TagSet
 	searchMatchTags TagSet
 	newFile         *NewFile
-	localFile       *File
+	localFile       *LocalFile
 	remoteFiles     TagSet
 	url             *Url
 }
@@ -58,7 +65,7 @@ func (m *Metadata) SetStringTags(tags []string) (err error) {
 	m.init()
 
 	for i, t := range tags {
-		if i == 0 {
+		if i == 0 && !TagPrefixRegexp.MatchString(t) {
 			m.description = t
 			continue
 		}
@@ -100,16 +107,12 @@ func (m *Metadata) addStringTag(t string) (err error) {
 		}
 
 		m.newFile = t2
-	case *File:
-		if t2.KastenName == "" {
-			if m.localFile != nil {
-				m.allTags.Del(m.localFile.Tag())
-			}
-
-			m.localFile = t2
-		} else {
-			m.remoteFiles.Add(t2)
+	case *LocalFile:
+		if m.localFile != nil {
+			m.allTags.Del(m.localFile.Tag())
 		}
+
+		m.localFile = t2
 
 	case *Url:
 		m.url = t2
@@ -195,7 +198,7 @@ func (m Metadata) NewFile() (fd NewFile, ok bool) {
 	return
 }
 
-func (m Metadata) LocalFile() (fd File, ok bool) {
+func (m Metadata) LocalFile() (fd LocalFile, ok bool) {
 	ok = m.localFile != nil
 
 	if ok {
@@ -205,19 +208,19 @@ func (m Metadata) LocalFile() (fd File, ok bool) {
 	return
 }
 
-func (m Metadata) RemoteFiles() (fds []File) {
+func (m Metadata) RemoteFiles() (fds []LocalFile) {
 	ts := m.remoteFiles.Tags()
-	fds = make([]File, len(ts))
+	fds = make([]LocalFile, len(ts))
 
 	for i, t := range ts {
-		fds[i] = *(t.(*File))
+		fds[i] = *(t.(*LocalFile))
 	}
 
 	return
 }
 
-func (m Metadata) Files() (fs []File) {
-	fs = make([]File, 0, 1+m.remoteFiles.Len())
+func (m Metadata) Files() (fs []LocalFile) {
+	fs = make([]LocalFile, 0, 1+m.remoteFiles.Len())
 
 	if f, ok := m.LocalFile(); ok {
 		fs = append(fs, f)
@@ -261,8 +264,8 @@ type jsonMetadata struct {
 	Description string
 	AllTags     []ITag
 	StringTags  []ITag
-	LocalFile   *File
-	RemoteFiles []File
+	LocalFile   *LocalFile
+	RemoteFiles []LocalFile
 	Url         *Url
 }
 

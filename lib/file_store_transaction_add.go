@@ -67,24 +67,46 @@ func (k *FileStore) updateFilesIfNecessary(z *Zettel) (err error) {
 }
 
 func (k *FileStore) updateNewFile(z *Zettel, f metadata.NewFile) (err error) {
-	// var sum string
-	// sum, err = util.Sha256HashForFile(f.Path)
+	var sum string
+	sum, err = util.Sha256HashForFile(f.Path)
 
-	// existingZettels, ok := k.umwelt.Index.Files.GetIds(sum, k.umwelt.Index)
-	// var oldZettelId zettel.Id
+	oldZettelId, ok := k.umwelt.Index.Files.GetId(sum)
 
-	//if ok {
-	//	//TODO: handle case, is this possible?
-	//	// oldZettelId = existingZettels.Slice()[0]
-	//} else {
-	//	//TODO: handle case, is this possible?
-	//}
+	if ok {
+		iz, ok := k.umwelt.Index.Get(oldZettelId)
+
+		if !ok {
+			panic("index had file in zettel but no zettel in index")
+		}
+
+		var oz *Zettel
+		k.umwelt.Index.HydrateZettel(oz, iz)
+
+		oz.Merge(z)
+		z = oz
+	} else {
+		var f1 metadata.LocalFile
+		f1, err = k.moveFile(z, f, sum)
+
+		if err != nil {
+			return
+		}
+
+		path := f1.FilePath(k.basePath)
+
+		err = util.SetDisallowUserChanges(path)
+
+		if err != nil {
+			return
+		}
+
+		k.umwelt.Index.AddFile(z, sum)
+	}
 
 	return
 }
 
-func (k *FileStore) updateLocalFile(z *Zettel, f metadata.File) (err error) {
-	stdprinter.Debugf("updating %s\n", z.Path)
+func (k *FileStore) updateLocalFile(z *Zettel, f metadata.LocalFile) (err error) {
 	fPath := f.FilePath(k.basePath)
 
 	isDir, err := util.IsDir(fPath)
@@ -97,7 +119,7 @@ func (k *FileStore) updateLocalFile(z *Zettel, f metadata.File) (err error) {
 	oldSum, ok := k.umwelt.Index.Files.GetValue(zettel.Id(z.Id))
 
 	if ok {
-		//TODO: handle case, is this possible?
+		//TODO: merge zettel
 	} else {
 		//TODO: handle case, is this possible?
 	}
@@ -113,7 +135,7 @@ func (k *FileStore) updateLocalFile(z *Zettel, f metadata.File) (err error) {
 	path := fPath
 
 	if oldSum != sum {
-		var f1 metadata.File
+		var f1 metadata.LocalFile
 		f1, err = k.moveFile(z, f, sum)
 
 		if err != nil {
@@ -134,9 +156,9 @@ func (k *FileStore) updateLocalFile(z *Zettel, f metadata.File) (err error) {
 	return
 }
 
-func (k *FileStore) moveFile(z *Zettel, f metadata.File, sum string) (f1 metadata.File, err error) {
+func (k *FileStore) moveFile(z *Zettel, f metadata.File, sum string) (f1 metadata.LocalFile, err error) {
 	fPath := f.FilePath(k.basePath)
-	f1 = k.uniqueFile(sum, f.Ext)
+	f1 = k.uniqueFile(sum, f.Extension())
 
 	f1Path := f1.FilePath(k.basePath)
 
@@ -166,7 +188,7 @@ func (k *FileStore) moveFile(z *Zettel, f metadata.File, sum string) (f1 metadat
 }
 
 //TODO-P3 handle concurrency
-func (k *FileStore) uniqueFile(sum, ext string) (f metadata.File) {
+func (k *FileStore) uniqueFile(sum, ext string) (f metadata.LocalFile) {
 	f.Ext = ext
 
 	for i := 7; i < 256; i++ {

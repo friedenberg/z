@@ -64,7 +64,13 @@ func TestMetadataToJSONNewFile(t *testing.T) {
 	assertMetadataSetStringTags(
 		t,
 		[]string{"nf-the_path"},
-		`["nf-the_path"]`,
+		`[]`,
+	)
+
+	assertMetadataSetStringTagsNewFileTag(
+		t,
+		[]string{"nf-the_path"},
+		"the_path",
 	)
 }
 
@@ -110,6 +116,28 @@ func assertMetadataSetStringTags(t *testing.T, in []string, expected string) {
 
 	if expected != json {
 		t.Errorf("\n  actual: '%s'\nexpected: '%s'", json, expected)
+	}
+}
+
+func assertMetadataSetStringTagsNewFileTag(t *testing.T, in []string, expected string) {
+	t.Helper()
+	var m Metadata
+	err := m.SetStringTags(in)
+
+	if err != nil {
+		t.Fatalf("failed to set string tags: %s", err)
+	}
+
+	tag, ok := m.NewFile()
+
+	if !ok {
+		t.Fatalf("metadata missing new file in metadata:\n%#v", m)
+	}
+
+	actual := tag.Path
+
+	if expected != actual {
+		t.Errorf("\n  actual: '%s'\nexpected: '%s'", actual, expected)
 	}
 }
 

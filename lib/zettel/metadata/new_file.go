@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"path"
-	"strings"
 
 	"golang.org/x/xerrors"
 )
@@ -21,26 +20,27 @@ type NewFile struct {
 }
 
 func (fd *NewFile) Set(s string) (err error) {
-	if len(s) < 3 {
+	if len(s) < 4 {
 		err = xerrors.Errorf("string %s is too small to be a file tag", s)
 		return
 	}
 
-	parts := strings.Split(s, "-")
-	partCount := len(parts)
-
-	if partCount > 3 || partCount < 2 {
-		err = xerrors.Errorf("wrong number of tag parts: %s", partCount)
-		return
-	}
-
-	fd.Path = parts[1]
+	fd.Path = s[3:]
 
 	return
 }
 
 func (fd NewFile) Ext() string {
 	return path.Ext(fd.Path)
+}
+
+func (fd NewFile) Extension() string {
+	return path.Ext(fd.Path)
+}
+
+func (fd NewFile) FilePath(_ string) string {
+	//TODO-P1 should be relative?
+	return fd.Path
 }
 
 func (fd NewFile) Tag() string {

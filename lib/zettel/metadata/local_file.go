@@ -12,22 +12,21 @@ import (
 func init() {
 	registerTagPrefix(
 		"f",
-		func() (t ITag) { return &File{} },
+		func() (t ITag) { return &LocalFile{} },
 	)
 }
 
-type File struct {
-	KastenName string
-	FullSha    string
-	Id         string
-	Ext        string
+type LocalFile struct {
+	FullSha string
+	Id      string
+	Ext     string
 }
 
 type RemoteFileDescriptor struct {
-	File
+	LocalFile
 }
 
-func (fd *File) Set(s string) (err error) {
+func (fd *LocalFile) Set(s string) (err error) {
 	if len(s) < 3 {
 		err = xerrors.Errorf("string %s is too small to be a file tag", s)
 		return
@@ -36,7 +35,7 @@ func (fd *File) Set(s string) (err error) {
 	parts := strings.Split(s, "-")
 	partCount := len(parts)
 
-	if partCount > 3 || partCount < 2 {
+	if partCount != 2 {
 		err = xerrors.Errorf("wrong number of tag parts: %s", partCount)
 		return
 	}
@@ -44,14 +43,10 @@ func (fd *File) Set(s string) (err error) {
 	fd.Id = util.BaseNameNoSuffix(parts[1])
 	fd.Ext = util.ExtNoDot(parts[1])
 
-	if partCount == 3 {
-		fd.KastenName = parts[2]
-	}
-
 	return
 }
 
-func (fd File) Tag() string {
+func (fd LocalFile) Tag() string {
 	sb := &strings.Builder{}
 
 	sb.WriteString("f-")
@@ -63,20 +58,11 @@ func (fd File) Tag() string {
 		sb.WriteString(fd.Ext)
 	}
 
-	if fd.KastenName != "" {
-		sb.WriteString("-")
-		sb.WriteString(fd.KastenName)
-	}
-
 	return sb.String()
 }
 
-func (f File) SearchMatchTags() (expanded TagSet) {
+func (f LocalFile) SearchMatchTags() (expanded TagSet) {
 	expanded = MakeTagSet()
-
-	if f.KastenName != "" {
-		expanded.Merge(Tag("r-" + f.KastenName).SearchMatchTags())
-	}
 
 	if f.Ext != "" {
 		expanded.Merge(Tag("e-" + f.Ext).SearchMatchTags())
@@ -85,7 +71,7 @@ func (f File) SearchMatchTags() (expanded TagSet) {
 	return
 }
 
-func (fd File) FileName() (fn string) {
+func (fd LocalFile) FileName() (fn string) {
 	fi := fd.Id
 
 	if fd.Ext == "" {
@@ -97,6 +83,10 @@ func (fd File) FileName() (fn string) {
 	return
 }
 
-func (fd File) FilePath(basepath string) (fn string) {
+func (fd LocalFile) Extension() string {
+	return fd.Ext
+}
+
+func (fd LocalFile) FilePath(basepath string) (fn string) {
 	return path.Join(basepath, fd.FileName())
 }

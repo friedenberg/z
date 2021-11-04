@@ -78,12 +78,9 @@ func (i Index) Write(w io.Writer) (err error) {
 }
 
 func (m Index) Get(k zettel.Id) (IndexZettel, bool) {
-	if m.Mutex == nil {
-		panic("mutex was not initalized")
-	}
-
 	m.Lock()
 	defer m.Unlock()
+
 	a, ok := m.Zettels[k]
 	return a, ok
 }
@@ -91,6 +88,7 @@ func (m Index) Get(k zettel.Id) (IndexZettel, bool) {
 func (m Index) set(k zettel.Id, z IndexZettel) {
 	m.Lock()
 	defer m.Unlock()
+
 	m.Zettels[k] = z
 }
 
