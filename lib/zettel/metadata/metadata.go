@@ -26,9 +26,7 @@ type Metadata struct {
 	allTags         TagSet
 	stringTags      TagSet
 	searchMatchTags TagSet
-	newFile         *NewFile
-	localFile       *LocalFile
-	remoteFiles     TagSet
+	file            File
 	url             *Url
 }
 
@@ -55,9 +53,7 @@ func (m *Metadata) init() {
 	m.allTags = MakeTagSet()
 	m.stringTags = MakeTagSet()
 	m.searchMatchTags = MakeTagSet()
-	m.newFile = nil
-	m.localFile = nil
-	m.remoteFiles = MakeTagSet()
+	m.file = nil
 	m.url = nil
 }
 
@@ -101,18 +97,17 @@ func (m *Metadata) addStringTag(t string) (err error) {
 
 	switch t2 := t1.(type) {
 	case *NewFile:
-		if m.newFile != nil {
-			err = xerrors.Errorf("already have new file, cannot add again")
-			return
+		if m.file != nil {
+			m.allTags.Del(m.file.Tag())
 		}
 
-		m.newFile = t2
+		m.file = t2
 	case *LocalFile:
-		if m.localFile != nil {
-			m.allTags.Del(m.localFile.Tag())
+		if m.file != nil {
+			m.allTags.Del(m.file.Tag())
 		}
 
-		m.localFile = t2
+		m.file = t2
 
 	case *Url:
 		m.url = t2
@@ -175,61 +170,26 @@ func (m *Metadata) SetUrl(u Url) {
 }
 
 func (m Metadata) HasFile() (ok bool) {
-	ok = false
-
-	_, ok = m.LocalFile()
-
-	if ok {
-		return
-	}
-
-	ok = len(m.RemoteFiles()) > 0
-
+	ok = m.file != nil
 	return
 }
 
-func (m Metadata) NewFile() (fd NewFile, ok bool) {
-	ok = m.newFile != nil
+func (m *Metadata) SetFile(fd *NewFile) {
+	m.file = fd
+}
 
-	if ok {
-		fd = *m.newFile
-	}
-
+func (m Metadata) File() (f File) {
+	f = m.file
 	return
 }
 
-func (m Metadata) LocalFile() (fd LocalFile, ok bool) {
-	ok = m.localFile != nil
-
-	if ok {
-		fd = *m.localFile
-	}
-
+func (m Metadata) NewFile() (nf *NewFile, ok bool) {
+	nf, ok = m.file.(*NewFile)
 	return
 }
 
-func (m Metadata) RemoteFiles() (fds []LocalFile) {
-	ts := m.remoteFiles.Tags()
-	fds = make([]LocalFile, len(ts))
-
-	for i, t := range ts {
-		fds[i] = *(t.(*LocalFile))
-	}
-
-	return
-}
-
-func (m Metadata) Files() (fs []LocalFile) {
-	fs = make([]LocalFile, 0, 1+m.remoteFiles.Len())
-
-	if f, ok := m.LocalFile(); ok {
-		fs = append(fs, f)
-	}
-
-	for _, f := range m.RemoteFiles() {
-		fs = append(fs, f)
-	}
-
+func (m Metadata) LocalFile() (lf *LocalFile, ok bool) {
+	lf, ok = m.file.(*LocalFile)
 	return
 }
 

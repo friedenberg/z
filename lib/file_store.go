@@ -106,7 +106,7 @@ func (k FileStore) Hydrate(z *Zettel, includeBody bool) (err error) {
 }
 
 func (k FileStore) CommitTransaction(u Umwelt) (err error) {
-	for _, z := range u.Transaction.Added() {
+	for _, z := range u.Transaction.Add.Zettels() {
 		err = k.transactionProcessAdd(u, z)
 
 		if err != nil {
@@ -114,7 +114,7 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 		}
 	}
 
-	for _, z := range u.Transaction.Modified() {
+	for _, z := range u.Transaction.Mod.Zettels() {
 		err = k.transactionProcessModify(u, z)
 
 		if err != nil {
@@ -122,7 +122,7 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 		}
 	}
 
-	for _, z := range u.Transaction.Deleted() {
+	for _, z := range u.Transaction.Del.Zettels() {
 		err = k.transactionProcessDelete(u, z)
 
 		if err != nil {

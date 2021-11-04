@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"os"
 	"os/exec"
 
 	"github.com/friedenberg/z/lib/zettel"
@@ -47,8 +48,6 @@ func (k *FileStore) transactionProcessAdd(u Umwelt, z *Zettel) (err error) {
 }
 
 func (k *FileStore) updateFilesIfNecessary(z *Zettel) (err error) {
-	// return
-	//TODO handle case with new files
 	lf, hasLocalFile := z.Note.Metadata.LocalFile()
 	nf, hasNewFile := z.Note.Metadata.NewFile()
 
@@ -66,9 +65,14 @@ func (k *FileStore) updateFilesIfNecessary(z *Zettel) (err error) {
 	return
 }
 
-func (k *FileStore) updateNewFile(z *Zettel, f metadata.NewFile) (err error) {
+func (k *FileStore) updateNewFile(z *Zettel, f *metadata.NewFile) (err error) {
 	var sum string
 	sum, err = util.Sha256HashForFile(f.Path)
+
+	if err != nil {
+		err = xerrors.Errorf("failed to get sum for zettel: %s: %w", z.Id, err)
+		return
+	}
 
 	oldZettelId, ok := k.umwelt.Index.Files.GetId(sum)
 
@@ -79,10 +83,20 @@ func (k *FileStore) updateNewFile(z *Zettel, f metadata.NewFile) (err error) {
 			panic("index had file in zettel but no zettel in index")
 		}
 
-		var oz *Zettel
+		oz := &Zettel{
+			Note: Note{},
+		}
+
 		k.umwelt.Index.HydrateZettel(oz, iz)
 
 		oz.Merge(z)
+		k.umwelt.Transaction.Add.Del(z)
+		err = os.Remove(z.Path)
+
+		if err != nil {
+			return
+		}
+
 		z = oz
 	} else {
 		var f1 metadata.LocalFile
@@ -106,7 +120,7 @@ func (k *FileStore) updateNewFile(z *Zettel, f metadata.NewFile) (err error) {
 	return
 }
 
-func (k *FileStore) updateLocalFile(z *Zettel, f metadata.LocalFile) (err error) {
+func (k *FileStore) updateLocalFile(z *Zettel, f *metadata.LocalFile) (err error) {
 	fPath := f.FilePath(k.basePath)
 
 	isDir, err := util.IsDir(fPath)
@@ -134,7 +148,7 @@ func (k *FileStore) updateLocalFile(z *Zettel, f metadata.LocalFile) (err error)
 
 	path := fPath
 
-	if oldSum != sum {
+	if oldSum != "" && oldSum != sum {
 		var f1 metadata.LocalFile
 		f1, err = k.moveFile(z, f, sum)
 

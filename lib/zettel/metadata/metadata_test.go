@@ -64,7 +64,7 @@ func TestMetadataToJSONNewFile(t *testing.T) {
 	assertMetadataSetStringTags(
 		t,
 		[]string{"nf-the_path"},
-		`[]`,
+		`["nf-the_path"]`,
 	)
 
 	assertMetadataSetStringTagsNewFileTag(

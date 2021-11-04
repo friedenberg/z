@@ -26,7 +26,7 @@ func (m Metadata) ToSortedTags() (t []string) {
 		t = append(t, f.Tag())
 	}
 
-	for _, f := range m.Files() {
+	if f := m.File(); f != nil {
 		t = append(t, f.Tag())
 	}
 

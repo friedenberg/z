@@ -24,7 +24,7 @@ func newForFile(u lib.Umwelt, i int, file string) (z *lib.Zettel, err error) {
 		Path: file,
 	}
 
-	z.Note.Metadata.AddStringTags(fd.Tag())
+	z.Metadata.SetFile(&fd)
 
 	return
 }

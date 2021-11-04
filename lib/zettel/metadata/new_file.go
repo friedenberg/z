@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"fmt"
 	"path"
 
 	"golang.org/x/xerrors"
@@ -44,7 +45,7 @@ func (fd NewFile) FilePath(_ string) string {
 }
 
 func (fd NewFile) Tag() string {
-	return ""
+	return fmt.Sprintf("%s-%s", NewFilePrefix, fd.Path)
 }
 
 func (f NewFile) SearchMatchTags() (expanded TagSet) {

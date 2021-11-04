@@ -54,13 +54,15 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 
 		p.Run(u)
 
-		added := u.Added().Paths()
-
 		err = u.RunTransaction(nil)
 
 		if err != nil {
 			return
 		}
+
+		//this must come after the transaction is run, as this may be changed by the
+		//transaction
+		added := u.Add.Zettels().Paths()
 
 		//TODO-P4 check why this is re-using added zettels rather than modifying new
 		//ones

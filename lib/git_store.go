@@ -67,19 +67,19 @@ func (k GitStore) CommitTransaction(u Umwelt) (err error) {
 		return
 	}
 
-	err = run("add", u.Transaction.Added().Paths())
+	err = run("add", u.Transaction.Add.Zettels().Paths())
 
 	if err != nil {
 		return
 	}
 
-	err = run("modify", u.Transaction.Modified().Paths())
+	err = run("modify", u.Transaction.Mod.Zettels().Paths())
 
 	if err != nil {
 		return
 	}
 
-	err = run("delete", u.Transaction.Deleted().Paths())
+	err = run("delete", u.Transaction.Del.Zettels().Paths())
 
 	if err != nil {
 		return

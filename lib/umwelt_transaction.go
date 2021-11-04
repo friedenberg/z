@@ -27,15 +27,15 @@ func (u Umwelt) RunTransaction(f Transactor) (err error) {
 }
 
 func (u Umwelt) IndexTransaction() (err error) {
-	for _, z := range u.Added() {
+	for _, z := range u.Add.Zettels() {
 		u.Index.Add(z)
 	}
 
-	for _, z := range u.Modified() {
+	for _, z := range u.Mod.Zettels() {
 		u.Index.Update(z)
 	}
 
-	for _, z := range u.Deleted() {
+	for _, z := range u.Del.Zettels() {
 		u.Index.Delete(z)
 	}
 

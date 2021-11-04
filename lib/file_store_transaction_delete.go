@@ -23,7 +23,7 @@ func (k *FileStore) transactionProcessDelete(u Umwelt, z *Zettel) (err error) {
 		return
 	}
 
-	u.Del.ModifyZettel(0, z)
+	u.Del.Add(z)
 
 	return
 }
