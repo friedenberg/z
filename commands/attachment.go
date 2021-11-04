@@ -21,10 +21,8 @@ func (a *attachmentKind) Set(s string) (err error) {
 		a.Reader = reader.Import(true)
 	case "zettels":
 		a.Reader = reader.Import(false)
-	case "files-copy":
-		a.Reader = reader.ForAttachmentFile(true)
 	case "files":
-		a.Reader = reader.ForAttachmentFile(false)
+		a.Reader = reader.ForAttachmentFile()
 	case "urls":
 		a.Reader = reader.ForAttachmentUrl()
 	default:

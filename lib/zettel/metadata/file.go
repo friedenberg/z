@@ -16,10 +16,9 @@ func init() {
 	)
 }
 
-const IdTruncationLength = 7
-
 type File struct {
 	KastenName string
+	FullSha    string
 	Id         string
 	Ext        string
 }
@@ -52,22 +51,12 @@ func (fd *File) Set(s string) (err error) {
 	return
 }
 
-func (fd File) TruncatedId() (i string) {
-	i = fd.Id
-
-	if len(i) > IdTruncationLength {
-		i = i[0:IdTruncationLength]
-	}
-
-	return
-}
-
 func (fd File) Tag() string {
 	sb := &strings.Builder{}
 
 	sb.WriteString("f-")
 
-	sb.WriteString(fd.TruncatedId())
+	sb.WriteString(fd.Id)
 
 	if fd.Ext != "" {
 		sb.WriteString(".")
@@ -97,7 +86,7 @@ func (f File) SearchMatchTags() (expanded TagSet) {
 }
 
 func (fd File) FileName() (fn string) {
-	fi := fd.TruncatedId()
+	fi := fd.Id
 
 	if fd.Ext == "" {
 		fn = fi

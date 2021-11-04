@@ -70,7 +70,7 @@ func TestFormatZettelNewlines(t *testing.T) {
 		t,
 		z,
 		"%f\n",
-		`filenam.extension
+		`filename.extension
 `,
 	)
 }

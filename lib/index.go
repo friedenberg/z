@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"sync"
+	"time"
 
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
@@ -20,6 +21,7 @@ type IndexZettel struct {
 
 //TODO-P4 move into index and use unmarshal methods
 type SerializableIndex struct {
+	ModTime int64
 	Zettels map[zettel.Id]IndexZettel
 	Files   ZettelIdMap
 	Urls    ZettelIdMap
@@ -56,6 +58,7 @@ func (i Index) Read(r io.Reader) (err error) {
 }
 
 func (i Index) Write(w io.Writer) (err error) {
+	i.ModTime = time.Now().Unix()
 	enc := json.NewEncoder(w)
 	// enc := gob.NewEncoder(w)
 	err = enc.Encode(i.SerializableIndex)
@@ -97,10 +100,6 @@ func (i Index) Add(z *Zettel) error {
 		Body:     z.Body,
 	})
 
-	if f, ok := z.Note.Metadata.LocalFile(); ok {
-		i.Files.Add(f.FileName(), zettel.Id(z.Id), i)
-	}
-
 	if u, ok := z.Metadata.Url(); ok {
 		i.Urls.Add(u.String(), zettel.Id(z.Id), i)
 	}
@@ -110,6 +109,12 @@ func (i Index) Add(z *Zettel) error {
 	}
 
 	return nil
+}
+
+func (i Index) AddFile(z *Zettel, sum string) (err error) {
+	i.Files.Add(sum, zettel.Id(z.Id), i)
+
+	return
 }
 
 func (i Index) Update(z *Zettel) (err error) {
@@ -142,7 +147,7 @@ func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 
 func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
 	//TODO-P3 normalize url
-	ids, ok := i.Urls.Get(u, i)
+	ids, ok := i.Urls.GetIds(u, i)
 
 	if !ok {
 		return

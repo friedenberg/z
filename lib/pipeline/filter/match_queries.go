@@ -9,7 +9,7 @@ func MatchQueries(qs ...string) (f filter) {
 				continue
 			}
 
-			if !z.Metadata.TagSet().Match(q) {
+			if !z.Metadata.Match(q) {
 				return false
 			}
 		}

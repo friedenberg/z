@@ -45,7 +45,7 @@ func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *lib.
 		err = xerrors.Errorf("imported zettel has both url and file")
 	} else if hasFile {
 		base := path.Dir(oldPath)
-		z, err = newOrFoundForFile(u, i, f.FilePath(base), shouldCopy)
+		z, err = newForFile(u, i, f.FilePath(base))
 	} else if hasUrl {
 		z, err = newOrFoundForUrl(u, i, ur.String())
 	} else {

@@ -23,7 +23,7 @@ func newOrFoundForUrl(u lib.Umwelt, i int, urlString string) (z *lib.Zettel, err
 		return
 	}
 
-	ids, ok := u.Index.Urls.Get(urlString, u.Index)
+	ids, ok := u.Index.Urls.GetIds(urlString, u.Index)
 
 	if ok && ids.Len() > 1 {
 		err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", ids, urlString)

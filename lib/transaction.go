@@ -13,6 +13,7 @@ func MakeTransaction() (t Transaction) {
 //TODO-P1 handle cases where files or zettles are just opened but not edited
 type Transaction struct {
 	ShouldSkipCommit bool
+	ShouldCopyFiles  bool
 	Add              *transactionModifier
 	Mod              *transactionModifier
 	Del              *transactionModifier

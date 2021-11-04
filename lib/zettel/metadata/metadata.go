@@ -21,7 +21,7 @@ type Metadata struct {
 	searchMatchTags TagSet
 	newFile         *NewFile
 	localFile       *File
-	remoteFiles     []File
+	remoteFiles     TagSet
 	url             *Url
 }
 
@@ -50,7 +50,7 @@ func (m *Metadata) init() {
 	m.searchMatchTags = MakeTagSet()
 	m.newFile = nil
 	m.localFile = nil
-	m.remoteFiles = nil
+	m.remoteFiles = MakeTagSet()
 	m.url = nil
 }
 
@@ -102,9 +102,13 @@ func (m *Metadata) addStringTag(t string) (err error) {
 		m.newFile = t2
 	case *File:
 		if t2.KastenName == "" {
+			if m.localFile != nil {
+				m.allTags.Del(m.localFile.Tag())
+			}
+
 			m.localFile = t2
 		} else {
-			m.remoteFiles = append(m.remoteFiles, *t2)
+			m.remoteFiles.Add(t2)
 		}
 
 	case *Url:
@@ -202,13 +206,18 @@ func (m Metadata) LocalFile() (fd File, ok bool) {
 }
 
 func (m Metadata) RemoteFiles() (fds []File) {
-	fds = m.remoteFiles
+	ts := m.remoteFiles.Tags()
+	fds = make([]File, len(ts))
+
+	for i, t := range ts {
+		fds[i] = *(t.(*File))
+	}
 
 	return
 }
 
 func (m Metadata) Files() (fs []File) {
-	fs = make([]File, 0, 1+len(m.remoteFiles))
+	fs = make([]File, 0, 1+m.remoteFiles.Len())
 
 	if f, ok := m.LocalFile(); ok {
 		fs = append(fs, f)
@@ -234,6 +243,18 @@ func (m Metadata) Tags() (r []ITag) {
 func (m Metadata) TagStrings() (r []string) {
 	r = m.allTags.Strings()
 	return
+}
+
+func (m Metadata) Match(q string) bool {
+	if m.TagSet().Match(q) {
+		return true
+	}
+
+	if strings.Contains(m.description, q) {
+		return true
+	}
+
+	return false
 }
 
 type jsonMetadata struct {
