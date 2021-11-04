@@ -1,40 +1,39 @@
-package lib
+package collections
 
 import (
 	"sync"
 
-	"github.com/friedenberg/z/lib/set"
 	"github.com/friedenberg/z/lib/zettel"
 )
 
-func MakeZettelIdMap() ZettelIdMap {
-	return ZettelIdMap{
-		ValueToId: make(map[string]*set.ZettelIdSet),
-		IdToValue: make(map[zettel.Id]*set.StringSet),
+func MakeMultiMap() MultiMap {
+	return MultiMap{
+		ValueToId: make(map[string]*ZettelIdSet),
+		IdToValue: make(map[zettel.Id]*StringSet),
 	}
 }
 
 //TODO add option for limiting set to one value
-type ZettelIdMap struct {
-	ValueToId map[string]*set.ZettelIdSet
-	IdToValue map[zettel.Id]*set.StringSet
+type MultiMap struct {
+	ValueToId map[string]*ZettelIdSet
+	IdToValue map[zettel.Id]*StringSet
 }
 
-func (m ZettelIdMap) GetIds(k string, l sync.Locker) (*set.ZettelIdSet, bool) {
+func (m MultiMap) GetIds(k string, l sync.Locker) (*ZettelIdSet, bool) {
 	l.Lock()
 	defer l.Unlock()
 	a, ok := m.ValueToId[k]
 	return a, ok
 }
 
-func (m ZettelIdMap) GetValues(id zettel.Id, l sync.Locker) (*set.StringSet, bool) {
+func (m MultiMap) GetValues(id zettel.Id, l sync.Locker) (*StringSet, bool) {
 	l.Lock()
 	defer l.Unlock()
 	a, ok := m.IdToValue[id]
 	return a, ok
 }
 
-func (m ZettelIdMap) Set(k string, ids *set.ZettelIdSet, l sync.Locker) {
+func (m MultiMap) Set(k string, ids *ZettelIdSet, l sync.Locker) {
 	l.Lock()
 	defer l.Unlock()
 
@@ -44,7 +43,7 @@ func (m ZettelIdMap) Set(k string, ids *set.ZettelIdSet, l sync.Locker) {
 		a, _ := m.IdToValue[id]
 
 		if a == nil {
-			a = set.MakeStringSet()
+			a = MakeStringSet()
 		}
 
 		a.Add(k)
@@ -52,18 +51,18 @@ func (m ZettelIdMap) Set(k string, ids *set.ZettelIdSet, l sync.Locker) {
 	}
 }
 
-func (m ZettelIdMap) Add(k string, id zettel.Id, l sync.Locker) {
+func (m MultiMap) Add(k string, id zettel.Id, l sync.Locker) {
 	a, _ := m.GetIds(k, l)
 
 	if a == nil {
-		a = set.MakeZettelIdSet()
+		a = MakeZettelIdSet()
 	}
 
 	a.Add(id)
 	m.Set(k, a, l)
 }
 
-func (m ZettelIdMap) Delete(id zettel.Id, l sync.Locker) {
+func (m MultiMap) Delete(id zettel.Id, l sync.Locker) {
 	l.Lock()
 	defer l.Unlock()
 	vs, ok := m.IdToValue[id]
