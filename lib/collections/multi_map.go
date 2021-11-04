@@ -1,40 +1,64 @@
 package collections
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/friedenberg/z/lib/zettel"
 )
 
-func MakeMultiMap() MultiMap {
+func MakeMultiMap(l sync.Locker) MultiMap {
 	return MultiMap{
-		ValueToId: make(map[string]*ZettelIdSet),
-		IdToValue: make(map[zettel.Id]*StringSet),
+		Locker: l,
+		multiMapSerializable: multiMapSerializable{
+
+			ValueToId: make(map[string]*ZettelIdSet),
+			IdToValue: make(map[zettel.Id]*StringSet),
+		},
 	}
 }
 
-type MultiMap struct {
+type multiMapSerializable struct {
 	ValueToId map[string]*ZettelIdSet
 	IdToValue map[zettel.Id]*StringSet
 }
 
-func (m MultiMap) GetIds(k string, l sync.Locker) (*ZettelIdSet, bool) {
-	l.Lock()
-	defer l.Unlock()
+type MultiMap struct {
+	sync.Locker
+	multiMapSerializable
+}
+
+func (s *MultiMap) UnmarshalJSON(b []byte) error {
+	if err := json.Unmarshal(b, &s.multiMapSerializable); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s MultiMap) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.multiMapSerializable)
+}
+
+func (m MultiMap) GetIds(k string) (*ZettelIdSet, bool) {
+	m.Lock()
+	defer m.Unlock()
+
 	a, ok := m.ValueToId[k]
 	return a, ok
 }
 
-func (m MultiMap) GetValues(id zettel.Id, l sync.Locker) (*StringSet, bool) {
-	l.Lock()
-	defer l.Unlock()
+func (m MultiMap) GetValues(id zettel.Id) (*StringSet, bool) {
+	m.Lock()
+	defer m.Unlock()
+
 	a, ok := m.IdToValue[id]
 	return a, ok
 }
 
-func (m MultiMap) Set(k string, ids *ZettelIdSet, l sync.Locker) {
-	l.Lock()
-	defer l.Unlock()
+func (m MultiMap) Set(k string, ids *ZettelIdSet) {
+	m.Lock()
+	defer m.Unlock()
 
 	m.ValueToId[k] = ids
 
@@ -50,20 +74,21 @@ func (m MultiMap) Set(k string, ids *ZettelIdSet, l sync.Locker) {
 	}
 }
 
-func (m MultiMap) Add(k string, id zettel.Id, l sync.Locker) {
-	a, _ := m.GetIds(k, l)
+func (m MultiMap) Add(k string, id zettel.Id) {
+	a, _ := m.GetIds(k)
 
 	if a == nil {
 		a = MakeZettelIdSet()
 	}
 
 	a.Add(id)
-	m.Set(k, a, l)
+	m.Set(k, a)
 }
 
-func (m MultiMap) Delete(id zettel.Id, l sync.Locker) {
-	l.Lock()
-	defer l.Unlock()
+func (m MultiMap) Delete(id zettel.Id) {
+	m.Lock()
+	defer m.Unlock()
+
 	vs, ok := m.IdToValue[id]
 
 	if !ok {

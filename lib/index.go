@@ -35,14 +35,16 @@ type Index struct {
 }
 
 func MakeIndex() *Index {
+	m := &sync.Mutex{}
+
 	return &Index{
 		SerializableIndex: SerializableIndex{
 			Zettels: make(map[zettel.Id]IndexZettel),
-			Files:   collections.MakeMap(),
-			Urls:    collections.MakeMap(),
-			Tags:    collections.MakeMultiMap(),
+			Files:   collections.MakeMap(m),
+			Urls:    collections.MakeMap(m),
+			Tags:    collections.MakeMultiMap(m),
 		},
-		Mutex: &sync.Mutex{},
+		Mutex: m,
 	}
 }
 
@@ -54,6 +56,10 @@ func (i Index) Read(r io.Reader) (err error) {
 	if err != nil {
 		return
 	}
+
+	i.Files.Locker = i
+	i.Urls.Locker = i
+	i.Tags.Locker = i
 
 	return
 }
@@ -103,18 +109,18 @@ func (i Index) Add(z *Zettel) error {
 
 	if u, ok := z.Metadata.Url(); ok {
 		//TODO-P3 ensure not clobbering
-		i.Urls.Set(u.String(), zettel.Id(z.Id), i)
+		i.Urls.Set(u.String(), zettel.Id(z.Id))
 	}
 
 	for _, t := range z.Metadata.TagStrings() {
-		i.Tags.Add(t, zettel.Id(z.Id), i)
+		i.Tags.Add(t, zettel.Id(z.Id))
 	}
 
 	return nil
 }
 
 func (i Index) AddFile(z *Zettel, sum string) (err error) {
-	i.Files.Set(sum, zettel.Id(z.Id), i)
+	i.Files.Set(sum, zettel.Id(z.Id))
 
 	return
 }
@@ -134,9 +140,9 @@ func (i Index) Update(z *Zettel) (err error) {
 func (i Index) Delete(z *Zettel) (err error) {
 	id := zettel.Id(z.Id)
 	delete(i.Zettels, id)
-	i.Files.Delete(id, i)
-	i.Urls.Delete(id, i)
-	i.Tags.Delete(id, i)
+	i.Files.Delete(id)
+	i.Urls.Delete(id)
+	i.Tags.Delete(id)
 	return
 }
 

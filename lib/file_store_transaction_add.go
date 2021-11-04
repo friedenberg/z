@@ -94,7 +94,7 @@ func (k *FileStore) updateLocalFile(z *Zettel, f metadata.File) (err error) {
 	}
 
 	//TODO use real umwelt passed to this function
-	oldSum, ok := k.umwelt.Index.Files.GetValue(zettel.Id(z.Id), k.umwelt.Index)
+	oldSum, ok := k.umwelt.Index.Files.GetValue(zettel.Id(z.Id))
 
 	if ok {
 		//TODO: handle case, is this possible?

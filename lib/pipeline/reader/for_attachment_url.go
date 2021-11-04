@@ -22,7 +22,7 @@ func newOrFoundForUrl(u lib.Umwelt, i int, urlString string) (z *lib.Zettel, err
 		return
 	}
 
-	id, ok := u.Index.Urls.GetId(urlString, u.Index)
+	id, ok := u.Index.Urls.GetId(urlString)
 
 	if ok {
 		z, err = hydrateFromFile(u, id.String()+".md", true)
