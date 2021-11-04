@@ -5,7 +5,6 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel/metadata"
-	"golang.org/x/xerrors"
 )
 
 func ForAttachmentUrl() reader {
@@ -23,13 +22,10 @@ func newOrFoundForUrl(u lib.Umwelt, i int, urlString string) (z *lib.Zettel, err
 		return
 	}
 
-	ids, ok := u.Index.Urls.GetIds(urlString, u.Index)
+	id, ok := u.Index.Urls.GetId(urlString, u.Index)
 
-	if ok && ids.Len() > 1 {
-		err = xerrors.Errorf("multiple zettels ('%q') with url: '%s'", ids, urlString)
-		return
-	} else if ok && ids.Len() == 1 {
-		z, err = hydrateFromFile(u, ids.Slice()[0].String()+".md", true)
+	if ok {
+		z, err = hydrateFromFile(u, id.String()+".md", true)
 		return
 	}
 

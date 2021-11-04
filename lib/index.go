@@ -24,8 +24,8 @@ type IndexZettel struct {
 type SerializableIndex struct {
 	ModTime int64
 	Zettels map[zettel.Id]IndexZettel
-	Files   collections.MultiMap
-	Urls    collections.MultiMap
+	Files   collections.Map
+	Urls    collections.Map
 	Tags    collections.MultiMap
 }
 
@@ -38,8 +38,8 @@ func MakeIndex() *Index {
 	return &Index{
 		SerializableIndex: SerializableIndex{
 			Zettels: make(map[zettel.Id]IndexZettel),
-			Files:   collections.MakeMultiMap(),
-			Urls:    collections.MakeMultiMap(),
+			Files:   collections.MakeMap(),
+			Urls:    collections.MakeMap(),
 			Tags:    collections.MakeMultiMap(),
 		},
 		Mutex: &sync.Mutex{},
@@ -102,7 +102,8 @@ func (i Index) Add(z *Zettel) error {
 	})
 
 	if u, ok := z.Metadata.Url(); ok {
-		i.Urls.Add(u.String(), zettel.Id(z.Id), i)
+		//TODO-P3 ensure not clobbering
+		i.Urls.Set(u.String(), zettel.Id(z.Id), i)
 	}
 
 	for _, t := range z.Metadata.TagStrings() {
@@ -113,7 +114,7 @@ func (i Index) Add(z *Zettel) error {
 }
 
 func (i Index) AddFile(z *Zettel, sum string) (err error) {
-	i.Files.Add(sum, zettel.Id(z.Id), i)
+	i.Files.Set(sum, zettel.Id(z.Id), i)
 
 	return
 }
@@ -144,21 +145,4 @@ func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 	z.Id = zb.Id
 	z.Path = zb.Path
 	z.Body = zb.Body
-}
-
-func (i Index) ZettelsForUrl(u string) (o []IndexZettel) {
-	//TODO-P3 normalize url
-	ids, ok := i.Urls.GetIds(u, i)
-
-	if !ok {
-		return
-	}
-
-	for _, id := range ids.Slice() {
-		if zi, ok := i.Zettels[zettel.Id(id)]; ok {
-			o = append(o, zi)
-		}
-	}
-
-	return
 }

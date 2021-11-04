@@ -13,7 +13,6 @@ func MakeMultiMap() MultiMap {
 	}
 }
 
-//TODO add option for limiting set to one value
 type MultiMap struct {
 	ValueToId map[string]*ZettelIdSet
 	IdToValue map[zettel.Id]*StringSet
