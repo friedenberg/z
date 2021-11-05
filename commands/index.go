@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/pipeline/modifier"
 	"github.com/friedenberg/z/lib/pipeline/reader"
 )
 
@@ -29,7 +30,7 @@ func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
 		p := pipeline.Pipeline{
 			Arguments: args,
 			Reader:    reader.FromFile(true),
-			Modifier:  u.Add,
+			Modifier:  modifier.TransactionAction(u.Transaction, lib.TransactionActionAdded),
 		}
 
 		p.Run(u)

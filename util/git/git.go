@@ -80,7 +80,7 @@ func (g FilesToCommit) Delete() (err error) {
 
 	cmd := util.ExecCommand(
 		"git",
-		[]string{"rm"},
+		[]string{"rm", "--ignore-unmatch"},
 		g.DeletedFiles,
 	)
 

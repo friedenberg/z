@@ -48,7 +48,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 						return
 					},
 				),
-				u.Add,
+				modifier.TransactionAction(u.Transaction, lib.TransactionActionAdded),
 			),
 		}
 
@@ -62,14 +62,16 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 
 		//this must come after the transaction is run, as this may be changed by the
 		//transaction
-		added := u.Add.Zettels().Paths()
+		toAction := make([]string, 0, u.Transaction.Len())
+		toAction = append(toAction, u.Transaction.ZettelsForActions(lib.TransactionActionAdded).Paths()...)
+		toAction = append(toAction, u.Transaction.ZettelsForActions(lib.TransactionActionModified).Paths()...)
 
 		//TODO-P4 check why this is re-using added zettels rather than modifying new
 		//ones
 		u.Transaction = lib.MakeTransaction()
 
 		p = pipeline.Pipeline{
-			Arguments: added,
+			Arguments: toAction,
 			Modifier: &modifier.Action{
 				Umwelt:  u,
 				Actions: editActions,

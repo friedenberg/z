@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"os"
 	"os/exec"
 
 	"github.com/friedenberg/z/lib/zettel"
@@ -74,29 +73,12 @@ func (k *FileStore) updateNewFile(z *Zettel, f *metadata.NewFile) (err error) {
 		return
 	}
 
-	oldZettelId, ok := k.umwelt.Index.Files.GetId(sum)
+	oz, ok := k.umwelt.Index.ForFileSum(sum)
 
 	if ok {
-		iz, ok := k.umwelt.Index.Get(oldZettelId)
-
-		if !ok {
-			panic("index had file in zettel but no zettel in index")
-		}
-
-		oz := &Zettel{
-			Note: Note{},
-		}
-
-		k.umwelt.Index.HydrateZettel(oz, iz)
-
 		oz.Merge(z)
-		k.umwelt.Transaction.Add.Del(z)
-		err = os.Remove(z.Path)
-
-		if err != nil {
-			return
-		}
-
+		k.umwelt.Transaction.Set(oz, TransactionActionModified)
+		k.umwelt.Transaction.Set(z, TransactionActionDeleted)
 		z = oz
 	} else {
 		var f1 metadata.LocalFile

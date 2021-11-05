@@ -144,6 +144,23 @@ func (i Index) Delete(z *Zettel) (err error) {
 	return
 }
 
+func (i Index) ForFileSum(sum string) (z *Zettel, ok bool) {
+	oldZettelId, ok := i.Files.GetId(sum)
+
+	if ok {
+		iz, ok := i.Get(oldZettelId)
+
+		if !ok {
+			panic("index had file in zettel but no zettel in index")
+		}
+
+		z = &Zettel{}
+		i.HydrateZettel(z, iz)
+	}
+
+	return
+}
+
 func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
 	z.Metadata = zb.Metadata
 	z.Id = zb.Id

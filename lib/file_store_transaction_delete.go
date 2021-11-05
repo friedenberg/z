@@ -15,7 +15,7 @@ func (k *FileStore) transactionProcessDelete(u Umwelt, z *Zettel) (err error) {
 		return
 	}
 
-	if f, ok := z.Metadata.LocalFile(); ok {
+	if f := z.Metadata.File(); f != nil {
 		err = os.Remove(f.FilePath(u.BasePath))
 	}
 
@@ -23,7 +23,7 @@ func (k *FileStore) transactionProcessDelete(u Umwelt, z *Zettel) (err error) {
 		return
 	}
 
-	u.Del.Add(z)
+	u.Set(z, TransactionActionDeleted)
 
 	return
 }

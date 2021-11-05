@@ -40,7 +40,7 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 					Umwelt:  u,
 					Actions: editActions,
 				},
-				u.Mod,
+				modifier.TransactionAction(u.Transaction, lib.TransactionActionModified),
 			),
 		}
 

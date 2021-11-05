@@ -51,6 +51,20 @@ func (m Set) Len() int {
 	return len(m.set)
 }
 
+func (m Set) Merged(s1 Set) (s Set) {
+	s = MakeSet()
+
+	for _, z := range m.set {
+		s.Add(z)
+	}
+
+	for _, z := range s1.set {
+		s.Add(z)
+	}
+
+	return
+}
+
 func (m Set) Zettels() (zs ZettelSlice) {
 	zs = make(ZettelSlice, 0, len(m.set))
 
