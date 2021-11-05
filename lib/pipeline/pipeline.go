@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
-	"github.com/friedenberg/z/lib/pipeline/reader"
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/reader"
 	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
 )

@@ -9,9 +9,9 @@ import (
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/lib/pipeline/modifier"
-	"github.com/friedenberg/z/lib/pipeline/reader"
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/modifier"
+	"github.com/friedenberg/z/lib/zettel/reader"
 )
 
 func init() {

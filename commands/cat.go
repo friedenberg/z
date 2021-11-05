@@ -6,8 +6,8 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/lib/pipeline/filter"
-	"github.com/friedenberg/z/lib/pipeline/writer"
+	"github.com/friedenberg/z/lib/zettel/filter"
+	"github.com/friedenberg/z/lib/zettel/writer"
 )
 
 func init() {

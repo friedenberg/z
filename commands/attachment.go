@@ -2,7 +2,7 @@ package commands
 
 import (
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/lib/pipeline/reader"
+	"github.com/friedenberg/z/lib/zettel/reader"
 	"golang.org/x/xerrors"
 )
 

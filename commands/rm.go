@@ -5,7 +5,7 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/lib/pipeline/modifier"
+	"github.com/friedenberg/z/lib/zettel/modifier"
 	"golang.org/x/xerrors"
 )
 
