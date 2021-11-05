@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
 	"github.com/pelletier/go-toml/v2"
 	"golang.org/x/xerrors"
@@ -12,7 +12,7 @@ import (
 
 type TomlToJson struct{}
 
-func (p *TomlToJson) WriteZettel(w io.Writer, i int, z *lib.Zettel) {
+func (p *TomlToJson) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 	if _, ok := z.Metadata.TagSet().Get("k-toml"); !ok {
 		return
 	}
@@ -41,7 +41,7 @@ func (p *TomlToJson) WriteZettel(w io.Writer, i int, z *lib.Zettel) {
 	stdprinter.PanicIfError(err)
 }
 
-func TomlZettelBody(z *lib.Zettel) (out map[string]interface{}, err error) {
+func TomlZettelBody(z *zettel.Zettel) (out map[string]interface{}, err error) {
 	err = toml.Unmarshal([]byte(z.Body), &out)
 	return
 }

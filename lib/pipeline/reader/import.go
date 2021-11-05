@@ -6,18 +6,19 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"golang.org/x/xerrors"
 )
 
 func Import(shouldCopy bool) reader {
 	return Make(
-		func(u lib.Umwelt, i int, b []byte) (*lib.Zettel, error) {
+		func(u lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
 			return importZettel(u, i, string(b), shouldCopy)
 		},
 	)
 }
 
-func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *lib.Zettel, err error) {
+func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *zettel.Zettel, err error) {
 	oldId := strings.TrimSuffix(path.Base(oldPath), path.Ext(oldPath))
 
 	oldIdInt, err := strconv.ParseInt(oldId, 10, 64)
@@ -26,7 +27,7 @@ func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *lib.
 		return
 	}
 
-	z1 := &lib.Zettel{
+	z1 := &zettel.Zettel{
 		Id:      oldIdInt,
 		Path:    oldPath,
 		ZUmwelt: u,

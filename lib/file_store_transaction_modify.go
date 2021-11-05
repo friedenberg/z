@@ -1,6 +1,8 @@
 package lib
 
-func (k *FileStore) transactionProcessModify(u Umwelt, z *Zettel) (err error) {
+import "github.com/friedenberg/z/lib/zettel"
+
+func (k *FileStore) transactionProcessModify(u Umwelt, z *zettel.Zettel) (err error) {
 	err = k.hydrateFromFileIfExists(z)
 
 	if err != nil {

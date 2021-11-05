@@ -1,14 +1,14 @@
 package filter
 
-import "github.com/friedenberg/z/lib"
+import "github.com/friedenberg/z/lib/zettel"
 
-type FilterFunc func(int, *lib.Zettel) bool
+type FilterFunc func(int, *zettel.Zettel) bool
 
 type filter struct {
 	filter FilterFunc
 }
 
-func (f filter) FilterZettel(i int, z *lib.Zettel) bool {
+func (f filter) FilterZettel(i int, z *zettel.Zettel) bool {
 	return f.filter(i, z)
 }
 

@@ -93,7 +93,7 @@ func (m Index) set(k zettel.Id, z IndexZettel) {
 }
 
 //TODO-P0 check for checksum file name collisions
-func (i Index) Add(z *Zettel) error {
+func (i Index) Add(z *zettel.Zettel) error {
 	if _, ok := i.Get(zettel.Id(z.Id)); ok {
 		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
 	}
@@ -117,13 +117,13 @@ func (i Index) Add(z *Zettel) error {
 	return nil
 }
 
-func (i Index) AddFile(z *Zettel, sum string) (err error) {
+func (i Index) AddFile(z *zettel.Zettel, sum string) (err error) {
 	i.Files.Set(sum, zettel.Id(z.Id))
 
 	return
 }
 
-func (i Index) Update(z *Zettel) (err error) {
+func (i Index) Update(z *zettel.Zettel) (err error) {
 	err = i.Delete(z)
 
 	if err != nil {
@@ -135,7 +135,7 @@ func (i Index) Update(z *Zettel) (err error) {
 	return
 }
 
-func (i Index) Delete(z *Zettel) (err error) {
+func (i Index) Delete(z *zettel.Zettel) (err error) {
 	id := zettel.Id(z.Id)
 	delete(i.Zettels, id)
 	i.Files.Delete(id)
@@ -144,7 +144,7 @@ func (i Index) Delete(z *Zettel) (err error) {
 	return
 }
 
-func (i Index) ForFileSum(sum string) (z *Zettel, ok bool) {
+func (i Index) ForFileSum(sum string) (z *zettel.Zettel, ok bool) {
 	oldZettelId, ok := i.Files.GetId(sum)
 
 	if ok {
@@ -154,14 +154,14 @@ func (i Index) ForFileSum(sum string) (z *Zettel, ok bool) {
 			panic("index had file in zettel but no zettel in index")
 		}
 
-		z = &Zettel{}
+		z = &zettel.Zettel{}
 		i.HydrateZettel(z, iz)
 	}
 
 	return
 }
 
-func (i Index) HydrateZettel(z *Zettel, zb IndexZettel) {
+func (i Index) HydrateZettel(z *zettel.Zettel, zb IndexZettel) {
 	z.Metadata = zb.Metadata
 	z.Id = zb.Id
 	z.Path = zb.Path

@@ -4,18 +4,19 @@ import (
 	"io"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
 type Reader interface {
-	ReadZettel(lib.Umwelt, int, []byte) (*lib.Zettel, error)
+	ReadZettel(lib.Umwelt, int, []byte) (*zettel.Zettel, error)
 }
 
 type Filter interface {
-	FilterZettel(int, *lib.Zettel) bool
+	FilterZettel(int, *zettel.Zettel) bool
 }
 
 type Modifier interface {
-	ModifyZettel(int, *lib.Zettel) error
+	ModifyZettel(int, *zettel.Zettel) error
 }
 
 type Beginner interface {
@@ -23,11 +24,11 @@ type Beginner interface {
 }
 
 type Writer interface {
-	WriteZettel(io.Writer, int, *lib.Zettel)
+	WriteZettel(io.Writer, int, *zettel.Zettel)
 }
 
 type WriterError interface {
-	WriteZettelError(io.Writer, int, *lib.Zettel, error)
+	WriteZettelError(io.Writer, int, *zettel.Zettel, error)
 }
 
 type Ender interface {

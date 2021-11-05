@@ -7,6 +7,7 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline/reader"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
 )
@@ -102,7 +103,7 @@ func (p Pipeline) outWriter() (w io.Writer) {
 	return
 }
 
-func (p Pipeline) readZettel(u lib.Umwelt, i int, s string) (z *lib.Zettel, err error) {
+func (p Pipeline) readZettel(u lib.Umwelt, i int, s string) (z *zettel.Zettel, err error) {
 	if p.Reader != nil {
 		return p.ReadZettel(u, i, []byte(s))
 	}
@@ -112,7 +113,7 @@ func (p Pipeline) readZettel(u lib.Umwelt, i int, s string) (z *lib.Zettel, err 
 	return
 }
 
-func (p Pipeline) modifyZettel(i int, z *lib.Zettel) (err error) {
+func (p Pipeline) modifyZettel(i int, z *zettel.Zettel) (err error) {
 	if p.Modifier == nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (p Pipeline) modifyZettel(i int, z *lib.Zettel) (err error) {
 	return
 }
 
-func (p Pipeline) writeZettel(i int, z *lib.Zettel) {
+func (p Pipeline) writeZettel(i int, z *zettel.Zettel) {
 	if p.Writer == nil {
 		return
 	}

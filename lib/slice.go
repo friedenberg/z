@@ -1,6 +1,8 @@
 package lib
 
-type ZettelSlice []*Zettel
+import "github.com/friedenberg/z/lib/zettel"
+
+type ZettelSlice []*zettel.Zettel
 
 func (s ZettelSlice) Paths() (p []string) {
 	p = make([]string, len(s))

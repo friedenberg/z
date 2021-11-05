@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util/stdprinter"
 )
@@ -54,7 +55,7 @@ func (p *Tags) Begin(_ io.Writer) {
 	}()
 }
 
-func (p *Tags) WriteZettel(_ io.Writer, i int, z *lib.Zettel) {
+func (p *Tags) WriteZettel(_ io.Writer, i int, z *zettel.Zettel) {
 	//TODO-P4 check performance of this
 	tagsToPush := z.Note.Metadata.StringTags()
 

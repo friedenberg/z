@@ -1,5 +1,8 @@
 package reader
 
-import "github.com/friedenberg/z/lib"
+import (
+	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
+)
 
-type ReaderFunc func(lib.Umwelt, int, []byte) (*lib.Zettel, error)
+type ReaderFunc func(lib.Umwelt, int, []byte) (*zettel.Zettel, error)

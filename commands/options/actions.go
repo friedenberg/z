@@ -3,7 +3,7 @@ package options
 import (
 	"strings"
 
-	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
 type Actions uint8
@@ -67,7 +67,7 @@ func (a *Actions) ShouldOpenUrl() bool {
 	return *a&ActionOpenUrl != 0
 }
 
-func (a *Actions) MatchZettel(z *lib.Zettel) bool {
+func (a *Actions) MatchZettel(z *zettel.Zettel) bool {
 	if *a&ActionEdit != 0 {
 		return true
 	}

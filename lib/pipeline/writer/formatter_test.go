@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
 func TestFormatZettelJustDate(t *testing.T) {
@@ -89,14 +90,14 @@ func TestFormatZettelBody(t *testing.T) {
 	)
 }
 
-func makeZettel() (z *lib.Zettel) {
+func makeZettel() (z *zettel.Zettel) {
 	k := lib.FileStore{}
 
 	umwelt := lib.Umwelt{
 		Kasten: &k,
 	}
 
-	z = &lib.Zettel{
+	z = &zettel.Zettel{
 		ZUmwelt: umwelt,
 		Path:    "1633902356.md",
 	}
@@ -104,7 +105,7 @@ func makeZettel() (z *lib.Zettel) {
 	return
 }
 
-func assertFormatZettel(t *testing.T, z *lib.Zettel, format string, expected string) {
+func assertFormatZettel(t *testing.T, z *zettel.Zettel, format string, expected string) {
 	t.Helper()
 
 	if z == nil {

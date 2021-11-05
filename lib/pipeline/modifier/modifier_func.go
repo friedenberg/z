@@ -1,5 +1,5 @@
 package modifier
 
-import "github.com/friedenberg/z/lib"
+import "github.com/friedenberg/z/lib/zettel"
 
-type ModifierFunc func(int, *lib.Zettel) error
+type ModifierFunc func(int, *zettel.Zettel) error

@@ -6,6 +6,7 @@ import (
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util"
 	"github.com/friedenberg/z/util/stdprinter"
@@ -16,13 +17,13 @@ import (
 type Action struct {
 	Umwelt      lib.Umwelt
 	Actions     options.Actions
-	zettels     []*lib.Zettel
+	zettels     []*zettel.Zettel
 	zettelFiles []string
 	files       []string
 	urls        []metadata.Url
 }
 
-func (p *Action) ModifyZettel(i int, z *lib.Zettel) (err error) {
+func (p *Action) ModifyZettel(i int, z *zettel.Zettel) (err error) {
 	p.zettels = append(p.zettels, z)
 	p.zettelFiles = append(p.zettelFiles, z.Path)
 

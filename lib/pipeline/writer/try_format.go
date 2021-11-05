@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type TryFormat struct{}
 
-func (p *TryFormat) WriteZettel(w io.Writer, i int, z *lib.Zettel) {
+func (p *TryFormat) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 	var err error
 	var doc interface{}
 	if _, ok := z.Metadata.TagSet().Get("k-toml"); ok {

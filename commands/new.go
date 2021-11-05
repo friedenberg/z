@@ -11,6 +11,7 @@ import (
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/pipeline/modifier"
 	"github.com/friedenberg/z/lib/pipeline/reader"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
 func init() {
@@ -34,7 +35,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 			Reader:    reader.New(),
 			Modifier: modifier.Chain(
 				modifier.Make(
-					func(i int, z *lib.Zettel) (err error) {
+					func(i int, z *zettel.Zettel) (err error) {
 						if tags != "" {
 							z.Note.Metadata.SetStringTags(strings.Split(tags, " "))
 						}
@@ -56,7 +57,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 					},
 				),
 				modifier.Make(
-					func(i int, z *lib.Zettel) (err error) {
+					func(i int, z *zettel.Zettel) (err error) {
 						err = z.Write(nil)
 						return
 					},

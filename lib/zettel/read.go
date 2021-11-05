@@ -1,4 +1,4 @@
-package lib
+package zettel
 
 import (
 	"bufio"

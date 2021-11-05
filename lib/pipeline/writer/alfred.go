@@ -5,11 +5,12 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type AlfredJson struct {
-	ItemFunc        func(z *lib.Zettel) []lib.AlfredItem
+	ItemFunc        func(z *zettel.Zettel) []lib.AlfredItem
 	afterFirstPrint bool
 	sync.Mutex
 }
@@ -30,7 +31,7 @@ func (p *AlfredJson) setShouldPrintComma() {
 	p.afterFirstPrint = true
 }
 
-func (p *AlfredJson) WriteZettel(w io.Writer, i int, z *lib.Zettel) {
+func (p *AlfredJson) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 
 	items := p.ItemFunc(z)
 	//TODO-P2 handle erro

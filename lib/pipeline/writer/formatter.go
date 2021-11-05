@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
 )
 
@@ -18,18 +19,18 @@ func MakeFormatter(format string) Formatter {
 	return Formatter{formats: formats}
 }
 
-func (f Formatter) WriteZettel(w io.Writer, i int, z *lib.Zettel) {
+func (f Formatter) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 	s := f.Format(z)
 	_, err := io.WriteString(w, s)
 	stdprinter.PanicIfError(err)
 }
 
-func FormatZettel(z *lib.Zettel, format string) string {
+func FormatZettel(z *zettel.Zettel, format string) string {
 	f := MakeFormatter(format)
 	return f.Format(z)
 }
 
-func (f Formatter) Format(z *lib.Zettel) string {
+func (f Formatter) Format(z *zettel.Zettel) string {
 	sb := &strings.Builder{}
 
 	lastLoopWasEmpty := false

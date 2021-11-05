@@ -8,6 +8,6 @@ type Kasten interface {
 	GetAll() (zettels []string, err error)
 	GetNormalizedPath(a string) (b string, err error)
 	NewId() (id zettel.Id, err error)
-	Hydrate(z *Zettel, includeBody bool) (err error)
+	Hydrate(z *zettel.Zettel, includeBody bool) (err error)
 	CommitTransaction(Umwelt) error
 }

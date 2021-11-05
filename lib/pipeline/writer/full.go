@@ -4,13 +4,13 @@ import (
 	"io"
 	"strings"
 
-	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type Full struct{}
 
-func (p *Full) WriteZettel(w io.Writer, _ int, z *lib.Zettel) {
+func (p *Full) WriteZettel(w io.Writer, _ int, z *zettel.Zettel) {
 	sb := &strings.Builder{}
 
 	y, err := z.Note.Metadata.ToYAMLWithBoundary()

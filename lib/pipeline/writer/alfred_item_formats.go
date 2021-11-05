@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
-func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
+func alfredItemFromZettelBase(z *zettel.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
 	if len(z.Note.Metadata.Description()) > 0 {
 		i.Title = z.Note.Metadata.Description()
@@ -42,13 +43,13 @@ func alfredItemFromZettelBase(z *lib.Zettel) (i lib.AlfredItem) {
 	return
 }
 
-func alfredItemsFromZettelDefault(z *lib.Zettel) (a []lib.AlfredItem) {
+func alfredItemsFromZettelDefault(z *zettel.Zettel) (a []lib.AlfredItem) {
 	a = append(a, alfredItemFromZettelBase(z))
 
 	return
 }
 
-func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
+func AlfredItemsFromZettelFiles(z *zettel.Zettel) (a []lib.AlfredItem) {
 	f, ok := z.Note.Metadata.LocalFile()
 
 	if !ok {
@@ -64,7 +65,7 @@ func AlfredItemsFromZettelFiles(z *lib.Zettel) (a []lib.AlfredItem) {
 	return
 }
 
-func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
+func AlfredItemsFromZettelUrls(z *zettel.Zettel) (a []lib.AlfredItem) {
 	u, ok := z.Note.Metadata.Url()
 
 	if !ok {
@@ -85,7 +86,7 @@ func AlfredItemsFromZettelUrls(z *lib.Zettel) (a []lib.AlfredItem) {
 	return
 }
 
-func AlfredItemsFromZettelAll(z *lib.Zettel) (a []lib.AlfredItem) {
+func AlfredItemsFromZettelAll(z *zettel.Zettel) (a []lib.AlfredItem) {
 	a = append(a, alfredItemFromZettelBase(z))
 
 	if z.Note.Metadata.HasFile() {
@@ -99,7 +100,7 @@ func AlfredItemsFromZettelAll(z *lib.Zettel) (a []lib.AlfredItem) {
 	return
 }
 
-func AlfredItemsFromZettelSnippets(z *lib.Zettel) (a []lib.AlfredItem) {
+func AlfredItemsFromZettelSnippets(z *zettel.Zettel) (a []lib.AlfredItem) {
 	i := alfredItemFromZettelBase(z)
 	//TODO-P3 move body normalization to dedicated function
 	i.Title = strings.ReplaceAll(z.Body, "\n", " ")

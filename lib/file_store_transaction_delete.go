@@ -1,8 +1,12 @@
 package lib
 
-import "os"
+import (
+	"os"
 
-func (k *FileStore) transactionProcessDelete(u Umwelt, z *Zettel) (err error) {
+	"github.com/friedenberg/z/lib/zettel"
+)
+
+func (k *FileStore) transactionProcessDelete(u Umwelt, z *zettel.Zettel) (err error) {
 	err = k.hydrateFromFileIfExists(z)
 
 	if err != nil {

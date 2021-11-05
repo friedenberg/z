@@ -10,7 +10,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func (k *FileStore) transactionProcessAdd(u Umwelt, z *Zettel) (err error) {
+func (k *FileStore) transactionProcessAdd(u Umwelt, z *zettel.Zettel) (err error) {
 	//add can be called for existing zettels or new zettels
 	//in the case of new, we need to create an id and populate it
 	if z.Id == 0 {
@@ -46,7 +46,7 @@ func (k *FileStore) transactionProcessAdd(u Umwelt, z *Zettel) (err error) {
 	return
 }
 
-func (k *FileStore) updateFilesIfNecessary(z *Zettel) (err error) {
+func (k *FileStore) updateFilesIfNecessary(z *zettel.Zettel) (err error) {
 	lf, hasLocalFile := z.Note.Metadata.LocalFile()
 	nf, hasNewFile := z.Note.Metadata.NewFile()
 
@@ -64,7 +64,7 @@ func (k *FileStore) updateFilesIfNecessary(z *Zettel) (err error) {
 	return
 }
 
-func (k *FileStore) updateNewFile(z *Zettel, f *metadata.NewFile) (err error) {
+func (k *FileStore) updateNewFile(z *zettel.Zettel, f *metadata.NewFile) (err error) {
 	var sum string
 	sum, err = util.Sha256HashForFile(f.Path)
 
@@ -102,7 +102,7 @@ func (k *FileStore) updateNewFile(z *Zettel, f *metadata.NewFile) (err error) {
 	return
 }
 
-func (k *FileStore) updateLocalFile(z *Zettel, f *metadata.LocalFile) (err error) {
+func (k *FileStore) updateLocalFile(z *zettel.Zettel, f *metadata.LocalFile) (err error) {
 	fPath := f.FilePath(k.basePath)
 
 	isDir, err := util.IsDir(fPath)
@@ -152,7 +152,7 @@ func (k *FileStore) updateLocalFile(z *Zettel, f *metadata.LocalFile) (err error
 	return
 }
 
-func (k *FileStore) moveFile(z *Zettel, f metadata.File, sum string) (f1 metadata.LocalFile, err error) {
+func (k *FileStore) moveFile(z *zettel.Zettel, f metadata.File, sum string) (f1 metadata.LocalFile, err error) {
 	fPath := f.FilePath(k.basePath)
 	f1 = k.uniqueFile(sum, f.Extension())
 

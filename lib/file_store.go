@@ -74,7 +74,7 @@ func (k *FileStore) nextAvailableId() (id zettel.Id) {
 	return
 }
 
-func (k FileStore) Hydrate(z *Zettel, includeBody bool) (err error) {
+func (k FileStore) Hydrate(z *zettel.Zettel, includeBody bool) (err error) {
 	z.ZUmwelt = k.umwelt
 
 	id := strings.TrimSuffix(path.Base(z.Path), path.Ext(z.Path))

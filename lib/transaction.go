@@ -23,7 +23,7 @@ type Transaction struct {
 	actions map[zettel.Id]TransactionEntry
 }
 
-func (t Transaction) Set(z *Zettel, action TransactionAction) {
+func (t Transaction) Set(z *zettel.Zettel, action TransactionAction) {
 	if z == nil {
 		return
 	}
@@ -54,7 +54,7 @@ func (t Transaction) ZettelsForActions(action TransactionAction) (zs ZettelSlice
 	t.Lock()
 	defer t.Unlock()
 
-	zs = make([]*Zettel, 0, len(t.actions))
+	zs = make([]*zettel.Zettel, 0, len(t.actions))
 
 	for _, ze := range t.actions {
 		if ze.TransactionAction == action {

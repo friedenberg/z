@@ -3,8 +3,8 @@ package modifier
 import (
 	"io"
 
-	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
 type chain []pipeline.Modifier
@@ -17,7 +17,7 @@ func (m chain) Begin(w io.Writer) {
 	}
 }
 
-func (m chain) ModifyZettel(i int, z *lib.Zettel) (err error) {
+func (m chain) ModifyZettel(i int, z *zettel.Zettel) (err error) {
 	for _, m1 := range m {
 		err = m1.ModifyZettel(i, z)
 

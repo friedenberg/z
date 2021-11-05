@@ -5,10 +5,11 @@ import (
 	"time"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/zettel"
 	"golang.org/x/xerrors"
 )
 
-func MakeAlfredMatches(z *lib.Zettel) string {
+func MakeAlfredMatches(z *zettel.Zettel) string {
 	m := z.Metadata
 	sb := &strings.Builder{}
 

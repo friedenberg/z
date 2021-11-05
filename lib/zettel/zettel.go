@@ -1,4 +1,4 @@
-package lib
+package zettel
 
 import (
 	"github.com/friedenberg/z/lib/zettel/metadata"

@@ -6,8 +6,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func FromIndex(u lib.Umwelt, _ int, s string) (z *lib.Zettel, err error) {
-	z = &lib.Zettel{
+func FromIndex(u lib.Umwelt, _ int, s string) (z *zettel.Zettel, err error) {
+	z = &zettel.Zettel{
 		ZUmwelt: u,
 	}
 

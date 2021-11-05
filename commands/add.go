@@ -8,6 +8,7 @@ import (
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/pipeline/modifier"
+	"github.com/friedenberg/z/lib/zettel"
 )
 
 func init() {
@@ -35,7 +36,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 			Reader:    kind,
 			Modifier: modifier.Chain(
 				modifier.Make(
-					func(i int, z *lib.Zettel) (err error) {
+					func(i int, z *zettel.Zettel) (err error) {
 						tags := strings.Split(tagString, " ")
 						z.Metadata.AddStringTags(tags...)
 
