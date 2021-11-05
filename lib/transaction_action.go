@@ -4,7 +4,7 @@ type TransactionAction int
 
 const (
 	TransactionActionNone  = 0
-	TransactionActionAdded = 1 << iota
+	TransactionActionAdded = iota
 	TransactionActionModified
 	TransactionActionDeleted
 )
