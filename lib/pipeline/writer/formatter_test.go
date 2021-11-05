@@ -97,8 +97,8 @@ func makeZettel() (z *lib.Zettel) {
 	}
 
 	z = &lib.Zettel{
-		Umwelt: umwelt,
-		Path:   "1633902356.md",
+		ZUmwelt: umwelt,
+		Path:    "1633902356.md",
 	}
 
 	return

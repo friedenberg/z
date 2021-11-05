@@ -27,9 +27,9 @@ func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *lib.
 	}
 
 	z1 := &lib.Zettel{
-		Id:     oldIdInt,
-		Path:   oldPath,
-		Umwelt: u,
+		Id:      oldIdInt,
+		Path:    oldPath,
+		ZUmwelt: u,
 	}
 
 	err = u.Kasten.Hydrate(z1, true)

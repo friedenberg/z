@@ -8,7 +8,7 @@ import (
 
 func FromIndex(u lib.Umwelt, _ int, s string) (z *lib.Zettel, err error) {
 	z = &lib.Zettel{
-		Umwelt: u,
+		ZUmwelt: u,
 	}
 
 	id, err := zettel.IdFromString(s)

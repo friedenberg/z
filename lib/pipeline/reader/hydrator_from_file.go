@@ -14,8 +14,8 @@ func FromFile(includeBody bool) reader {
 
 func hydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *lib.Zettel, err error) {
 	z = &lib.Zettel{
-		Umwelt: u,
-		Path:   p,
+		ZUmwelt: u,
+		Path:    p,
 	}
 
 	err = u.Kasten.Hydrate(z, includeBody)

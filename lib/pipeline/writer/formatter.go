@@ -57,7 +57,7 @@ func (f Formatter) Format(z *lib.Zettel) string {
 			sb.WriteString(z.Metadata.Description())
 		case 'f':
 			if f, ok := z.Note.Metadata.LocalFile(); ok {
-				sb.WriteString(f.FilePath(z.Umwelt.BasePath))
+				sb.WriteString(f.FilePath(z.ZUmwelt.Dir()))
 			}
 		case 'p':
 			sb.WriteString(z.Path)

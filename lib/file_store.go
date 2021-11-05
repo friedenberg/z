@@ -75,7 +75,7 @@ func (k *FileStore) nextAvailableId() (id zettel.Id) {
 }
 
 func (k FileStore) Hydrate(z *Zettel, includeBody bool) (err error) {
-	z.Umwelt = k.umwelt
+	z.ZUmwelt = k.umwelt
 
 	id := strings.TrimSuffix(path.Base(z.Path), path.Ext(z.Path))
 	idInt, err := strconv.ParseInt(id, 10, 64)

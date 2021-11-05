@@ -4,8 +4,12 @@ import (
 	"github.com/friedenberg/z/lib/zettel/metadata"
 )
 
+type ZUmwelt interface {
+	Dir() string
+}
+
 type Zettel struct {
-	Umwelt
+	ZUmwelt
 
 	//TODO-P2 change to zettel.Id
 	Id int64

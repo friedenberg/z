@@ -97,3 +97,7 @@ func (e Umwelt) CacheIndex() (err error) {
 
 	return
 }
+
+func (u Umwelt) Dir() string {
+	return u.BasePath
+}
