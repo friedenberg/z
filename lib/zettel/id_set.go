@@ -5,19 +5,19 @@ import (
 	"sync"
 )
 
-func MakeZettelIdSet() *ZettelIdSet {
-	return &ZettelIdSet{
+func MakeIdSet() *IdSet {
+	return &IdSet{
 		Locker: &sync.Mutex{},
 		Set:    make(map[Id]bool),
 	}
 }
 
-type ZettelIdSet struct {
+type IdSet struct {
 	sync.Locker `json:"-"`
 	Set         map[Id]bool
 }
 
-func (s *ZettelIdSet) UnmarshalJSON(b []byte) error {
+func (s *IdSet) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &s.Set); err != nil {
 		return err
 	}
@@ -27,11 +27,11 @@ func (s *ZettelIdSet) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (s *ZettelIdSet) MarshalJSON() ([]byte, error) {
+func (s *IdSet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.Set)
 }
 
-func (s *ZettelIdSet) Add(in ...Id) {
+func (s *IdSet) Add(in ...Id) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -42,18 +42,18 @@ func (s *ZettelIdSet) Add(in ...Id) {
 	return
 }
 
-func (s *ZettelIdSet) Delete(i Id) {
+func (s *IdSet) Delete(i Id) {
 	s.Lock()
 	defer s.Unlock()
 
 	delete(s.Set, i)
 }
 
-func (s *ZettelIdSet) Len() int {
+func (s *IdSet) Len() int {
 	return len(s.Set)
 }
 
-func (s *ZettelIdSet) Slice() (out []Id) {
+func (s *IdSet) Slice() (out []Id) {
 	s.Lock()
 	defer s.Unlock()
 

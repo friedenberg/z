@@ -10,14 +10,14 @@ func MakeMultiMap(l sync.Locker) MultiMap {
 		Locker: l,
 		multiMapSerializable: multiMapSerializable{
 
-			ValueToId: make(map[string]*ZettelIdSet),
+			ValueToId: make(map[string]*IdSet),
 			IdToValue: make(map[Id]*StringSet),
 		},
 	}
 }
 
 type multiMapSerializable struct {
-	ValueToId map[string]*ZettelIdSet
+	ValueToId map[string]*IdSet
 	IdToValue map[Id]*StringSet
 }
 
@@ -38,7 +38,7 @@ func (s MultiMap) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.multiMapSerializable)
 }
 
-func (m MultiMap) GetIds(k string) (*ZettelIdSet, bool) {
+func (m MultiMap) GetIds(k string) (*IdSet, bool) {
 	m.Lock()
 	defer m.Unlock()
 
@@ -54,7 +54,7 @@ func (m MultiMap) GetValues(id Id) (*StringSet, bool) {
 	return a, ok
 }
 
-func (m MultiMap) Set(k string, ids *ZettelIdSet) {
+func (m MultiMap) Set(k string, ids *IdSet) {
 	m.Lock()
 	defer m.Unlock()
 
@@ -76,7 +76,7 @@ func (m MultiMap) Add(k string, id Id) {
 	a, _ := m.GetIds(k)
 
 	if a == nil {
-		a = MakeZettelIdSet()
+		a = MakeIdSet()
 	}
 
 	a.Add(id)
