@@ -9,7 +9,7 @@ import (
 	"github.com/friedenberg/z/lib/zettel"
 )
 
-func alfredItemFromZettelBase(z *zettel.Zettel) (i lib.AlfredItem) {
+func AlfredItemFromZettelBase(z *zettel.Zettel) (i lib.AlfredItem) {
 	id := strconv.FormatInt(z.Id, 10)
 	if len(z.Note.Metadata.Description()) > 0 {
 		i.Title = z.Note.Metadata.Description()
@@ -44,7 +44,7 @@ func alfredItemFromZettelBase(z *zettel.Zettel) (i lib.AlfredItem) {
 }
 
 func alfredItemsFromZettelDefault(z *zettel.Zettel) (a []lib.AlfredItem) {
-	a = append(a, alfredItemFromZettelBase(z))
+	a = append(a, AlfredItemFromZettelBase(z))
 
 	return
 }
@@ -56,10 +56,11 @@ func AlfredItemsFromZettelFiles(z *zettel.Zettel) (a []lib.AlfredItem) {
 		return
 	}
 
-	i := alfredItemFromZettelBase(z)
+	i := AlfredItemFromZettelBase(z)
 	i.Icon.Path = f.FilePath(z.ZUmwelt.Dir())
 	i.Uid = i.Uid + ".file"
 	i.Match = i.Match + "i-f"
+	i.Arg = fmt.Sprintf("-actions open-files %s", z.Path)
 	a = append(a, i)
 
 	return
@@ -72,10 +73,10 @@ func AlfredItemsFromZettelUrls(z *zettel.Zettel) (a []lib.AlfredItem) {
 		return
 	}
 
-	i := alfredItemFromZettelBase(z)
+	i := AlfredItemFromZettelBase(z)
 	//TODO-P2 set to url icon
 	// i.Icon.Path = z.FilePath()
-	i.Arg = u.CorrectedString()
+	i.Arg = fmt.Sprintf("-actions open-urls %s", z.Path)
 
 	//TODO-P4 move to tags
 	i.Title = fmt.Sprintf("%s: %s", u.Host, z.Note.Metadata.Description())
@@ -87,7 +88,7 @@ func AlfredItemsFromZettelUrls(z *zettel.Zettel) (a []lib.AlfredItem) {
 }
 
 func AlfredItemsFromZettelAll(z *zettel.Zettel) (a []lib.AlfredItem) {
-	a = append(a, alfredItemFromZettelBase(z))
+	a = append(a, AlfredItemFromZettelBase(z))
 
 	if z.Note.Metadata.HasFile() {
 		a = append(a, AlfredItemsFromZettelFiles(z)...)
@@ -101,7 +102,7 @@ func AlfredItemsFromZettelAll(z *zettel.Zettel) (a []lib.AlfredItem) {
 }
 
 func AlfredItemsFromZettelSnippets(z *zettel.Zettel) (a []lib.AlfredItem) {
-	i := alfredItemFromZettelBase(z)
+	i := AlfredItemFromZettelBase(z)
 	//TODO-P3 move body normalization to dedicated function
 	i.Title = strings.ReplaceAll(z.Body, "\n", " ")
 	i.Subtitle = FormatZettel(z, "%d, %t")

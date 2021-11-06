@@ -17,28 +17,12 @@ var (
 func init() {
 	Formats = map[string]Format{
 		"alfred-json": Format{
-			Writer: &writer.AlfredJson{},
-		},
-		"alfred-json-files": Format{
-			Filter: filter.HasFile(),
-			Writer: &writer.AlfredJson{
-				ItemFunc: writer.AlfredItemsFromZettelFiles,
-			},
-		},
-		"alfred-json-urls": Format{
-			Filter: filter.HasUrl(),
-			Writer: &writer.AlfredJson{
-				ItemFunc: writer.AlfredItemsFromZettelUrls,
-			},
-		},
-		"alfred-json-all": Format{
 			Writer: &writer.AlfredJson{
 				ItemFunc: writer.AlfredItemsFromZettelAll,
 			},
 		},
 		"alfred-json-snippets": Format{
 			Filter: filter.MatchQuery("t-snippet"),
-			//TODO
 			Writer: &writer.AlfredJson{
 				ItemFunc: writer.AlfredItemsFromZettelSnippets,
 			},
