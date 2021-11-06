@@ -7,7 +7,6 @@ import (
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel/filter"
-	"github.com/friedenberg/z/lib/zettel/writer"
 )
 
 func init() {
@@ -18,10 +17,10 @@ func init() {
 }
 
 func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
-	var format writer.Format
+	var format pipeline.Format
 	var query string
 	//TODO-P3 rename to "format"
-	f.Var(&format, "output-format", fmt.Sprintf("One of %q", writer.FormatKeys))
+	f.Var(&format, "output-format", fmt.Sprintf("One of %q", pipeline.FormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
 	disableExclude := f.Bool("disable-tag-exclusions", false, "")
 

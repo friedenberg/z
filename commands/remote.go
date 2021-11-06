@@ -10,7 +10,6 @@ import (
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel/filter"
-	"github.com/friedenberg/z/lib/zettel/writer"
 	"golang.org/x/xerrors"
 )
 
@@ -54,7 +53,7 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 			return
 		}
 
-		var format writer.Format
+		var format pipeline.Format
 		err = format.Set(remotePipeline.Format)
 
 		if err != nil {

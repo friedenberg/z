@@ -1,4 +1,4 @@
-package collections
+package zettel
 
 import (
 	"encoding/json"

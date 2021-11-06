@@ -2,6 +2,10 @@ package filter
 
 import "github.com/friedenberg/z/lib/zettel"
 
+type Filter interface {
+	FilterZettel(int, *zettel.Zettel) bool
+}
+
 type FilterFunc func(int, *zettel.Zettel) bool
 
 type filter struct {

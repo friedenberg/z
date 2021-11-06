@@ -1,10 +1,8 @@
-package collections
+package zettel
 
 import (
 	"encoding/json"
 	"sync"
-
-	"github.com/friedenberg/z/lib/zettel"
 )
 
 func MakeMultiMap(l sync.Locker) MultiMap {
@@ -13,14 +11,14 @@ func MakeMultiMap(l sync.Locker) MultiMap {
 		multiMapSerializable: multiMapSerializable{
 
 			ValueToId: make(map[string]*ZettelIdSet),
-			IdToValue: make(map[zettel.Id]*StringSet),
+			IdToValue: make(map[Id]*StringSet),
 		},
 	}
 }
 
 type multiMapSerializable struct {
 	ValueToId map[string]*ZettelIdSet
-	IdToValue map[zettel.Id]*StringSet
+	IdToValue map[Id]*StringSet
 }
 
 type MultiMap struct {
@@ -48,7 +46,7 @@ func (m MultiMap) GetIds(k string) (*ZettelIdSet, bool) {
 	return a, ok
 }
 
-func (m MultiMap) GetValues(id zettel.Id) (*StringSet, bool) {
+func (m MultiMap) GetValues(id Id) (*StringSet, bool) {
 	m.Lock()
 	defer m.Unlock()
 
@@ -74,7 +72,7 @@ func (m MultiMap) Set(k string, ids *ZettelIdSet) {
 	}
 }
 
-func (m MultiMap) Add(k string, id zettel.Id) {
+func (m MultiMap) Add(k string, id Id) {
 	a, _ := m.GetIds(k)
 
 	if a == nil {
@@ -85,7 +83,7 @@ func (m MultiMap) Add(k string, id zettel.Id) {
 	m.Set(k, a)
 }
 
-func (m MultiMap) Delete(id zettel.Id) {
+func (m MultiMap) Delete(id Id) {
 	m.Lock()
 	defer m.Unlock()
 

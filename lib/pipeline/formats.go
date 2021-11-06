@@ -1,13 +1,13 @@
-package writer
+package pipeline
 
 import (
 	"sort"
 
-	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel/filter"
+	"github.com/friedenberg/z/lib/zettel/writer"
 )
 
-type Format pipeline.Pipeline
+type Format Pipeline
 
 var (
 	Formats    map[string]Format
@@ -17,61 +17,61 @@ var (
 func init() {
 	Formats = map[string]Format{
 		"alfred-json": Format{
-			Writer: &AlfredJson{},
+			Writer: &writer.AlfredJson{},
 		},
 		"alfred-json-files": Format{
 			Filter: filter.HasFile(),
-			Writer: &AlfredJson{
-				ItemFunc: AlfredItemsFromZettelFiles,
+			Writer: &writer.AlfredJson{
+				ItemFunc: writer.AlfredItemsFromZettelFiles,
 			},
 		},
 		"alfred-json-urls": Format{
 			Filter: filter.HasUrl(),
-			Writer: &AlfredJson{
-				ItemFunc: AlfredItemsFromZettelUrls,
+			Writer: &writer.AlfredJson{
+				ItemFunc: writer.AlfredItemsFromZettelUrls,
 			},
 		},
 		"alfred-json-all": Format{
-			Writer: &AlfredJson{
-				ItemFunc: AlfredItemsFromZettelAll,
+			Writer: &writer.AlfredJson{
+				ItemFunc: writer.AlfredItemsFromZettelAll,
 			},
 		},
 		"alfred-json-snippets": Format{
 			Filter: filter.MatchQuery("t-snippet"),
 			//TODO
-			Writer: &AlfredJson{
-				ItemFunc: AlfredItemsFromZettelSnippets,
+			Writer: &writer.AlfredJson{
+				ItemFunc: writer.AlfredItemsFromZettelSnippets,
 			},
 		},
 		"alfred-tags": Format{
-			Writer: &Tags{},
+			Writer: &writer.Tags{},
 		},
 		"alfred-expanded-tags": Format{
-			Writer: &Tags{ShouldExpand: true},
+			Writer: &writer.Tags{ShouldExpand: true},
 		},
 		"full": Format{
-			Writer: &Full{},
+			Writer: &writer.Full{},
 		},
 		"filename": Format{
-			Writer: MakeFormatter("%p"),
+			Writer: writer.MakeFormatter("%p"),
 		},
 		"toml-to-json": Format{
 			// Filter: filter.MatchQuery("k-toml"),
-			Writer: &TomlToJson{},
+			Writer: &writer.TomlToJson{},
 		},
 		"try-format": Format{
 			Filter: filter.Or(
 				filter.MatchQuery("k-toml"),
 				filter.MatchQuery("from-pb"),
 			),
-			Writer: &TryFormat{},
+			Writer: &writer.TryFormat{},
 		},
 		"json": Format{
-			Reader: &Json{},
-			Writer: &Json{},
+			Reader: &writer.Json{},
+			Writer: &writer.Json{},
 		},
 		"json-with-body": Format{
-			Writer: &Json{IncludeBody: true},
+			Writer: &writer.Json{IncludeBody: true},
 		},
 	}
 
@@ -93,11 +93,11 @@ func (a *Format) Set(s string) (err error) {
 	} else {
 		if s == "" {
 			*a = Format{
-				Writer: &Full{},
+				Writer: &writer.Full{},
 			}
 		} else {
 			*a = Format{
-				Writer: MakeFormatter(s),
+				Writer: writer.MakeFormatter(s),
 			}
 		}
 	}

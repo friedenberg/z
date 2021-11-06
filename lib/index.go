@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/friedenberg/z/lib/collections"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
 	"golang.org/x/xerrors"
@@ -24,9 +23,9 @@ type IndexZettel struct {
 type SerializableIndex struct {
 	ModTime int64
 	Zettels map[zettel.Id]IndexZettel
-	Files   collections.Map
-	Urls    collections.Map
-	Tags    collections.MultiMap
+	Files   zettel.Map
+	Urls    zettel.Map
+	Tags    zettel.MultiMap
 }
 
 type Index struct {
@@ -40,9 +39,9 @@ func MakeIndex() *Index {
 	return &Index{
 		SerializableIndex: SerializableIndex{
 			Zettels: make(map[zettel.Id]IndexZettel),
-			Files:   collections.MakeMap(m),
-			Urls:    collections.MakeMap(m),
-			Tags:    collections.MakeMultiMap(m),
+			Files:   zettel.MakeMap(m),
+			Urls:    zettel.MakeMap(m),
+			Tags:    zettel.MakeMultiMap(m),
 		},
 		Mutex: m,
 	}

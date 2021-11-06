@@ -1,25 +1,23 @@
-package collections
+package zettel
 
 import (
 	"encoding/json"
 	"sync"
-
-	"github.com/friedenberg/z/lib/zettel"
 )
 
 func MakeMap(l sync.Locker) Map {
 	return Map{
 		Locker: l,
 		mapSerializable: mapSerializable{
-			ValueToId: make(map[string]zettel.Id),
-			IdToValue: make(map[zettel.Id]string),
+			ValueToId: make(map[string]Id),
+			IdToValue: make(map[Id]string),
 		},
 	}
 }
 
 type mapSerializable struct {
-	ValueToId map[string]zettel.Id
-	IdToValue map[zettel.Id]string
+	ValueToId map[string]Id
+	IdToValue map[Id]string
 }
 
 type Map struct {
@@ -39,21 +37,21 @@ func (s Map) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.mapSerializable)
 }
 
-func (m Map) GetId(k string) (zettel.Id, bool) {
+func (m Map) GetId(k string) (Id, bool) {
 	m.Lock()
 	defer m.Unlock()
 	a, ok := m.ValueToId[k]
 	return a, ok
 }
 
-func (m Map) GetValue(id zettel.Id) (string, bool) {
+func (m Map) GetValue(id Id) (string, bool) {
 	m.Lock()
 	defer m.Unlock()
 	a, ok := m.IdToValue[id]
 	return a, ok
 }
 
-func (m Map) Set(k string, id zettel.Id) {
+func (m Map) Set(k string, id Id) {
 	m.Lock()
 	defer m.Unlock()
 
@@ -61,7 +59,7 @@ func (m Map) Set(k string, id zettel.Id) {
 	m.IdToValue[id] = k
 }
 
-func (m Map) Delete(id zettel.Id) {
+func (m Map) Delete(id Id) {
 	m.Lock()
 	defer m.Unlock()
 	v, ok := m.IdToValue[id]
