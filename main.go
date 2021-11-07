@@ -15,19 +15,31 @@ import (
 )
 
 func main() {
-	os.Exit(run())
+	defer stdprinter.WaitForPrinter()
+	stdprinter.SetDebug(shouldDebug())
+	os.Exit(run(os.Args))
 }
 
-func run() int {
-	defer stdprinter.WaitForPrinter()
-	stdprinter.SetDebug(true)
+func shouldDebug() bool {
+	for i, a := range os.Args {
+		if a == "-v" {
+			stdprinter.Debug("debugging on")
+			os.Args = append(os.Args[:i], os.Args[i+1:]...)
+			return true
+		}
+	}
 
-	if len(os.Args) < 2 {
+	return false
+}
+
+func run(args []string) int {
+	if len(os.Args) < 1 {
+		stdprinter.Debug("printing usage")
 		return printUsage(nil)
 	}
 
 	cmds := commands.Commands()
-	specifiedSubcommand := os.Args[1]
+	specifiedSubcommand := args[1]
 	cmd, ok := cmds[specifiedSubcommand]
 
 	if !ok {
@@ -45,12 +57,12 @@ func run() int {
 	umwelt, err := c.Umwelt()
 
 	if err != nil {
-		stdprinter.Error(err)
+		stdprinter.Err(err)
 		return 1
 	}
 
 	//TODO-P4 refactor to be command too
-	cmd.Flags.Parse(os.Args[2:])
+	cmd.Flags.Parse(args[2:])
 	err = cmd.Run(&umwelt)
 
 	if err != nil {
