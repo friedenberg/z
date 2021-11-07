@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/friedenberg/z/lib/zettel/filter"
+	"github.com/friedenberg/z/lib/zettel/reader"
 	"github.com/friedenberg/z/lib/zettel/writer"
 )
 
@@ -51,7 +52,7 @@ func init() {
 			Writer: &writer.TryFormat{},
 		},
 		"json": Format{
-			Reader: &writer.Json{},
+			Reader: &reader.Json{},
 			Writer: &writer.Json{},
 		},
 		"json-with-body": Format{

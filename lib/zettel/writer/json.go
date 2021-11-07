@@ -36,15 +36,3 @@ func (p *Json) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 	_, err := w.Write(b)
 	stdprinter.PanicIfError(err)
 }
-
-func (p *Json) ReadZettel(u *lib.Umwelt, i int, b []byte) (z *zettel.Zettel, err error) {
-	//TODO-P3 try to read ID or assign ID
-	err = json.Unmarshal(b, &z)
-
-	if err != nil {
-		err = xerrors.Errorf("unable to read zettel from json: %w", err)
-		return
-	}
-
-	return
-}
