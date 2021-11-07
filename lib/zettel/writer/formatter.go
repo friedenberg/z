@@ -11,16 +11,27 @@ import (
 )
 
 type Formatter struct {
-	formats []string
+	formats      []string
+	excludeEmpty bool
 }
 
-func MakeFormatter(format string) Formatter {
+func MakeFormatter(format string) *Formatter {
 	formats := strings.Split(format, "%")
-	return Formatter{formats: formats}
+	return &Formatter{formats: formats}
+}
+
+func (f *Formatter) SetExcludeEmpty() {
+	stdprinter.Debug("set exclude empty")
+	f.excludeEmpty = true
 }
 
 func (f Formatter) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 	s := f.Format(z)
+
+	if strings.TrimSpace(s) == "" && f.excludeEmpty {
+		return
+	}
+
 	_, err := io.WriteString(w, s)
 	stdprinter.PanicIfError(err)
 }

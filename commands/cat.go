@@ -19,10 +19,15 @@ func init() {
 func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	var format pipeline.Format
 	var query string
+	var excludeEmpty bool
+
+	tagExclusions := filter.MakeTagExclusions()
+
 	//TODO-P3 rename to "format"
-	f.Var(&format, "output-format", fmt.Sprintf("One of %q", pipeline.FormatKeys))
+	f.Var(&format, "format", fmt.Sprintf("One of %q", pipeline.FormatKeys))
 	f.StringVar(&query, "query", "", "zettel-spec")
-	disableExclude := f.Bool("disable-tag-exclusions", false, "")
+	f.Var(&tagExclusions, "disable-tag-exclusions", "show all zettels, including those excluded by config")
+	f.BoolVar(&excludeEmpty, "exclude-empty", true, "don't output empty lines")
 
 	return func(u *lib.Umwelt) (err error) {
 		u.ShouldSkipCommit = true
@@ -33,30 +38,20 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 			args = u.GetAll()
 		}
 
-		p := pipeline.Pipeline{
-			Arguments: args,
-			Filter: filter.And(
-				filter.MatchQuery(query),
-				format.Filter,
-			),
-			Writer: format.Writer,
-			//TODO-P3 why was this here?
-			// PostWriter: pipeline.MakePostWriter(
-			// 	func(i int, z *lib.Zettel) (err error) {
-			// 		u.Add.PrintZettel(i, z, err)
-
-			// 		return
-			// 	},
-			// ),
+		if excludeEmpty {
+			format.SetExcludeEmpty()
 		}
 
-		if !*disableExclude {
-			p.Filter = filter.And(
-				p.Filter,
-				filter.Not(
-					filter.MatchQueries(u.TagsForExcludedZettels...),
+		p := pipeline.Pipeline{
+			Arguments: args,
+			Filter: tagExclusions.WithFilter(
+				filter.And(
+					filter.MatchQuery(query),
+					format.Filter,
 				),
-			)
+				u.TagsForExcludedZettels,
+			),
+			Writer: format.Writer,
 		}
 
 		p.Run(u)

@@ -27,6 +27,11 @@ type Writer interface {
 	WriteZettel(io.Writer, int, *zettel.Zettel)
 }
 
+type WriterExcludeEmpty interface {
+	Writer
+	SetExcludeEmpty()
+}
+
 type WriterError interface {
 	WriteZettelError(io.Writer, int, *zettel.Zettel, error)
 }

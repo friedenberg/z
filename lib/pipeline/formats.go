@@ -89,3 +89,9 @@ func (a *Format) Set(s string) (err error) {
 
 	return
 }
+
+func (f *Format) SetExcludeEmpty() {
+	if w, ok := f.Writer.(WriterExcludeEmpty); ok {
+		w.SetExcludeEmpty()
+	}
+}
