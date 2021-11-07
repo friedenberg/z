@@ -7,14 +7,14 @@ import (
 
 func (k *FileStore) transactionProcessModify(u *Umwelt, z *zettel.Zettel) (err error) {
 	stdprinter.Debug("will process transaction modify for zettel:", z.Path)
-	err = k.hydrateFromFileIfExists(z)
+	err = k.hydrateFromFileIfExists(u, z)
 
 	if err != nil {
 		return
 	}
 
 	if u.IsFinalTransaction {
-		err = k.updateFilesIfNecessary(z)
+		err = k.updateFilesIfNecessary(u, z)
 
 		if err != nil {
 			return

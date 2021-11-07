@@ -8,7 +8,7 @@ import (
 )
 
 type Reader interface {
-	ReadZettel(lib.Umwelt, int, []byte) (*zettel.Zettel, error)
+	ReadZettel(*lib.Umwelt, int, []byte) (*zettel.Zettel, error)
 }
 
 type Filter interface {

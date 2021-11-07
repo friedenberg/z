@@ -12,8 +12,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func (k *FileStore) hydrateFromFileIfExists(z *zettel.Zettel) (err error) {
-	err = k.Hydrate(z, true)
+func (k *FileStore) hydrateFromFileIfExists(u *Umwelt, z *zettel.Zettel) (err error) {
+	err = k.Hydrate(u, z, true)
 
 	if os.IsNotExist(err) {
 		err = nil
@@ -34,7 +34,7 @@ func (k *FileStore) writeToFile(z *zettel.Zettel) (err error) {
 	return
 }
 
-func (k *FileStore) updateFilesIfNecessary(z *zettel.Zettel) (err error) {
+func (k *FileStore) updateFilesIfNecessary(u *Umwelt, z *zettel.Zettel) (err error) {
 	lf, hasLocalFile := z.Note.Metadata.LocalFile()
 	nf, hasNewFile := z.Note.Metadata.NewFile()
 
@@ -44,15 +44,15 @@ func (k *FileStore) updateFilesIfNecessary(z *zettel.Zettel) (err error) {
 	}
 
 	if hasLocalFile {
-		return k.updateLocalFile(z, lf)
+		return k.updateLocalFile(u, z, lf)
 	} else if hasNewFile {
-		return k.updateNewFile(z, nf)
+		return k.updateNewFile(u, z, nf)
 	}
 
 	return
 }
 
-func (k *FileStore) updateNewFile(z *zettel.Zettel, f *metadata.NewFile) (err error) {
+func (k *FileStore) updateNewFile(u *Umwelt, z *zettel.Zettel, f *metadata.NewFile) (err error) {
 	var sum string
 	sum, err = util.Sha256HashForFile(f.Path)
 
@@ -61,12 +61,12 @@ func (k *FileStore) updateNewFile(z *zettel.Zettel, f *metadata.NewFile) (err er
 		return
 	}
 
-	oz, ok := k.umwelt.Index.ForFileSum(sum)
+	oz, ok := u.Index.ForFileSum(sum)
 
 	if ok {
 		oz.Merge(z)
-		k.umwelt.Transaction.Set(oz, TransactionActionModified)
-		k.umwelt.Transaction.Set(z, TransactionActionDeleted)
+		u.Set(oz, TransactionActionModified)
+		u.Set(z, TransactionActionDeleted)
 		z = oz
 	} else {
 		var f1 metadata.LocalFile
@@ -85,13 +85,13 @@ func (k *FileStore) updateNewFile(z *zettel.Zettel, f *metadata.NewFile) (err er
 		}
 
 		stdprinter.Debug("adding sum to index:", z.Path, sum)
-		k.umwelt.Index.AddFile(z, sum)
+		u.Index.AddFile(z, sum)
 	}
 
 	return
 }
 
-func (k *FileStore) updateLocalFile(z *zettel.Zettel, f *metadata.LocalFile) (err error) {
+func (k *FileStore) updateLocalFile(u *Umwelt, z *zettel.Zettel, f *metadata.LocalFile) (err error) {
 	fPath := f.FilePath(k.basePath)
 
 	isDir, err := util.IsDir(fPath)
@@ -101,7 +101,7 @@ func (k *FileStore) updateLocalFile(z *zettel.Zettel, f *metadata.LocalFile) (er
 	}
 
 	//TODO use real umwelt passed to this function
-	oldSum, ok := k.umwelt.Index.Files.GetValue(zettel.Id(z.Id))
+	oldSum, ok := u.Index.Files.GetValue(zettel.Id(z.Id))
 
 	if ok {
 		//TODO: merge zettel
@@ -136,7 +136,7 @@ func (k *FileStore) updateLocalFile(z *zettel.Zettel, f *metadata.LocalFile) (er
 		return
 	}
 
-	k.umwelt.Index.AddFile(z, sum)
+	u.Index.AddFile(z, sum)
 
 	return
 }

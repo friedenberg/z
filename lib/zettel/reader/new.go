@@ -10,7 +10,7 @@ func New() (h reader) {
 	return MakeStringReader(readerNew)
 }
 
-func readerNew(u lib.Umwelt, _ int, _ string) (z *zettel.Zettel, err error) {
+func readerNew(u *lib.Umwelt, _ int, _ string) (z *zettel.Zettel, err error) {
 	id, err := u.Kasten.NewId()
 
 	if err != nil {

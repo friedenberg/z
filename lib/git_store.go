@@ -23,7 +23,7 @@ func (k GitStore) CommitTransaction(u *Umwelt) (err error) {
 	//TODO-P2 migrate to git_store
 	g := git.FilesToCommit{
 		Git: git.Git{
-			Path:       k.umwelt.Dir(),
+			Path:       k.BasePath(),
 			SignOption: git.SignOption(k.SignCommits),
 		},
 	}

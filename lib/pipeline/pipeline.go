@@ -105,10 +105,10 @@ func (p Pipeline) outWriter() (w io.Writer) {
 
 func (p Pipeline) readZettel(u *lib.Umwelt, i int, s string) (z *zettel.Zettel, err error) {
 	if p.Reader != nil {
-		return p.ReadZettel(*u, i, []byte(s))
+		return p.ReadZettel(u, i, []byte(s))
 	}
 
-	z, err = reader.FromIndex(*u, i, s)
+	z, err = reader.FromIndex(u, i, s)
 
 	return
 }

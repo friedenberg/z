@@ -7,19 +7,19 @@ import (
 
 func FromFile(includeBody bool) reader {
 	return Make(
-		func(u lib.Umwelt, _ int, b []byte) (*zettel.Zettel, error) {
+		func(u *lib.Umwelt, _ int, b []byte) (*zettel.Zettel, error) {
 			return hydrateFromFile(u, string(b), includeBody)
 		},
 	)
 }
 
-func hydrateFromFile(u lib.Umwelt, p string, includeBody bool) (z *zettel.Zettel, err error) {
+func hydrateFromFile(u *lib.Umwelt, p string, includeBody bool) (z *zettel.Zettel, err error) {
 	z = &zettel.Zettel{
 		ZUmwelt: u,
 		Path:    p,
 	}
 
-	err = u.Kasten.Hydrate(z, includeBody)
+	err = u.Kasten.Hydrate(u, z, includeBody)
 
 	return
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func (k *FileStore) transactionProcessDelete(u *Umwelt, z *zettel.Zettel) (err error) {
-	err = k.hydrateFromFileIfExists(z)
+	err = k.hydrateFromFileIfExists(u, z)
 
 	if err != nil {
 		return
@@ -21,14 +21,14 @@ func (k *FileStore) transactionProcessDelete(u *Umwelt, z *zettel.Zettel) (err e
 	}
 
 	if f := z.Metadata.File(); f != nil {
-		path := f.FilePath(k.umwelt.Dir())
+		path := f.FilePath(k.BasePath())
 		err = util.SetAllowUserChanges(path)
 
 		if err != nil {
 			return
 		}
 
-		err = os.Remove(f.FilePath(k.umwelt.Dir()))
+		err = os.Remove(f.FilePath(k.BasePath()))
 
 		if err != nil {
 			return

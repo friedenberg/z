@@ -10,13 +10,13 @@ import (
 
 func ForAttachmentUrl() reader {
 	return Make(
-		func(u lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
+		func(u *lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
 			return newOrFoundForUrl(u, i, string(b))
 		},
 	)
 }
 
-func newOrFoundForUrl(u lib.Umwelt, i int, urlString string) (z *zettel.Zettel, err error) {
+func newOrFoundForUrl(u *lib.Umwelt, i int, urlString string) (z *zettel.Zettel, err error) {
 	ur, err := url.Parse(urlString)
 
 	if err != nil {

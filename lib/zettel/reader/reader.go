@@ -11,7 +11,7 @@ type reader struct {
 	readerFunc ReaderFunc
 }
 
-func (h reader) ReadZettel(u lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
+func (h reader) ReadZettel(u *lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
 	if h.readerFunc == nil {
 		stdprinter.PanicIfError(xerrors.Errorf("no hydrator set"))
 	}

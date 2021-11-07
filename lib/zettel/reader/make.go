@@ -11,7 +11,7 @@ func Make(f ReaderFunc) (h reader) {
 }
 
 func MakeStringReader(f StringReaderFunc) (h reader) {
-	h.readerFunc = func(u lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
+	h.readerFunc = func(u *lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
 		return f(u, i, string(b))
 	}
 	return

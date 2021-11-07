@@ -12,13 +12,13 @@ import (
 
 func Import(shouldCopy bool) reader {
 	return Make(
-		func(u lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
+		func(u *lib.Umwelt, i int, b []byte) (*zettel.Zettel, error) {
 			return importZettel(u, i, string(b), shouldCopy)
 		},
 	)
 }
 
-func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *zettel.Zettel, err error) {
+func importZettel(u *lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *zettel.Zettel, err error) {
 	oldId := strings.TrimSuffix(path.Base(oldPath), path.Ext(oldPath))
 
 	oldIdInt, err := strconv.ParseInt(oldId, 10, 64)
@@ -33,7 +33,7 @@ func importZettel(u lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *zett
 		ZUmwelt: u,
 	}
 
-	err = u.Kasten.Hydrate(z1, true)
+	err = u.Kasten.Hydrate(u, z1, true)
 
 	if err != nil {
 		return

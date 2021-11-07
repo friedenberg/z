@@ -11,24 +11,24 @@ func (k *FileStore) transactionProcessAdd(u *Umwelt, z *zettel.Zettel) (err erro
 	//in the case of new, we need to create an id and populate it
 	if z.Id == 0 {
 		var id zettel.Id
-		id, err = k.umwelt.Kasten.NewId()
+		id, err = k.NewId()
 
 		if err != nil {
 			return
 		}
 
 		z.Id = id.Int()
-		z.Path = MakePathFromId(k.umwelt.Kasten.BasePath(), id.String())
+		z.Path = MakePathFromId(k.BasePath(), id.String())
 	}
 
-	err = k.hydrateFromFileIfExists(z)
+	err = k.hydrateFromFileIfExists(u, z)
 
 	if err != nil {
 		return
 	}
 
 	if u.IsFinalTransaction {
-		err = k.updateFilesIfNecessary(z)
+		err = k.updateFilesIfNecessary(u, z)
 
 		if err != nil {
 			return

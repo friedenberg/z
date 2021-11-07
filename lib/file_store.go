@@ -25,14 +25,12 @@ func init() {
 
 //TODO-P2 move to lib/kasten
 type FileStore struct {
-	umwelt     Umwelt
 	basePath   string
 	lastIdTime time.Time
 	*sync.Mutex
 }
 
 func (s *FileStore) Init(u Umwelt, o map[string]interface{}) (err error) {
-	s.umwelt = u
 	//TODO-P1 init from options
 	s.lastIdTime = time.Now()
 	s.Mutex = &sync.Mutex{}
@@ -74,8 +72,8 @@ func (k *FileStore) nextAvailableId() (id zettel.Id) {
 	return
 }
 
-func (k FileStore) Hydrate(z *zettel.Zettel, includeBody bool) (err error) {
-	z.ZUmwelt = k.umwelt
+func (k FileStore) Hydrate(u *Umwelt, z *zettel.Zettel, includeBody bool) (err error) {
+	z.ZUmwelt = u
 
 	id := strings.TrimSuffix(path.Base(z.Path), path.Ext(z.Path))
 	idInt, err := strconv.ParseInt(id, 10, 64)
@@ -157,7 +155,7 @@ func (k FileStore) CommitTransaction(u *Umwelt) (err error) {
 			z.Path,
 		)
 
-		k.umwelt.Index.Add(z)
+		u.Index.Add(z)
 	}
 
 	for _, z := range u.ZettelsForActions(TransactionActionModified) {
@@ -167,7 +165,7 @@ func (k FileStore) CommitTransaction(u *Umwelt) (err error) {
 			z.Path,
 		)
 
-		k.umwelt.Index.Update(z)
+		u.Index.Update(z)
 	}
 
 	for _, z := range u.ZettelsForActions(TransactionActionDeleted) {
@@ -177,7 +175,7 @@ func (k FileStore) CommitTransaction(u *Umwelt) (err error) {
 			z.Path,
 		)
 
-		k.umwelt.Index.Delete(z)
+		u.Index.Delete(z)
 	}
 
 	stdprinter.Debug("did commit transaction")
