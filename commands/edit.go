@@ -8,6 +8,7 @@ import (
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel/filter"
 	"github.com/friedenberg/z/lib/zettel/modifier"
+	"golang.org/x/xerrors"
 )
 
 func init() {
@@ -19,8 +20,10 @@ func init() {
 
 func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 	var query string
+	var editAll bool
 	editActions := options.Actions(options.ActionEdit)
 
+	f.BoolVar(&editAll, "all", false, "edit all zettels if no arguments are passed in")
 	f.StringVar(&query, "query", "", "zettel-spec string to determine which zettels to open or edit")
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
@@ -28,8 +31,12 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 		args := f.Args()
 
 		if len(args) == 0 {
-			//TODO-P3 does it make sense to edit all zettels on no args?
-			args = u.GetAll()
+			if editAll {
+				err = xerrors.Errorf("refusing to edit all zettels unless '-all' flag is set")
+				return
+			} else {
+				args = u.GetAll()
+			}
 		}
 
 		p := pipeline.Pipeline{
