@@ -65,7 +65,6 @@ func (i Index) Read(r io.Reader) (err error) {
 
 func (i Index) Write(w io.Writer) (err error) {
 	stdprinter.Debug("will write index")
-	stdprinter.Debugf("%#v", i)
 	i.ModTime = time.Now().Unix()
 	enc := json.NewEncoder(w)
 	// enc := gob.NewEncoder(w)
