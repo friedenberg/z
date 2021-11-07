@@ -9,21 +9,21 @@ type GitStore struct {
 	SignCommits bool
 }
 
-func (k GitStore) CommitTransaction(u Umwelt) (err error) {
+func (k GitStore) CommitTransaction(u *Umwelt) (err error) {
 	err = k.FileStore.CommitTransaction(u)
 
 	if err != nil {
 		return
 	}
 
-	if u.Transaction.ShouldSkipCommit {
+	if u.ShouldSkipCommit {
 		return
 	}
 
 	//TODO-P2 migrate to git_store
 	g := git.FilesToCommit{
 		Git: git.Git{
-			Path:       u.Kasten.BasePath(),
+			Path:       k.umwelt.Dir(),
 			SignOption: git.SignOption(k.SignCommits),
 		},
 	}
@@ -67,19 +67,19 @@ func (k GitStore) CommitTransaction(u Umwelt) (err error) {
 		return
 	}
 
-	err = run("add", u.Transaction.ZettelsForActions(TransactionActionAdded).Paths())
+	err = run("add", u.ZettelsForActions(TransactionActionAdded).Paths())
 
 	if err != nil {
 		return
 	}
 
-	err = run("modify", u.Transaction.ZettelsForActions(TransactionActionModified).Paths())
+	err = run("modify", u.ZettelsForActions(TransactionActionModified).Paths())
 
 	if err != nil {
 		return
 	}
 
-	err = run("delete", u.Transaction.ZettelsForActions(TransactionActionDeleted).Paths())
+	err = run("delete", u.ZettelsForActions(TransactionActionDeleted).Paths())
 
 	if err != nil {
 		return

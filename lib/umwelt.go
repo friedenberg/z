@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/friedenberg/z/util/files_guard"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type Umwelt struct {
@@ -89,12 +90,14 @@ func (e Umwelt) CacheIndex() (err error) {
 		return
 	}
 
+	stdprinter.Debug("will cache index")
 	err = e.Index.Write(f)
 
 	if err != nil {
 		return
 	}
 
+	stdprinter.Debug("did cache index")
 	return
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 func GetSubcommandBuild(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		// actioner := func(i int, z *lib.Zettel) (shouldPrint bool, actionErr error) {
 		// 	shouldPrint = true
 
@@ -55,7 +55,7 @@ func GetSubcommandBuild(f *flag.FlagSet) lib.Transactor {
 	}
 }
 
-// func symlinkZettel(u lib.Umwelt, dir string, z *lib.Zettel) (err error) {
+// func symlinkZettel(u *lib.Umwelt, dir string, z *lib.Zettel) (err error) {
 // buildDir, err := makeDirectoryIfNecessary(u, dir)
 
 // if err != nil {
@@ -95,7 +95,7 @@ func GetSubcommandBuild(f *flag.FlagSet) lib.Transactor {
 // return
 // }
 
-// func makeDirectoryIfNecessary(u lib.Umwelt, p string) (a string, err error) {
+// func makeDirectoryIfNecessary(u *lib.Umwelt, p string) (a string, err error) {
 // a = path.Join(u.FilesAndGit().BasePath, "build", p)
 // err = os.Mkdir(a, 0700)
 

@@ -3,6 +3,8 @@ package zettel
 import (
 	"encoding/json"
 	"sync"
+
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 func MakeIdSet() *IdSet {
@@ -36,6 +38,7 @@ func (s *IdSet) Add(in ...Id) {
 	defer s.Unlock()
 
 	for _, i := range in {
+		stdprinter.Debug("adding id to set:", i)
 		s.Set[i] = true
 	}
 
@@ -46,6 +49,7 @@ func (s *IdSet) Delete(i Id) {
 	s.Lock()
 	defer s.Unlock()
 
+	stdprinter.Debug("deleting id from set:", i)
 	delete(s.Set, i)
 }
 

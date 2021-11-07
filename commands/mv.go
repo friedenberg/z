@@ -18,7 +18,7 @@ func GetSubcommandMv(f *flag.FlagSet) lib.Transactor {
 
 	f.BoolVar(&isDryRun, "dry-run", false, "")
 
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		//TODO
 
 		return

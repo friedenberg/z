@@ -51,10 +51,27 @@ func run() int {
 
 	//TODO-P4 refactor to be command too
 	cmd.Flags.Parse(os.Args[2:])
-	err = umwelt.RunTransaction(cmd.Run)
+	err = cmd.Run(&umwelt)
 
 	if err != nil {
 		stdprinter.Error(err)
+		return 1
+	}
+
+	umwelt.Transaction.IsFinalTransaction = true
+
+	err = umwelt.Kasten.CommitTransaction(&umwelt)
+
+	if err != nil {
+		stdprinter.Error(err)
+		return 1
+	}
+
+	err = umwelt.CacheIndex()
+
+	if err != nil {
+		stdprinter.Error(err)
+		return 1
 	}
 
 	return 0

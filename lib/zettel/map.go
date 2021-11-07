@@ -3,6 +3,8 @@ package zettel
 import (
 	"encoding/json"
 	"sync"
+
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 func MakeMap(l sync.Locker) Map {
@@ -55,6 +57,7 @@ func (m Map) Set(k string, id Id) {
 	m.Lock()
 	defer m.Unlock()
 
+	stdprinter.Debug("setting key and id in map:", k, id)
 	m.ValueToId[k] = id
 	m.IdToValue[id] = k
 }
@@ -68,6 +71,7 @@ func (m Map) Delete(id Id) {
 		return
 	}
 
+	stdprinter.Debug("deleting id from map:", id)
 	delete(m.IdToValue, id)
 	delete(m.ValueToId, v)
 }

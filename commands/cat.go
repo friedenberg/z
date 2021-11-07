@@ -24,7 +24,7 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&query, "query", "", "zettel-spec")
 	disableExclude := f.Bool("disable-tag-exclusions", false, "")
 
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		u.ShouldSkipCommit = true
 
 		args := f.Args()

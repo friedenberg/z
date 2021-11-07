@@ -30,7 +30,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&description, "description", "", "use this string as the zettel description")
 	f.Var(&kind, "kind", "treat the positional arguments as this kind.")
 
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		p := pipeline.Pipeline{
 			Arguments: f.Args(),
 			Reader:    kind,
@@ -55,7 +55,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 
 		p.Run(u)
 
-		err = u.RunTransaction(nil)
+		err = u.Kasten.CommitTransaction(u)
 
 		if err != nil {
 			return
@@ -67,16 +67,17 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 		toAction = append(toAction, u.Transaction.ZettelsForActions(lib.TransactionActionAdded).Paths()...)
 		toAction = append(toAction, u.Transaction.ZettelsForActions(lib.TransactionActionModified).Paths()...)
 
-		//TODO-P4 check why this is re-using added zettels rather than modifying new
-		//ones
 		u.Transaction = lib.MakeTransaction()
 
 		p = pipeline.Pipeline{
 			Arguments: toAction,
-			Modifier: &modifier.Action{
-				Umwelt:  u,
-				Actions: editActions,
-			},
+			Modifier: modifier.Chain(
+				&modifier.Action{
+					Umwelt:  *u,
+					Actions: editActions,
+				},
+				modifier.TransactionAction(u.Transaction, lib.TransactionActionModified),
+			),
 		}
 
 		p.Run(u)

@@ -17,7 +17,7 @@ func init() {
 }
 
 func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		args := f.Args()
 
 		if len(args) == 0 {

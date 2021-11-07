@@ -105,8 +105,16 @@ func (k FileStore) Hydrate(z *zettel.Zettel, includeBody bool) (err error) {
 	return
 }
 
-func (k FileStore) CommitTransaction(u Umwelt) (err error) {
-	for _, z := range u.Transaction.ZettelsForActions(TransactionActionAdded) {
+func (k FileStore) CommitTransaction(u *Umwelt) (err error) {
+	stdprinter.Debug("FileStore.CommitTransaction", "will commit transaction")
+
+	for _, z := range u.ZettelsForActions(TransactionActionAdded) {
+		stdprinter.Debug(
+			"FileStore.CommitTransaction",
+			"will process add",
+			z.Path,
+		)
+
 		err = k.transactionProcessAdd(u, z)
 
 		if err != nil {
@@ -114,7 +122,13 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 		}
 	}
 
-	for _, z := range u.Transaction.ZettelsForActions(TransactionActionModified) {
+	for _, z := range u.ZettelsForActions(TransactionActionModified) {
+		stdprinter.Debug(
+			"FileStore.CommitTransaction",
+			"will process modify",
+			z.Path,
+		)
+
 		err = k.transactionProcessModify(u, z)
 
 		if err != nil {
@@ -122,7 +136,13 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 		}
 	}
 
-	for _, z := range u.Transaction.ZettelsForActions(TransactionActionDeleted) {
+	for _, z := range u.ZettelsForActions(TransactionActionDeleted) {
+		stdprinter.Debug(
+			"FileStore.CommitTransaction",
+			"will process delete",
+			z.Path,
+		)
+
 		err = k.transactionProcessDelete(u, z)
 
 		if err != nil {
@@ -130,5 +150,36 @@ func (k FileStore) CommitTransaction(u Umwelt) (err error) {
 		}
 	}
 
+	for _, z := range u.ZettelsForActions(TransactionActionAdded) {
+		stdprinter.Debug(
+			"FileStore.CommitTransaction",
+			"will index add",
+			z.Path,
+		)
+
+		k.umwelt.Index.Add(z)
+	}
+
+	for _, z := range u.ZettelsForActions(TransactionActionModified) {
+		stdprinter.Debug(
+			"FileStore.CommitTransaction",
+			"will index modify",
+			z.Path,
+		)
+
+		k.umwelt.Index.Update(z)
+	}
+
+	for _, z := range u.ZettelsForActions(TransactionActionDeleted) {
+		stdprinter.Debug(
+			"FileStore.CommitTransaction",
+			"will index delete",
+			z.Path,
+		)
+
+		k.umwelt.Index.Delete(z)
+	}
+
+	stdprinter.Debug("did commit transaction")
 	return
 }

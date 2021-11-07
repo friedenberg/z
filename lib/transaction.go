@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 func MakeTransaction() (t Transaction) {
@@ -17,8 +18,9 @@ func MakeTransaction() (t Transaction) {
 
 //TODO-P1 handle cases where files or zettles are just opened but not edited
 type Transaction struct {
-	ShouldSkipCommit bool
-	ShouldCopyFiles  bool
+	ShouldSkipCommit   bool
+	ShouldCopyFiles    bool
+	IsFinalTransaction bool
 	sync.Locker
 	actions map[zettel.Id]TransactionEntry
 }
@@ -27,6 +29,13 @@ func (t Transaction) Set(z *zettel.Zettel, action TransactionAction) {
 	if z == nil {
 		return
 	}
+
+	stdprinter.Debug(
+		"Transaction.Set",
+		"begin",
+		z.Path,
+		action,
+	)
 
 	t.Lock()
 	defer t.Unlock()
@@ -41,6 +50,13 @@ func (t Transaction) Set(z *zettel.Zettel, action TransactionAction) {
 			TransactionAction: action,
 		}
 	}
+
+	stdprinter.Debug(
+		"Transaction.Set",
+		"end",
+		z.Path,
+		action,
+	)
 }
 
 func (t Transaction) Len() int {

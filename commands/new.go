@@ -29,7 +29,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 	f.StringVar(&content, "content", "", "use the passed-in string as the body. Pass in '-' to read from stdin.")
 	f.StringVar(&tags, "tags", "", "use the passed-in space-separated string as tags")
 
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		p := pipeline.Pipeline{
 			Arguments: []string{""},
 			Reader:    reader.New(),
@@ -63,7 +63,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 					},
 				),
 				&modifier.Action{
-					Umwelt:  u,
+					Umwelt:  *u,
 					Actions: editActions,
 				},
 				modifier.TransactionAction(u.Transaction, lib.TransactionActionAdded),

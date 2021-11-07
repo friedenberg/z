@@ -17,7 +17,7 @@ func init() {
 }
 
 func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
-	return func(u lib.Umwelt) (err error) {
+	return func(u *lib.Umwelt) (err error) {
 		u.ShouldSkipCommit = true
 		u.Index = lib.MakeIndex()
 

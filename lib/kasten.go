@@ -9,5 +9,5 @@ type Kasten interface {
 	GetNormalizedPath(a string) (b string, err error)
 	NewId() (id zettel.Id, err error)
 	Hydrate(z *zettel.Zettel, includeBody bool) (err error)
-	CommitTransaction(Umwelt) error
+	CommitTransaction(*Umwelt) error
 }

@@ -24,7 +24,7 @@ type Pipeline struct {
 	Out io.Writer
 }
 
-func (p Pipeline) Run(u lib.Umwelt) {
+func (p Pipeline) Run(u *lib.Umwelt) {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(p.Arguments))
 	p.begin()
@@ -33,13 +33,13 @@ func (p Pipeline) Run(u lib.Umwelt) {
 	wg.Wait()
 }
 
-func (p Pipeline) runAll(u lib.Umwelt, wg *sync.WaitGroup) {
+func (p Pipeline) runAll(u *lib.Umwelt, wg *sync.WaitGroup) {
 	for i, arg := range p.Arguments {
 		go p.runOne(u, wg, i, arg)
 	}
 }
 
-func (p Pipeline) runOne(u lib.Umwelt, wg *sync.WaitGroup, i int, s string) {
+func (p Pipeline) runOne(u *lib.Umwelt, wg *sync.WaitGroup, i int, s string) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -103,12 +103,12 @@ func (p Pipeline) outWriter() (w io.Writer) {
 	return
 }
 
-func (p Pipeline) readZettel(u lib.Umwelt, i int, s string) (z *zettel.Zettel, err error) {
+func (p Pipeline) readZettel(u *lib.Umwelt, i int, s string) (z *zettel.Zettel, err error) {
 	if p.Reader != nil {
-		return p.ReadZettel(u, i, []byte(s))
+		return p.ReadZettel(*u, i, []byte(s))
 	}
 
-	z, err = reader.FromIndex(u, i, s)
+	z, err = reader.FromIndex(*u, i, s)
 
 	return
 }

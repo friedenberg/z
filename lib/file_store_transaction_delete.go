@@ -4,9 +4,10 @@ import (
 	"os"
 
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/util"
 )
 
-func (k *FileStore) transactionProcessDelete(u Umwelt, z *zettel.Zettel) (err error) {
+func (k *FileStore) transactionProcessDelete(u *Umwelt, z *zettel.Zettel) (err error) {
 	err = k.hydrateFromFileIfExists(z)
 
 	if err != nil {
@@ -20,11 +21,18 @@ func (k *FileStore) transactionProcessDelete(u Umwelt, z *zettel.Zettel) (err er
 	}
 
 	if f := z.Metadata.File(); f != nil {
-		err = os.Remove(f.FilePath(u.BasePath))
-	}
+		path := f.FilePath(k.umwelt.Dir())
+		err = util.SetAllowUserChanges(path)
 
-	if err != nil {
-		return
+		if err != nil {
+			return
+		}
+
+		err = os.Remove(f.FilePath(k.umwelt.Dir()))
+
+		if err != nil {
+			return
+		}
 	}
 
 	u.Set(z, TransactionActionDeleted)

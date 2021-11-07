@@ -8,7 +8,7 @@ import (
 
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
-	"golang.org/x/xerrors"
+	"github.com/friedenberg/z/util/stdprinter"
 )
 
 type IndexZettel struct {
@@ -64,6 +64,8 @@ func (i Index) Read(r io.Reader) (err error) {
 }
 
 func (i Index) Write(w io.Writer) (err error) {
+	stdprinter.Debug("will write index")
+	stdprinter.Debugf("%#v", i)
 	i.ModTime = time.Now().Unix()
 	enc := json.NewEncoder(w)
 	// enc := gob.NewEncoder(w)
@@ -73,6 +75,7 @@ func (i Index) Write(w io.Writer) (err error) {
 		return
 	}
 
+	stdprinter.Debug("did write index")
 	return
 }
 
@@ -92,9 +95,10 @@ func (m Index) set(k zettel.Id, z IndexZettel) {
 }
 
 //TODO-P0 check for checksum file name collisions
-func (i Index) Add(z *zettel.Zettel) error {
+func (i Index) Add(z *zettel.Zettel) {
+	stdprinter.Debug("will add zettel in index:", z.Path)
 	if _, ok := i.Get(zettel.Id(z.Id)); ok {
-		return xerrors.Errorf("zettel with id '%d' already exists in index", z.Id)
+		stdprinter.Debugf("zettel with id '%d' already exists in index\n", z.Id)
 	}
 
 	i.set(zettel.Id(z.Id), IndexZettel{
@@ -113,33 +117,39 @@ func (i Index) Add(z *zettel.Zettel) error {
 		i.Tags.Add(t, zettel.Id(z.Id))
 	}
 
-	return nil
+	stdprinter.Debug("did add zettel in index:", z.Path)
 }
 
 func (i Index) AddFile(z *zettel.Zettel, sum string) (err error) {
+	stdprinter.Debug("will add sum to index:", z.Path, sum)
 	i.Files.Set(sum, zettel.Id(z.Id))
+	stdprinter.Debug("did add sum to index:", z.Path, sum)
 
 	return
 }
 
 func (i Index) Update(z *zettel.Zettel) (err error) {
+	stdprinter.Debug("will update zettel in index:", z.Path)
 	err = i.Delete(z)
 
 	if err != nil {
 		return err
 	}
 
-	err = i.Add(z)
+	i.Add(z)
 
+	stdprinter.Debug("did update zettel in index:", z.Path)
 	return
 }
 
 func (i Index) Delete(z *zettel.Zettel) (err error) {
+	stdprinter.Debug("will delete zettel in index:", z.Path)
 	id := zettel.Id(z.Id)
 	delete(i.Zettels, id)
 	i.Files.Delete(id)
 	i.Urls.Delete(id)
 	i.Tags.Delete(id)
+	stdprinter.Debug("did delete zettel in index:", z.Path)
 	return
 }
 
