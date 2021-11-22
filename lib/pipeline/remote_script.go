@@ -57,7 +57,7 @@ func MakeRemoteScript(u *lib.Umwelt, c1 flag.Value, c2 lib.ConfigRemoteScript) (
 
 	// start with using the specific filter for the script
 	var f1 filter.Filter
-	f1 = filter.String(rs.Filter)
+	f1 = filter.Tag(rs.Filter)
 
 	// then, include the filter for the format if it exists
 	if f.Filter != nil {

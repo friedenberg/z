@@ -23,7 +23,7 @@ func init() {
 			},
 		},
 		"alfred-json-snippets": Format{
-			Filter: filter.String("t-snippet"),
+			Filter: filter.Tag("t-snippet"),
 			Writer: &writer.AlfredJson{
 				ItemFunc: writer.AlfredItemsFromZettelSnippets,
 			},
@@ -47,8 +47,8 @@ func init() {
 		},
 		"try-format": Format{
 			Filter: filter.MakeOr(
-				filter.String("k-toml"),
-				filter.String("from-pb"),
+				filter.Tag("k-toml"),
+				filter.Tag("from-pb"),
 			),
 			Writer: &writer.TryFormat{},
 		},
@@ -69,7 +69,7 @@ func init() {
 }
 
 func (a *Format) String() string {
-	//TODO
+	//TODO-P4
 	return ""
 }
 

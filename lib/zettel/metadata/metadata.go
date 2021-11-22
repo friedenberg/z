@@ -212,18 +212,6 @@ func (m Metadata) TagStrings() (r []string) {
 	return
 }
 
-func (m Metadata) Match(q string) bool {
-	if m.TagSet().Match(q) {
-		return true
-	}
-
-	if strings.Contains(m.description, q) {
-		return true
-	}
-
-	return false
-}
-
 type jsonMetadata struct {
 	Description string
 	AllTags     []ITag

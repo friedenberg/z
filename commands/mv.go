@@ -28,7 +28,7 @@ func GetSubcommandMv(f *flag.FlagSet) lib.Transactor {
 
 		p := pipeline.Pipeline{
 			Arguments: u.GetAll(),
-			Filter:    filter.String(t1),
+			Filter:    filter.Tag(t1),
 			Modifier: modifier.Chain(
 				modifier.Make(
 					func(i int, z *zettel.Zettel) (err error) {

@@ -16,7 +16,3 @@ func (t *SearchMatchTag) Set(s string) (err error) {
 func (t SearchMatchTag) SearchMatchTags() (a TagSet) {
 	return
 }
-
-func (t SearchMatchTag) Match(q string) bool {
-	return Tag(t).Match(q)
-}

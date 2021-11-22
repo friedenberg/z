@@ -41,7 +41,7 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 
 		p := pipeline.Pipeline{
 			Arguments: args,
-			Filter:    filter.String(query),
+			Filter:    filter.Tag(query),
 			Modifier: modifier.Chain(
 				&lib.ActionModifier{
 					Umwelt:  u,

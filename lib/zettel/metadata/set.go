@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"sort"
-	"strings"
 )
 
 func MakeTagSet() TagSet {
@@ -49,9 +48,8 @@ func (s TagSet) Add(t ...ITag) (ok bool) {
 	return
 }
 
-func (s TagSet) Get(t string) (t1 ITag, ok bool) {
-	//TODO-P1 normalize
-	t1, ok = s.set[t]
+func (s TagSet) Get(q string) (t1 ITag, ok bool) {
+	t1, ok = s.set[q]
 	return
 }
 
@@ -90,17 +88,4 @@ func (s TagSet) Strings() (ts []string) {
 	})
 
 	return
-}
-
-func (s TagSet) Match(q string) bool {
-	//TODO-P3 strip diacritics
-	q = strings.ToLower(q)
-
-	for _, t := range s.set {
-		if t.Match(q) {
-			return true
-		}
-	}
-
-	return false
 }

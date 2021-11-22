@@ -28,12 +28,24 @@ func (t *TagExclusions) Set(s string) (err error) {
 	return
 }
 
+func (t TagExclusions) getNotOrFilterFromExcludedTags(excludedTags []string) (f Filter) {
+	fs := make([]Filter, len(excludedTags))
+
+	for i, f := range excludedTags {
+		fs[i] = Tag(f)
+	}
+
+	f = Not(MakeOr(fs...))
+
+	return
+}
+
 func (t TagExclusions) WithFilter(f Filter, excludedTags []string) (f1 Filter) {
 	f1 = f
 
 	if t.shouldExclude {
 		f1 = MakeAnd(
-			Not(Strings(excludedTags).Filters().Or()),
+			t.getNotOrFilterFromExcludedTags(excludedTags),
 			f,
 		)
 	}

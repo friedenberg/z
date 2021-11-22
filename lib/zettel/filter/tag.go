@@ -1,13 +1,28 @@
 package filter
 
-import "github.com/friedenberg/z/lib/zettel"
+import (
+	"strings"
 
-type Tag string
+	"github.com/friedenberg/z/lib/zettel"
+)
 
-func (f Tag) FilterZettel(_ int, z *zettel.Zettel) bool {
+type tag string
+
+func Tag(q string) (t tag) {
+	t = tag(strings.ToLower(q))
+	return
+}
+
+func (f tag) FilterZettel(_ int, z *zettel.Zettel) bool {
 	if f == "" {
 		return true
-	} else {
-		return z.Metadata.Match(string(f))
 	}
+
+	_, ok := z.Metadata.StringTags().Get(string(f))
+	return ok
 }
+
+// func (f *tag) Set(t string) (err error) {
+// 	f = Tag(t)
+// 	return
+// }

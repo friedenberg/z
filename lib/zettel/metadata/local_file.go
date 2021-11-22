@@ -90,7 +90,3 @@ func (fd LocalFile) Extension() string {
 func (fd LocalFile) FilePath(basepath string) (fn string) {
 	return path.Join(basepath, fd.FileName())
 }
-
-func (fd LocalFile) Match(_ string) bool {
-	return false
-}

@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"regexp"
-	"strings"
 )
 
 var (
@@ -11,13 +10,6 @@ var (
 
 func init() {
 	regexExpandTagsHyphens = regexp.MustCompile(`[^-]-+[^-]`)
-}
-
-type ITag interface {
-	Set(string) error
-	Tag() string
-	SearchMatchTags() TagSet
-	Match(string) bool
 }
 
 type Tag string
@@ -66,8 +58,4 @@ func (t Tag) SearchMatchTags() (expanded TagSet) {
 	}
 
 	return
-}
-
-func (t Tag) Match(q string) bool {
-	return strings.Contains(string(t), q)
 }
