@@ -32,8 +32,8 @@ func (t TagExclusions) WithFilter(f Filter, excludedTags []string) (f1 Filter) {
 	f1 = f
 
 	if t.shouldExclude {
-		f1 = And(
-			Not(MatchQueries(excludedTags...)),
+		f1 = MakeAnd(
+			Not(Strings(excludedTags).Filters().Or()),
 			f,
 		)
 	}

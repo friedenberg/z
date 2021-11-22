@@ -125,6 +125,10 @@ func (m *Metadata) addStringTag(t string) (err error) {
 	return
 }
 
+func (m *Metadata) Delete(t string) {
+	m.stringTags.Del(t)
+}
+
 func (m Metadata) Description() string {
 	return m.description
 }
@@ -244,4 +248,9 @@ func (m *Metadata) UnmarshalJSON(b []byte) error {
 func (m Metadata) MarshalJSON() (b []byte, err error) {
 	b, err = json.Marshal(m.ToSortedTags())
 	return
+}
+
+func (m Metadata) String() string {
+	s, _ := m.ToYAMLWithBoundary()
+	return s
 }

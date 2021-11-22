@@ -15,31 +15,20 @@ import (
 )
 
 func main() {
-	defer stdprinter.WaitForPrinter()
+	os.Exit(run())
+}
+
+func run() int {
 	stdprinter.SetDebug(shouldDebug())
-	os.Exit(run(os.Args))
-}
+	defer stdprinter.WaitForPrinter()
 
-func shouldDebug() bool {
-	for i, a := range os.Args {
-		if a == "-v" {
-			stdprinter.Debug("debugging on")
-			os.Args = append(os.Args[:i], os.Args[i+1:]...)
-			return true
-		}
-	}
-
-	return false
-}
-
-func run(args []string) int {
 	if len(os.Args) < 1 {
 		stdprinter.Debug("printing usage")
 		return printUsage(nil)
 	}
 
 	cmds := commands.Commands()
-	specifiedSubcommand := args[1]
+	specifiedSubcommand := os.Args[1]
 	cmd, ok := cmds[specifiedSubcommand]
 
 	if !ok {
@@ -62,8 +51,8 @@ func run(args []string) int {
 	}
 
 	//TODO-P4 refactor to be command too
-	cmd.Flags.Parse(args[2:])
-	err = cmd.Run(&umwelt)
+	cmd.Flags.Parse(os.Args[2:])
+	err = cmd.Run(umwelt)
 
 	if err != nil {
 		stdprinter.Error(err)
@@ -72,14 +61,7 @@ func run(args []string) int {
 
 	umwelt.Transaction.IsFinalTransaction = true
 
-	err = umwelt.Kasten.CommitTransaction(&umwelt)
-
-	if err != nil {
-		stdprinter.Error(err)
-		return 1
-	}
-
-	err = umwelt.CacheIndex()
+	err = umwelt.Kasten.CommitTransaction(umwelt)
 
 	if err != nil {
 		stdprinter.Error(err)
@@ -140,4 +122,16 @@ func printSubcommandUsage(flags flag.FlagSet) {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
+}
+
+func shouldDebug() bool {
+	for i, a := range os.Args {
+		if a == "-v" {
+			stdprinter.Debug("debugging on")
+			os.Args = append(os.Args[:i], os.Args[i+1:]...)
+			return true
+		}
+	}
+
+	return false
 }

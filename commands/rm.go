@@ -5,7 +5,6 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/lib/zettel/modifier"
 	"golang.org/x/xerrors"
 )
 
@@ -27,7 +26,7 @@ func GetSubcommandRm(f *flag.FlagSet) lib.Transactor {
 
 		p := pipeline.Pipeline{
 			Arguments: args,
-			Modifier:  modifier.TransactionAction(u.Transaction, lib.TransactionActionDeleted),
+			Modifier:  lib.MakeTransactionAction(u.Transaction, lib.TransactionActionDeleted),
 		}
 
 		p.Run(u)

@@ -25,12 +25,14 @@ func init() {
 
 //TODO-P2 move to lib/kasten
 type FileStore struct {
+	umwelt     *Umwelt
 	basePath   string
 	lastIdTime time.Time
 	*sync.Mutex
 }
 
-func (s *FileStore) Init(u Umwelt, o map[string]interface{}) (err error) {
+func (s *FileStore) Init(u *Umwelt, o map[string]interface{}) (err error) {
+	s.umwelt = u
 	//TODO-P1 init from options
 	s.lastIdTime = time.Now()
 	s.Mutex = &sync.Mutex{}
@@ -105,6 +107,13 @@ func (k FileStore) Hydrate(u *Umwelt, z *zettel.Zettel, includeBody bool) (err e
 
 func (k FileStore) CommitTransaction(u *Umwelt) (err error) {
 	stdprinter.Debug("FileStore.CommitTransaction", "will commit transaction")
+	stdprinter.Debugf("%#v\n", u.Transaction.actions)
+	stdprinter.Debugf("FileStore.CommitTransaction: len: %d\n", len(u.Transaction.actions))
+
+	if u.Len() == 0 {
+		stdprinter.Debug("nothing to transact, terminating early")
+		return
+	}
 
 	for _, z := range u.ZettelsForActions(TransactionActionAdded) {
 		stdprinter.Debug(
@@ -179,5 +188,13 @@ func (k FileStore) CommitTransaction(u *Umwelt) (err error) {
 	}
 
 	stdprinter.Debug("did commit transaction")
+
+	err = u.CacheIndex()
+
+	if err != nil {
+		err = xerrors.Errorf("failed to cache index: %w", err)
+		return
+	}
+
 	return
 }

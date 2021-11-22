@@ -74,6 +74,7 @@ func LoadConfig(p string) (c Config, err error) {
 	err = toml.Unmarshal([]byte(doc), &c)
 
 	if err != nil {
+		err = xerrors.Errorf("failed to parse config: %w", err)
 		return
 	}
 
@@ -104,14 +105,14 @@ func LoadDefaultConfig() (c Config, err error) {
 	return
 }
 
-func (c Config) Umwelt() (u Umwelt, err error) {
-	u, err = MakeUmwelt(c)
+func (c Config) Umwelt() (u *Umwelt, err error) {
+	wd, err := os.Getwd()
 
 	if err != nil {
 		return
 	}
 
-	wd, err := os.Getwd()
+	u, err = MakeUmwelt(c, wd)
 
 	if err != nil {
 		return

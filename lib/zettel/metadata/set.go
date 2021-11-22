@@ -96,10 +96,8 @@ func (s TagSet) Match(q string) bool {
 	//TODO-P3 strip diacritics
 	q = strings.ToLower(q)
 
-	for k, _ := range s.set {
-		//TODO-P3 cache this
-		k = strings.ToLower(k)
-		if strings.Contains(k, q) {
+	for _, t := range s.set {
+		if t.Match(q) {
 			return true
 		}
 	}

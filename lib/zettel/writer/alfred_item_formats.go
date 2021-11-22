@@ -28,7 +28,8 @@ func AlfredItemFromZettelBase(z *zettel.Zettel) (i lib.AlfredItem) {
 	}
 
 	i.QuicklookUrl = FormatZettel(z, "%f")
-	i.Match = MakeAlfredMatches(z)
+	mb := MakeMatchBuilder()
+	i.Match = mb.Zettel(z)
 
 	i.Icon = lib.AlfredItemIcon{
 		Type: "fileicon",
@@ -136,17 +137,14 @@ func alfredItemFromTag(t string, t1 Tag) (i lib.AlfredItem) {
 
 	i.Subtitle = sb.String()
 
-	sb = &strings.Builder{}
+	mb := MakeMatchBuilder()
 
-	sb.WriteString(t1.Tag())
-	sb.WriteString(" ")
-
+	mb.AddMatch(t1.Tag())
 	for _, m := range t1.SearchMatchTags().Strings() {
-		sb.WriteString(m)
-		sb.WriteString(" ")
+		mb.AddMatch(m)
 	}
 
-	i.Match = sb.String()
+	i.Match = mb.String()
 
 	return
 }

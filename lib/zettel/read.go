@@ -31,6 +31,7 @@ func (z *Zettel) ReadFrom(r1 io.Reader, includeBody bool) (err error) {
 
 		if !within && s == MetadataStartSequence {
 			within = true
+			//TODO-P3 support no terminating newline
 		} else if within && s == MetadataEndSequence {
 			err = z.Metadata.Set(sb.String())
 

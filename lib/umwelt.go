@@ -15,17 +15,12 @@ type Umwelt struct {
 	Config                 Config
 	TagsForNewZettels      []string
 	TagsForExcludedZettels []string
-	Transaction
+	*Transaction
 }
 
-func MakeUmwelt(c Config) (k Umwelt, err error) {
+func MakeUmwelt(c Config, wd string) (k *Umwelt, err error) {
+	k = &Umwelt{}
 	k.Config = c
-
-	wd, err := os.Getwd()
-
-	if err != nil {
-		return
-	}
 
 	k.BasePath = wd
 	k.Index = MakeIndex()

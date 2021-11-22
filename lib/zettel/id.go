@@ -21,3 +21,7 @@ func (id Id) Int() int64 {
 func (id Id) String() string {
 	return strconv.FormatInt(id.Int(), 10)
 }
+
+func (id Id) IsNew() bool {
+	return id == 0
+}

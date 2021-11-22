@@ -41,13 +41,13 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 
 		p := pipeline.Pipeline{
 			Arguments: args,
-			Filter:    filter.MatchQuery(query),
+			Filter:    filter.String(query),
 			Modifier: modifier.Chain(
-				&modifier.Action{
-					Umwelt:  *u,
+				&lib.Action{
+					Umwelt:  u,
 					Actions: editActions,
 				},
-				modifier.TransactionAction(u.Transaction, lib.TransactionActionModified),
+				lib.MakeTransactionAction(u.Transaction, lib.TransactionActionModified),
 			),
 		}
 

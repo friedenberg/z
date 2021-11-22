@@ -78,3 +78,8 @@ func (u Url) SearchMatchTags() (expanded TagSet) {
 
 	return
 }
+
+func (u Url) Match(q string) bool {
+	//TODO-P4 consider if url paths should be matched?
+	return strings.Contains(u.Hostname(), q)
+}

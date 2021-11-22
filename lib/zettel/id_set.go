@@ -2,6 +2,7 @@ package zettel
 
 import (
 	"encoding/json"
+	"sort"
 	"sync"
 
 	"github.com/friedenberg/z/util/stdprinter"
@@ -45,6 +46,14 @@ func (s *IdSet) Add(in ...Id) {
 	return
 }
 
+func (s *IdSet) Contains(id Id) bool {
+	s.Lock()
+	defer s.Unlock()
+
+	_, ok := s.Set[id]
+	return ok
+}
+
 func (s *IdSet) Delete(i Id) {
 	s.Lock()
 	defer s.Unlock()
@@ -64,6 +73,10 @@ func (s *IdSet) Slice() (out []Id) {
 	for k, _ := range s.Set {
 		out = append(out, k)
 	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return out[i] < out[j]
+	})
 
 	return
 }

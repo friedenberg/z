@@ -1,6 +1,9 @@
 package metadata
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 var (
 	regexExpandTagsHyphens *regexp.Regexp
@@ -14,11 +17,10 @@ type ITag interface {
 	Set(string) error
 	Tag() string
 	SearchMatchTags() TagSet
+	Match(string) bool
 }
 
 type Tag string
-
-type SearchMatchTag Tag
 
 func (t *Tag) Set(s string) (err error) {
 	*t = Tag(s)
@@ -66,17 +68,6 @@ func (t Tag) SearchMatchTags() (expanded TagSet) {
 	return
 }
 
-func (t SearchMatchTag) Tag() string {
-	t1 := Tag(t)
-	return t1.Tag()
-}
-
-func (t *SearchMatchTag) Set(s string) (err error) {
-	t1 := Tag(*t)
-	err = t1.Set(s)
-	return
-}
-
-func (t SearchMatchTag) SearchMatchTags() (a TagSet) {
-	return
+func (t Tag) Match(q string) bool {
+	return strings.Contains(string(t), q)
 }

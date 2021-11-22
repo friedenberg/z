@@ -2,6 +2,10 @@ package modifier
 
 import "github.com/friedenberg/z/lib/zettel"
 
+type Modifier interface {
+ModifyZettel(i int, z *zettel.Zettel) (err error)
+}
+
 type modifier struct {
 	modifierFunc ModifierFunc
 }

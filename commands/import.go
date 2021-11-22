@@ -8,7 +8,6 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/pipeline"
-	"github.com/friedenberg/z/lib/zettel/modifier"
 )
 
 func init() {
@@ -41,7 +40,7 @@ func GetSubcommandImport(f *flag.FlagSet) lib.Transactor {
 		p := pipeline.Pipeline{
 			Arguments: args,
 			Reader:    format.Reader,
-			Modifier:  modifier.TransactionAction(u.Transaction, lib.TransactionActionAdded),
+			Modifier:  lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
 		}
 
 		p.Run(u)

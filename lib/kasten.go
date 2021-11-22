@@ -3,7 +3,7 @@ package lib
 import "github.com/friedenberg/z/lib/zettel"
 
 type Kasten interface {
-	Init(Umwelt, map[string]interface{}) (err error)
+	Init(*Umwelt, map[string]interface{}) (err error)
 	BasePath() string
 	GetAll() (zettels []string, err error)
 	GetNormalizedPath(a string) (b string, err error)

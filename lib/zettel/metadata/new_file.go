@@ -52,3 +52,7 @@ func (f NewFile) SearchMatchTags() (expanded TagSet) {
 	expanded = MakeTagSet()
 	return
 }
+
+func (f NewFile) Match(_ string) bool {
+	return false
+}

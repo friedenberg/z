@@ -10,25 +10,25 @@ import (
 func MakeMap(l sync.Locker) Map {
 	return Map{
 		Locker: l,
-		mapSerializable: mapSerializable{
+		MapSerializable: MapSerializable{
 			ValueToId: make(map[string]Id),
 			IdToValue: make(map[Id]string),
 		},
 	}
 }
 
-type mapSerializable struct {
+type MapSerializable struct {
 	ValueToId map[string]Id
 	IdToValue map[Id]string
 }
 
 type Map struct {
 	sync.Locker
-	mapSerializable
+	MapSerializable
 }
 
 func (s *Map) UnmarshalJSON(b []byte) error {
-	if err := json.Unmarshal(b, &s.mapSerializable); err != nil {
+	if err := json.Unmarshal(b, &s.MapSerializable); err != nil {
 		return err
 	}
 
@@ -36,7 +36,7 @@ func (s *Map) UnmarshalJSON(b []byte) error {
 }
 
 func (s Map) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.mapSerializable)
+	return json.Marshal(s.MapSerializable)
 }
 
 func (m Map) GetId(k string) (Id, bool) {

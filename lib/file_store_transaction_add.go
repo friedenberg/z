@@ -9,9 +9,10 @@ func (k *FileStore) transactionProcessAdd(u *Umwelt, z *zettel.Zettel) (err erro
 	stdprinter.Debug("will process transaction add for zettel:", z.Path)
 	//add can be called for existing zettels or new zettels
 	//in the case of new, we need to create an id and populate it
-	if z.Id == 0 {
-		var id zettel.Id
-		id, err = k.NewId()
+	id := zettel.Id(z.Id)
+
+	if id.IsNew() {
+		id, err = k.umwelt.Kasten.NewId()
 
 		if err != nil {
 			return

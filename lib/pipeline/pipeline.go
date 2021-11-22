@@ -7,6 +7,8 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/lib/zettel/beginner"
+	"github.com/friedenberg/z/lib/zettel/ender"
 	"github.com/friedenberg/z/lib/zettel/reader"
 	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
@@ -74,21 +76,21 @@ func (p Pipeline) runOne(u *lib.Umwelt, wg *sync.WaitGroup, i int, s string) {
 }
 
 func (p Pipeline) begin() {
-	if c, ok := p.Modifier.(Beginner); ok {
+	if c, ok := p.Modifier.(beginner.Beginner); ok {
 		c.Begin(p.outWriter())
 	}
 
-	if c, ok := p.Writer.(Beginner); ok {
+	if c, ok := p.Writer.(beginner.Beginner); ok {
 		c.Begin(p.outWriter())
 	}
 }
 
 func (p Pipeline) end() {
-	if c, ok := p.Modifier.(Ender); ok {
+	if c, ok := p.Modifier.(ender.Ender); ok {
 		c.End(p.outWriter())
 	}
 
-	if c, ok := p.Writer.(Ender); ok {
+	if c, ok := p.Writer.(ender.Ender); ok {
 		c.End(p.outWriter())
 	}
 }

@@ -6,39 +6,57 @@ import (
 
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel"
+	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
 )
 
-func MakeAlfredMatches(z *zettel.Zettel) string {
-	m := z.Metadata
-	sb := &strings.Builder{}
+type MatchBuilder struct {
+	*strings.Builder
+}
 
-	addMatch := func(s string) {
-		sb.WriteString(s)
-		sb.WriteString(" ")
+func MakeMatchBuilder() MatchBuilder {
+	return MatchBuilder{
+		Builder: &strings.Builder{},
 	}
+}
+
+func (mb MatchBuilder) AddMatch(s string) {
+	s1 := strings.Split(s, "_")
+
+	for _, s2 := range s1 {
+		mb.WriteString(s2)
+		mb.WriteString(" ")
+	}
+
+	mb.WriteString(s)
+	mb.WriteString(" ")
+}
+
+func (mb *MatchBuilder) Zettel(z *zettel.Zettel) string {
+	m := z.Metadata
 
 	t, err := lib.TimeFromPath(z.Path)
 
 	if err != nil {
-		panic(xerrors.Errorf("make alfred match field: %w", err))
+		err = xerrors.Errorf("make alfred match field: %w", err)
+		stdprinter.PanicIfError(err)
 	}
 
-	addMatch(m.Description())
+	mb.AddMatch(m.Description())
 
 	for _, t1 := range m.SearchMatchTagStrings() {
-		addMatch(t1)
+		mb.AddMatch(t1)
 	}
 
 	day := t.Format("2006-01-02")
 
-	addMatch("w-" + day)
+	mb.AddMatch("w-" + day)
 
 	today := time.Now()
 
 	if today.Format("2006-01-02") == day {
-		addMatch("w-today")
+		mb.AddMatch("w-today")
 	}
 
-	return sb.String()
+	return mb.String()
 }

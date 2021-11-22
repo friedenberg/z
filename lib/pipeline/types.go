@@ -19,10 +19,6 @@ type Modifier interface {
 	ModifyZettel(int, *zettel.Zettel) error
 }
 
-type Beginner interface {
-	Begin(io.Writer)
-}
-
 type Writer interface {
 	WriteZettel(io.Writer, int, *zettel.Zettel)
 }
@@ -36,6 +32,3 @@ type WriterError interface {
 	WriteZettelError(io.Writer, int, *zettel.Zettel, error)
 }
 
-type Ender interface {
-	End(io.Writer)
-}

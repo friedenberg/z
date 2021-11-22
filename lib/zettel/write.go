@@ -9,6 +9,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
+//TODO-P4 remove
 type OnZettelWriteFunc func(*Zettel, error) error
 
 func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
@@ -36,8 +37,14 @@ func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
 }
 
 func (z *Zettel) WriteTo(w1 io.Writer) (err error) {
-	y, err := z.Note.Metadata.ToYAMLWithBoundary()
 	w := bufio.NewWriter(w1)
+	defer func() {
+		if err == nil {
+			w.Flush()
+		}
+	}()
+
+	y, err := z.Note.Metadata.ToYAMLWithBoundary()
 
 	if err != nil {
 		return
@@ -76,10 +83,6 @@ func (z *Zettel) WriteTo(w1 io.Writer) (err error) {
 			return
 		}
 
-	}
-
-	if err == nil {
-		w.Flush()
 	}
 
 	return

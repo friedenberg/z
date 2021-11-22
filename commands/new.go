@@ -62,11 +62,11 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 						return
 					},
 				),
-				&modifier.Action{
-					Umwelt:  *u,
+				&lib.Action{
+					Umwelt:  u,
 					Actions: editActions,
 				},
-				modifier.TransactionAction(u.Transaction, lib.TransactionActionAdded),
+				lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
 			),
 		}
 

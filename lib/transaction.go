@@ -7,10 +7,10 @@ import (
 	"github.com/friedenberg/z/util/stdprinter"
 )
 
-func MakeTransaction() (t Transaction) {
-	t = Transaction{
+func MakeTransaction() (t *Transaction) {
+	t = &Transaction{
 		Locker:  &sync.Mutex{},
-		actions: make(map[zettel.Id]TransactionEntry),
+		actions: make([]TransactionEntry, 0),
 	}
 
 	return
@@ -22,10 +22,10 @@ type Transaction struct {
 	ShouldCopyFiles    bool
 	IsFinalTransaction bool
 	sync.Locker
-	actions map[zettel.Id]TransactionEntry
+	actions []TransactionEntry
 }
 
-func (t Transaction) Set(z *zettel.Zettel, action TransactionAction) {
+func (t *Transaction) Set(z *zettel.Zettel, action TransactionAction) {
 	if z == nil {
 		return
 	}
@@ -42,13 +42,16 @@ func (t Transaction) Set(z *zettel.Zettel, action TransactionAction) {
 
 	switch action {
 	case TransactionActionNone:
-		delete(t.actions, zettel.Id(z.Id))
+		//TODO-P4
+		panic("TODO")
 
 	default:
-		t.actions[zettel.Id(z.Id)] = TransactionEntry{
+		ne := TransactionEntry{
 			Zettel:            z,
 			TransactionAction: action,
 		}
+
+		t.actions = append(t.actions, ne)
 	}
 
 	stdprinter.Debug(
@@ -73,10 +76,13 @@ func (t Transaction) ZettelsForActions(action TransactionAction) (zs ZettelSlice
 	zs = make([]*zettel.Zettel, 0, len(t.actions))
 
 	for _, ze := range t.actions {
+		stdprinter.Debug("ZettelsForActions")
 		if ze.TransactionAction == action {
 			zs = append(zs, ze.Zettel)
 		}
 	}
+
+	stdprinter.Debugf("len: %d", len(zs))
 
 	return
 }

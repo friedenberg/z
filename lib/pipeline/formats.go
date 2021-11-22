@@ -23,7 +23,7 @@ func init() {
 			},
 		},
 		"alfred-json-snippets": Format{
-			Filter: filter.MatchQuery("t-snippet"),
+			Filter: filter.String("t-snippet"),
 			Writer: &writer.AlfredJson{
 				ItemFunc: writer.AlfredItemsFromZettelSnippets,
 			},
@@ -35,6 +35,7 @@ func init() {
 			Writer: &writer.Tags{ShouldExpand: true},
 		},
 		"full": Format{
+			Reader: reader.FromFile(true),
 			Writer: &writer.Full{},
 		},
 		"filename": Format{
@@ -45,9 +46,9 @@ func init() {
 			Writer: &writer.TomlToJson{},
 		},
 		"try-format": Format{
-			Filter: filter.Or(
-				filter.MatchQuery("k-toml"),
-				filter.MatchQuery("from-pb"),
+			Filter: filter.MakeOr(
+				filter.String("k-toml"),
+				filter.String("from-pb"),
 			),
 			Writer: &writer.TryFormat{},
 		},

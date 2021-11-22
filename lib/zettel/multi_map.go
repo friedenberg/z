@@ -8,26 +8,25 @@ import (
 func MakeMultiMap(l sync.Locker) MultiMap {
 	return MultiMap{
 		Locker: l,
-		multiMapSerializable: multiMapSerializable{
-
+		MultiMapSerializable: MultiMapSerializable{
 			ValueToId: make(map[string]*IdSet),
 			IdToValue: make(map[Id]*StringSet),
 		},
 	}
 }
 
-type multiMapSerializable struct {
+type MultiMapSerializable struct {
 	ValueToId map[string]*IdSet
 	IdToValue map[Id]*StringSet
 }
 
 type MultiMap struct {
 	sync.Locker
-	multiMapSerializable
+	MultiMapSerializable
 }
 
 func (s *MultiMap) UnmarshalJSON(b []byte) error {
-	if err := json.Unmarshal(b, &s.multiMapSerializable); err != nil {
+	if err := json.Unmarshal(b, &s.MultiMapSerializable); err != nil {
 		return err
 	}
 
@@ -35,7 +34,7 @@ func (s *MultiMap) UnmarshalJSON(b []byte) error {
 }
 
 func (s MultiMap) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.multiMapSerializable)
+	return json.Marshal(s.MultiMapSerializable)
 }
 
 func (m MultiMap) GetIds(k string) (*IdSet, bool) {
@@ -101,6 +100,16 @@ func (m MultiMap) Delete(id Id) {
 	}
 
 	for _, v := range vs.Slice() {
-		delete(m.ValueToId, v)
+		vs1, ok := m.ValueToId[v]
+
+		if !ok {
+			//TODO P4 this is inconsistent now?
+		}
+
+		vs1.Delete(id)
+
+		if vs1.Len() == 0 {
+			delete(m.ValueToId, v)
+		}
 	}
 }

@@ -1,11 +1,10 @@
-package modifier
+package lib
 
 import (
 	"io"
 	"sync"
 
 	"github.com/friedenberg/z/commands/options"
-	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util"
@@ -15,7 +14,7 @@ import (
 
 //TODO-P1 change to Modifier
 type Action struct {
-	Umwelt      lib.Umwelt
+	Umwelt      *Umwelt
 	Actions     options.Actions
 	zettels     []*zettel.Zettel
 	zettelFiles []string

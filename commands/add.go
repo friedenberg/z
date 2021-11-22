@@ -49,7 +49,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 						return
 					},
 				),
-				modifier.TransactionAction(u.Transaction, lib.TransactionActionAdded),
+				lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
 			),
 		}
 
@@ -72,11 +72,11 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 		p = pipeline.Pipeline{
 			Arguments: toAction,
 			Modifier: modifier.Chain(
-				&modifier.Action{
-					Umwelt:  *u,
+				&lib.Action{
+					Umwelt:  u,
 					Actions: editActions,
 				},
-				modifier.TransactionAction(u.Transaction, lib.TransactionActionModified),
+				lib.MakeTransactionAction(u.Transaction, lib.TransactionActionModified),
 			),
 		}
 

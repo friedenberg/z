@@ -2,6 +2,7 @@ package zettel
 
 import (
 	"encoding/json"
+	"sort"
 	"sync"
 )
 
@@ -42,6 +43,14 @@ func (s *StringSet) Add(in ...string) {
 	return
 }
 
+func (s *StringSet) Contains(s1 string) bool {
+	s.Lock()
+	defer s.Unlock()
+
+	_, ok := s.Set[s1]
+	return ok
+}
+
 func (s *StringSet) Delete(i string) {
 	s.Lock()
 	defer s.Unlock()
@@ -60,6 +69,10 @@ func (s *StringSet) Slice() (out []string) {
 	for k, _ := range s.Set {
 		out = append(out, k)
 	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return out[i] < out[j]
+	})
 
 	return
 }
