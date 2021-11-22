@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/beginner"
 	"github.com/friedenberg/z/lib/zettel/ender"
@@ -16,9 +17,8 @@ import (
 
 //TODO-P3 add structured error printing
 type Pipeline struct {
-	//TODO-P2 change to channel or io.StringWriter to able to process stdin separately
-	//TODO-P2 modify to support non-strings
-	Arguments []string
+	//TODO-P3 modify to support non-strings
+	feeder.Feeder
 	Reader
 	Filter
 	Modifier
@@ -28,16 +28,24 @@ type Pipeline struct {
 
 func (p Pipeline) Run(u *lib.Umwelt) {
 	wg := &sync.WaitGroup{}
-	wg.Add(len(p.Arguments))
+
 	p.begin()
 	defer p.end()
-	go p.runAll(u, wg)
-	wg.Wait()
+
+	p.runAll(u, wg)
 }
 
 func (p Pipeline) runAll(u *lib.Umwelt, wg *sync.WaitGroup) {
-	for i, arg := range p.Arguments {
+	defer wg.Wait()
+
+	go p.Feeder.Run()
+
+	i := 0
+
+	for arg := range p.Feeder.GetChan() {
+		wg.Add(1)
 		go p.runOne(u, wg, i, arg)
+		i += 1
 	}
 }
 

@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"os"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/pipeline"
 )
 
@@ -24,23 +24,18 @@ func GetSubcommandImport(f *flag.FlagSet) lib.Transactor {
 	f.BoolVar(&stdin, "stdin", false, "use stdin for input")
 
 	return func(u *lib.Umwelt) (err error) {
-		var args []string
+		var args feeder.Feeder
 
 		if stdin {
-			args = make([]string, 0)
-			scanner := bufio.NewScanner(os.Stdin)
-
-			for scanner.Scan() {
-				args = append(args, scanner.Text())
-			}
+			args = feeder.MakeIoReader(os.Stdin)
 		} else {
-			args = f.Args()
+			args = feeder.MakeStringSlice(f.Args())
 		}
 
 		p := pipeline.Pipeline{
-			Arguments: args,
-			Reader:    format.Reader,
-			Modifier:  lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
+			Feeder:   args,
+			Reader:   format.Reader,
+			Modifier: lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
 		}
 
 		p.Run(u)

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/util/files_guard"
 	"github.com/friedenberg/z/util/stdprinter"
 )
@@ -44,14 +45,14 @@ func (e Umwelt) GetIndexPath() string {
 	return path.Join(e.BasePath, ".zettel-cache")
 }
 
-func (u Umwelt) GetAll() (ids []string) {
-	ids = make([]string, 0, len(u.Index.Zettels))
-
-	for id, _ := range u.Index.Zettels {
-		ids = append(ids, id.String())
-	}
-
-	return
+func (u Umwelt) GetAll() feeder.Feeder {
+	return feeder.MakeFeeder(
+		func(c chan<- string) {
+			for id, _ := range u.Index.Zettels {
+				c <- id.String()
+			}
+		},
+	)
 }
 
 func (u Umwelt) LoadIndexFromCache() (err error) {

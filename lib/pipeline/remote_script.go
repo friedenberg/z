@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/zettel/filter"
 	"github.com/friedenberg/z/util/stdprinter"
 	"golang.org/x/xerrors"
@@ -137,7 +138,7 @@ func (s *RemoteScriptPull) Run(u *lib.Umwelt) (err error) {
 
 	wg.Wait()
 
-	s.Pipeline.Arguments = args
+	s.Pipeline.Feeder = feeder.MakeStringSlice(args)
 	s.Pipeline.Out = os.Stdout
 	s.Pipeline.Run(u)
 
@@ -155,7 +156,7 @@ func (s *RemoteScriptPush) Run(u *lib.Umwelt) (err error) {
 
 	script.Start()
 
-	s.Pipeline.Arguments = u.GetAll()
+	s.Pipeline.Feeder = u.GetAll()
 	s.Pipeline.Out = w
 	s.Pipeline.Run(u)
 

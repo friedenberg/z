@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/files_guard"
 	"github.com/friedenberg/z/util/stdprinter"
@@ -42,10 +43,15 @@ func (s FileStore) BasePath() string {
 	return s.basePath
 }
 
-func (e FileStore) GetAll() (zettels []string, err error) {
+func (e FileStore) GetAll() feeder.Feeder {
 	glob := filepath.Join(e.BasePath(), "*.md")
-	zettels, err = filepath.Glob(glob)
-	return
+	zettels, err := filepath.Glob(glob)
+
+	if err != nil {
+		stdprinter.PanicIfError(err)
+	}
+
+	return feeder.MakeStringSlice(zettels)
 }
 
 func (e FileStore) GetNormalizedPath(a string) (b string, err error) {

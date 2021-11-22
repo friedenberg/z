@@ -6,6 +6,7 @@ import (
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/modifier"
@@ -32,8 +33,8 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 
 	return func(u *lib.Umwelt) (err error) {
 		p := pipeline.Pipeline{
-			Arguments: f.Args(),
-			Reader:    kind,
+			Feeder: feeder.MakeStringSlice(f.Args()),
+			Reader: kind,
 			Modifier: modifier.Chain(
 				modifier.Make(
 					func(i int, z *zettel.Zettel) (err error) {
@@ -70,7 +71,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 		u.Transaction = lib.MakeTransaction()
 
 		p = pipeline.Pipeline{
-			Arguments: toAction,
+			Feeder: feeder.MakeStringSlice(toAction),
 			Modifier: modifier.Chain(
 				&lib.ActionModifier{
 					Umwelt:  u,

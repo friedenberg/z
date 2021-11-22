@@ -5,6 +5,7 @@ import (
 
 	"github.com/friedenberg/z/commands/options"
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel/filter"
 	"github.com/friedenberg/z/lib/zettel/modifier"
@@ -28,20 +29,22 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 	f.Var(&editActions, "actions", "action to perform for the matched zettels")
 
 	return func(u *lib.Umwelt) (err error) {
-		args := f.Args()
+		var args feeder.Feeder
 
-		if len(args) == 0 {
+		if len(f.Args()) == 0 {
 			if editAll {
 				err = xerrors.Errorf("refusing to edit all zettels unless '-all' flag is set")
 				return
 			} else {
 				args = u.GetAll()
 			}
+		} else {
+			args = feeder.MakeStringSlice(f.Args())
 		}
 
 		p := pipeline.Pipeline{
-			Arguments: args,
-			Filter:    filter.Tag(query),
+			Feeder: args,
+			Filter: filter.Tag(query),
 			Modifier: modifier.Chain(
 				&lib.ActionModifier{
 					Umwelt:  u,

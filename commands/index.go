@@ -20,16 +20,12 @@ func GetSubcommandIndex(f *flag.FlagSet) lib.Transactor {
 		u.ShouldSkipCommit = true
 		u.Index = lib.MakeIndex()
 
-		args, err := u.Kasten.GetAll()
-
-		if err != nil {
-			return
-		}
+		args := u.Kasten.GetAll()
 
 		p := pipeline.Pipeline{
-			Arguments: args,
-			Reader:    reader.FromFile(true),
-			Modifier:  lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
+			Feeder:   args,
+			Reader:   reader.FromFile(true),
+			Modifier: lib.MakeTransactionAction(u.Transaction, lib.TransactionActionAdded),
 		}
 
 		p.Run(u)

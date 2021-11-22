@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/friedenberg/z/lib"
+	"github.com/friedenberg/z/lib/feeder"
 	"github.com/friedenberg/z/lib/pipeline"
 	"github.com/friedenberg/z/lib/zettel/filter"
 )
@@ -32,10 +33,12 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 	return func(u *lib.Umwelt) (err error) {
 		u.ShouldSkipCommit = true
 
-		args := f.Args()
+		var args feeder.Feeder
 
-		if len(args) == 0 {
+		if len(f.Args()) == 0 {
 			args = u.GetAll()
+		} else {
+			args = feeder.MakeStringSlice(f.Args())
 		}
 
 		if excludeEmpty {
@@ -43,7 +46,7 @@ func GetSubcommandCat(f *flag.FlagSet) lib.Transactor {
 		}
 
 		p := pipeline.Pipeline{
-			Arguments: args,
+			Feeder: args,
 			Filter: tagExclusions.WithFilter(
 				filter.MakeAnd(query, format.Filter),
 				u.TagsForExcludedZettels,
