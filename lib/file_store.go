@@ -33,7 +33,6 @@ type FileStore struct {
 
 func (s *FileStore) Init(u *Umwelt, o map[string]interface{}) (err error) {
 	s.umwelt = u
-	//TODO-P1 init from options
 	s.lastIdTime = time.Now()
 	s.Mutex = &sync.Mutex{}
 	return

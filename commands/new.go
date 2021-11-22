@@ -62,7 +62,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 						return
 					},
 				),
-				&lib.Action{
+				&lib.ActionModifier{
 					Umwelt:  u,
 					Actions: editActions,
 				},

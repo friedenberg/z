@@ -14,8 +14,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-//TODO-P1 change to Modifier
-type Action struct {
+type ActionModifier struct {
 	Umwelt      *Umwelt
 	Actions     options.Actions
 	zettels     []*zettel.Zettel
@@ -24,7 +23,7 @@ type Action struct {
 	urls        []metadata.Url
 }
 
-func (p *Action) ModifyZettel(i int, z *zettel.Zettel) (err error) {
+func (p *ActionModifier) ModifyZettel(i int, z *zettel.Zettel) (err error) {
 	p.zettels = append(p.zettels, z)
 	p.zettelFiles = append(p.zettelFiles, z.Path)
 
@@ -44,7 +43,7 @@ func (p *Action) ModifyZettel(i int, z *zettel.Zettel) (err error) {
 	return
 }
 
-func (p *Action) End(_ io.Writer) {
+func (p *ActionModifier) End(_ io.Writer) {
 	wg := &sync.WaitGroup{}
 
 	var err error
@@ -83,7 +82,7 @@ func (p *Action) End(_ io.Writer) {
 	}
 }
 
-func (p *Action) openZettels() (err error) {
+func (p *ActionModifier) openZettels() (err error) {
 	if len(p.zettels) == 0 {
 		stdprinter.Debug("no zettels to open")
 		return
@@ -107,7 +106,7 @@ func (p *Action) openZettels() (err error) {
 	return
 }
 
-func (p *Action) openFiles() (err error) {
+func (p *ActionModifier) openFiles() (err error) {
 	if len(p.files) == 0 {
 		return
 	}
@@ -128,7 +127,7 @@ func (p *Action) openFiles() (err error) {
 	return
 }
 
-func (p *Action) openUrls() (err error) {
+func (p *ActionModifier) openUrls() (err error) {
 	if len(p.urls) == 0 {
 		return
 	}
@@ -161,7 +160,7 @@ func (p *Action) openUrls() (err error) {
 	return
 }
 
-func (p *Action) openNormalUrls(us []string) (err error) {
+func (p *ActionModifier) openNormalUrls(us []string) (err error) {
 	args := []string{
 		"-na",
 		"Google Chrome",
@@ -185,7 +184,7 @@ func (p *Action) openNormalUrls(us []string) (err error) {
 	return
 }
 
-func (p *Action) openFileUrls(us []string) (err error) {
+func (p *ActionModifier) openFileUrls(us []string) (err error) {
 	cmd := util.ExecCommand(
 		"open",
 		us,

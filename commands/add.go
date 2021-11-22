@@ -72,7 +72,7 @@ func GetSubcommandAdd(f *flag.FlagSet) lib.Transactor {
 		p = pipeline.Pipeline{
 			Arguments: toAction,
 			Modifier: modifier.Chain(
-				&lib.Action{
+				&lib.ActionModifier{
 					Umwelt:  u,
 					Actions: editActions,
 				},

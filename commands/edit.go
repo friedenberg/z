@@ -43,7 +43,7 @@ func GetSubcommandEdit(f *flag.FlagSet) lib.Transactor {
 			Arguments: args,
 			Filter:    filter.String(query),
 			Modifier: modifier.Chain(
-				&lib.Action{
+				&lib.ActionModifier{
 					Umwelt:  u,
 					Actions: editActions,
 				},

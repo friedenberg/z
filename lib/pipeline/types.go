@@ -31,4 +31,3 @@ type WriterExcludeEmpty interface {
 type WriterError interface {
 	WriteZettelError(io.Writer, int, *zettel.Zettel, error)
 }
-
