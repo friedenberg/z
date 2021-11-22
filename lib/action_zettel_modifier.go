@@ -1,7 +1,9 @@
 package lib
 
 import (
+	"fmt"
 	"io"
+	"os"
 	"sync"
 
 	"github.com/friedenberg/z/commands/options"
@@ -34,12 +36,10 @@ func (p *Action) ModifyZettel(i int, z *zettel.Zettel) (err error) {
 		p.urls = append(p.urls, u)
 	}
 
-	//TODO-P4
-	//if p.Actions&options.ActionPrintZettelPath != 0 {
-	//	//TODO-P2 full path
-	//	_, err := io.WriteString(w, fmt.Sprintf("%s", z.Path))
-	//	stdprinter.ErrorThenPanic(err)
-	//}
+	if p.Actions&options.ActionPrintZettelPath != 0 {
+		_, err := io.WriteString(os.Stdout, fmt.Sprintf("%s\n", z.Path))
+		stdprinter.PanicIfError(err)
+	}
 
 	return
 }
