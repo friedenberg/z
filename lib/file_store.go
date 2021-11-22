@@ -90,7 +90,7 @@ func (k FileStore) Hydrate(u *Umwelt, z *zettel.Zettel, includeBody bool) (err e
 		return
 	}
 
-	z.Id = idInt
+	z.Id = zettel.Id(idInt)
 
 	f, err := files_guard.Open(z.Path)
 	defer files_guard.Close(f)

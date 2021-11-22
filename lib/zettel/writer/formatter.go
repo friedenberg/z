@@ -2,7 +2,6 @@ package writer
 
 import (
 	"io"
-	"strconv"
 	"strings"
 
 	"github.com/friedenberg/z/lib"
@@ -89,7 +88,7 @@ func (f Formatter) Format(z *zettel.Zettel) string {
 			day := t.Format("2006-01-02")
 			sb.WriteString(day)
 		case 'z':
-			sb.WriteString(strconv.FormatInt(z.Id, 10))
+			sb.WriteString(z.Id.String())
 		default:
 			didConsume = false
 		}

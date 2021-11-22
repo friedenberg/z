@@ -2,7 +2,6 @@ package writer
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/friedenberg/z/lib"
@@ -10,7 +9,7 @@ import (
 )
 
 func AlfredItemFromZettelBase(z *zettel.Zettel) (i lib.AlfredItem) {
-	id := strconv.FormatInt(z.Id, 10)
+	id := z.Id.String()
 	if len(z.Note.Metadata.Description()) > 0 {
 		i.Title = z.Note.Metadata.Description()
 	} else {

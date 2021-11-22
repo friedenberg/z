@@ -13,7 +13,7 @@ import (
 
 type IndexZettel struct {
 	Path     string
-	Id       int64
+	Id       zettel.Id
 	Metadata metadata.Metadata
 	//TODO-P2 remove
 	Body string
@@ -102,7 +102,7 @@ func (i Index) Add(z *zettel.Zettel) {
 
 	i.set(zettel.Id(z.Id), IndexZettel{
 		Path:     z.Path,
-		Id:       int64(z.Id),
+		Id:       z.Id,
 		Metadata: z.Metadata,
 		Body:     z.Body,
 	})

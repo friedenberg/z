@@ -18,7 +18,7 @@ func readerNew(u *lib.Umwelt, _ int, _ string) (z *zettel.Zettel, err error) {
 	}
 
 	z = &zettel.Zettel{
-		Id:      id.Int(),
+		Id:      id,
 		Path:    lib.MakePathFromId(u.Kasten.BasePath(), id.String()),
 		ZUmwelt: u,
 		Note: zettel.Note{

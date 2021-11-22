@@ -28,7 +28,7 @@ func importZettel(u *lib.Umwelt, i int, oldPath string, shouldCopy bool) (z *zet
 	}
 
 	z1 := &zettel.Zettel{
-		Id:      oldIdInt,
+		Id:      zettel.Id(oldIdInt),
 		Path:    oldPath,
 		ZUmwelt: u,
 	}

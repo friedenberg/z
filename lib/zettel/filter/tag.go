@@ -18,10 +18,11 @@ func (f tag) FilterZettel(_ int, z *zettel.Zettel) bool {
 		return true
 	}
 
-	_, ok := z.Metadata.StringTags().Get(string(f))
+	_, ok := z.Metadata.SearchMatchTags().Get(string(f))
 	return ok
 }
 
+//TODO-P3
 // func (f *tag) Set(t string) (err error) {
 // 	f = Tag(t)
 // 	return

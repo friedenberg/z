@@ -10,16 +10,12 @@ type ZUmwelt interface {
 
 type Zettel struct {
 	ZUmwelt
-
-	//TODO-P2 change to zettel.Id
-	Id int64
+	Id
 	Note
-
 	Path string
 }
 
 type Note struct {
-	// Metadata
-	Metadata metadata.Metadata
-	Body     string
+	metadata.Metadata
+	Body string
 }
