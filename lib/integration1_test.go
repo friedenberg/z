@@ -75,7 +75,7 @@ func TestAddTwoZettelsThenModifyOne(t *testing.T) {
 	u.Transaction = MakeTransaction()
 
 	z2.Metadata.SetStringTags([]string{"the title 2"})
-	z2.Write(nil)
+	z2.Write()
 	u.Set(z2, TransactionActionModified)
 
 	assertTransactionSuccessful(t, u, 1)

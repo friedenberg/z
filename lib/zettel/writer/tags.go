@@ -8,6 +8,7 @@ import (
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/lib/zettel/metadata"
 	"github.com/friedenberg/z/util/stdprinter"
+	"golang.org/x/xerrors"
 )
 
 type tagCounts struct {
@@ -89,7 +90,8 @@ func (p *Tags) End(w io.Writer) {
 		j, err := lib.GenerateAlfredItemsJson([]lib.AlfredItem{item})
 
 		if err != nil {
-			//TODO-P2 handle error
+			err = xerrors.Errorf("failed to generated alfred items: %w", err)
+			stdprinter.Error(err)
 			continue
 		}
 

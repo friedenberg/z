@@ -59,7 +59,7 @@ func GetSubcommandNew(f *flag.FlagSet) lib.Transactor {
 				),
 				modifier.Make(
 					func(i int, z *zettel.Zettel) (err error) {
-						err = z.Write(nil)
+						err = z.Write()
 						return
 					},
 				),

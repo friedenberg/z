@@ -78,7 +78,6 @@ func AlfredItemsFromZettelUrls(z *zettel.Zettel) (a []lib.AlfredItem) {
 	// i.Icon.Path = z.FilePath()
 	i.Arg = fmt.Sprintf("-actions open-urls %s", z.Path)
 
-	//TODO-P4 move to tags
 	i.Title = fmt.Sprintf("%s: %s", u.Host, z.Note.Metadata.Description())
 	i.Uid = i.Uid + ".url"
 	i.Match = i.Match + "i-u"

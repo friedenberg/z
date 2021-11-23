@@ -25,7 +25,7 @@ func (k *FileStore) hydrateFromFileIfExists(u *Umwelt, z *zettel.Zettel) (err er
 }
 
 func (k *FileStore) writeToFile(z *zettel.Zettel) (err error) {
-	err = z.Write(nil)
+	err = z.Write()
 
 	if err != nil {
 		return

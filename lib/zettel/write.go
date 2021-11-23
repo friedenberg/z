@@ -9,14 +9,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-//TODO-P4 remove
-type OnZettelWriteFunc func(*Zettel, error) error
-
-func (z *Zettel) Write(onWriteFunc OnZettelWriteFunc) (err error) {
-	if onWriteFunc != nil {
-		defer onWriteFunc(z, err)
-	}
-
+func (z *Zettel) Write() (err error) {
 	f, err := files_guard.OpenFile(z.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	defer files_guard.Close(f)
 

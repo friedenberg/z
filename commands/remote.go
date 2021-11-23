@@ -33,6 +33,11 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 
 		args = args[1:]
 
+		if len(args) == 0 {
+			err = xerrors.Errorf("remote name required")
+			return
+		}
+
 		remoteName := args[0]
 
 		remote, ok := u.Config.RemoteScripts[remoteName]
@@ -48,7 +53,6 @@ func GetSubcommandRemote(f *flag.FlagSet) lib.Transactor {
 			return
 		}
 
-		//TODO-P3 validation
 		args = args[1:]
 
 		if len(args) != 0 {

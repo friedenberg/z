@@ -40,7 +40,7 @@ func GetSubcommandClean(f *flag.FlagSet) lib.Transactor {
 
 		return
 
-		////TODO-P3 add to transaction
+		////TODO-P5 add to transaction
 	}
 }
 

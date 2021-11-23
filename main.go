@@ -95,7 +95,7 @@ func printUsage(err error) int {
 	status := 0
 
 	if err != nil {
-		//TODO-P4 get correct status
+		//TODO-P5 get correct status
 		status = 1
 	}
 

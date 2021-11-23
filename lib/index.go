@@ -15,12 +15,11 @@ type IndexZettel struct {
 	Path     string
 	Id       zettel.Id
 	Metadata metadata.Metadata
-	//TODO-P2 remove
-	Body string
+	Body     string
 }
 
 //TODO-P4 move into index and use unmarshal methods
-type SerializableIndex struct {
+type serializableIndex struct {
 	ModTime int64
 	Zettels map[zettel.Id]IndexZettel
 	Files   zettel.Map
@@ -29,7 +28,7 @@ type SerializableIndex struct {
 }
 
 type Index struct {
-	SerializableIndex
+	serializableIndex
 	*sync.Mutex
 }
 
@@ -37,7 +36,7 @@ func MakeIndex() *Index {
 	m := &sync.Mutex{}
 
 	return &Index{
-		SerializableIndex: SerializableIndex{
+		serializableIndex: serializableIndex{
 			Zettels: make(map[zettel.Id]IndexZettel),
 			Files:   zettel.MakeMap(m),
 			Urls:    zettel.MakeMap(m),
@@ -50,7 +49,7 @@ func MakeIndex() *Index {
 func (i Index) Read(r io.Reader) (err error) {
 	dec := json.NewDecoder(r)
 	// dec := gob.NewDecoder(r)
-	err = dec.Decode(&i.SerializableIndex)
+	err = dec.Decode(&i.serializableIndex)
 
 	if err != nil {
 		return
@@ -68,7 +67,7 @@ func (i Index) Write(w io.Writer) (err error) {
 	i.ModTime = time.Now().Unix()
 	enc := json.NewEncoder(w)
 	// enc := gob.NewEncoder(w)
-	err = enc.Encode(i.SerializableIndex)
+	err = enc.Encode(i.serializableIndex)
 
 	if err != nil {
 		return

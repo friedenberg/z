@@ -7,6 +7,7 @@ import (
 	"github.com/friedenberg/z/lib"
 	"github.com/friedenberg/z/lib/zettel"
 	"github.com/friedenberg/z/util/stdprinter"
+	"golang.org/x/xerrors"
 )
 
 type AlfredJson struct {
@@ -32,10 +33,13 @@ func (p *AlfredJson) setShouldPrintComma() {
 }
 
 func (p *AlfredJson) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
-
 	items := p.ItemFunc(z)
-	//TODO-P2 handle erro
-	j, _ := lib.GenerateAlfredItemsJson(items)
+	j, err := lib.GenerateAlfredItemsJson(items)
+
+	if err != nil {
+		err = xerrors.Errorf("failed to generated alfred items: %w", err)
+		stdprinter.Error(err)
+	}
 
 	p.Lock()
 	defer p.Unlock()
@@ -46,7 +50,7 @@ func (p *AlfredJson) WriteZettel(w io.Writer, i int, z *zettel.Zettel) {
 		stdprinter.PanicIfError(err)
 	}
 
-	_, err := io.WriteString(w, j)
+	_, err = io.WriteString(w, j)
 	stdprinter.PanicIfError(err)
 }
 

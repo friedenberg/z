@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-//TODO-P3 add exponential backoff for too many files open error
+//TODO-P5 add exponential backoff for too many files open error
 type openFilesGuard struct {
 	channel chan struct{}
 }

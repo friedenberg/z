@@ -35,7 +35,7 @@ func GetSubcommandMv(f *flag.FlagSet) lib.Transactor {
 						z.Metadata.Delete(t1)
 						z.Metadata.AddStringTags(t2)
 
-						z.Write(nil)
+						z.Write()
 
 						return
 					},

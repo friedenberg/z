@@ -22,7 +22,7 @@ func (f tag) FilterZettel(_ int, z *zettel.Zettel) bool {
 	return ok
 }
 
-//TODO-P3
+//TODO-P3 add set method to filter.Tag
 // func (f *tag) Set(t string) (err error) {
 // 	f = Tag(t)
 // 	return
